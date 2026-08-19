@@ -14,11 +14,10 @@ out/
 # payload
 apps/cms/build/
 apps/cms/dist/
-media/
 
 # env
 .env
-.env.local
+
 .env.*.local
 !.env.example
 

@@ -1,0 +1,255 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #08080A;
+  --foreground: #FAFAFA;
+  --card: #121214;
+  --card-foreground: #FAFAFA;
+  --popover: #1A1A1D;
+  --popover-foreground: #FAFAFA;
+  --primary: #EF4A4F;
+  --primary-foreground: #FAFAFA;
+  --secondary: #18181B;
+  --secondary-foreground: #A1A1AA;
+  --muted: #1C1C1F;
+  --muted-foreground: #71717A;
+  --accent: #EF4A4F;
+  --accent-foreground: #FAFAFA;
+  --destructive: #EF4A4F;
+  --destructive-foreground: #FAFAFA;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.06);
+  --input-background: rgba(255, 255, 255, 0.06);
+  --switch-background: #3f3f46;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: rgba(239, 74, 79, 0.45);
+  --chart-1: #EF4A4F;
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --radius: 0.75rem;
+  --sidebar: #121214;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #EF4A4F;
+  --sidebar-primary-foreground: #FAFAFA;
+  --sidebar-accent: #18181B;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(239, 74, 79, 0.45);
+
+  /* Extended cinematic tokens */
+  --gold: #F0B33D;
+  --gold-foreground: #1A1200;
+  --accent-2: #FF7A5C;
+  --gradient-accent: linear-gradient(135deg, #FF6A5A 0%, #EF4A4F 55%, #C7333B 100%);
+  --gradient-vignette: radial-gradient(120% 100% at 50% 0%, transparent 30%, rgba(8,8,10,0.55) 100%);
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --surface-glass-strong: rgba(20, 20, 23, 0.72);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px -6px rgba(0,0,0,0.55);
+  --shadow-elevated: 0 20px 50px -12px rgba(0,0,0,0.7);
+  --shadow-glow: 0 0 0 1px rgba(239,74,79,0.25), 0 8px 30px -6px rgba(239,74,79,0.35);
+}
+
+.dark {
+  --background: #08080A;
+  --foreground: #FAFAFA;
+  --card: #121214;
+  --card-foreground: #FAFAFA;
+  --popover: #1A1A1D;
+  --popover-foreground: #FAFAFA;
+  --primary: #EF4A4F;
+  --primary-foreground: #FAFAFA;
+  --secondary: #18181B;
+  --secondary-foreground: #A1A1AA;
+  --muted: #1C1C1F;
+  --muted-foreground: #71717A;
+  --accent: #EF4A4F;
+  --accent-foreground: #FAFAFA;
+  --destructive: #EF4A4F;
+  --destructive-foreground: #FAFAFA;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.06);
+  --ring: rgba(239, 74, 79, 0.45);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: #EF4A4F;
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: #121214;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #EF4A4F;
+  --sidebar-primary-foreground: #FAFAFA;
+  --sidebar-accent: #18181B;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(239, 74, 79, 0.45);
+  --gold: #F0B33D;
+  --gold-foreground: #1A1200;
+  --accent-2: #FF7A5C;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-accent-2: var(--accent-2);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CINEMATIC POLISH — grain, scrollbar, selection, focus
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  letter-spacing: -0.011em;
+}
+
+/* Subtle film-grain texture over the whole app for a premium, non-flat feel */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background-color: rgba(239, 74, 79, 0.35);
+  color: #FAFAFA;
+}
+
+/* Slim, dark, unobtrusive scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
+
+/* Consistent, elegant accent focus ring app-wide */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px rgba(239, 74, 79, 0.55);
+  border-radius: 6px;
+}
+
+/* Hide horizontal scrollbars for content rails while keeping them scrollable */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

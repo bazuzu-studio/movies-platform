@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# turbo
+.turbo/
+**/.turbo/
+
+# next.js
+.next/
+**/.next/
+out/
+
+# payload
+apps/cms/build/
+apps/cms/dist/
+media/
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# misc
+.DS_Store
+*.log
+dist/
+build/
+
+# pnpm
+.pnpm-store/

@@ -237,6 +237,14 @@ export interface Content {
     [k: string]: unknown;
   } | null;
   /**
+   * Для дедупликации при импорте из Kodik
+   */
+  shikimoriId?: string | null;
+  /**
+   * ID материала в Kodik
+   */
+  kodikId?: string | null;
+  /**
    * Год выпуска (movie) или год начала выхода (series)
    */
   releaseYear: number;
@@ -501,6 +509,8 @@ export interface ContentSelect<T extends boolean = true> {
   originalTitle?: T;
   slug?: T;
   description?: T;
+  shikimoriId?: T;
+  kodikId?: T;
   releaseYear?: T;
   duration?: T;
   genres?: T;

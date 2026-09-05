@@ -18,11 +18,23 @@
 import { ALL_CONTENT, GENRES, getContentBySlug as findBySlug, getSimilar } from "./data";
 import type { ContentItem, Genre } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+import { GraphQLClient } from 'graphql-request'
+import { GetContentDocument } from '@/generated/graphql'
+
+
+const endpoint = process.env.NEXT_PUBLIC_GRAPHQL_API_URL ?? 'http://localhost:4000/api/graphql'
+
+/**
+ * Отдельный клиент для server-side запросов публичного контента.
+ * credentials здесь не нужны — GetContentDocument не требует авторизации,
+ * в отличие от избранного/профиля, которые идут через gqlClient
+ * из lib/graphql-client.ts (с credentials: 'include' для браузера).
+ */
+const serverClient = new GraphQLClient(endpoint)
 
 export async function getContentList(): Promise<ContentItem[]> {
-  // TODO: заменить на fetch(`${API_BASE}/api/content?...`)
-  return ALL_CONTENT;
+  const data = await serverClient.request(GetContentDocument)
+  return data.Contents.docs as ContentItem[]
 }
 
 export async function getContentBySlug(slug: string): Promise<ContentItem | undefined> {
@@ -39,4 +51,4 @@ export async function getSimilarContent(item: ContentItem, limit = 5): Promise<C
   return getSimilar(item, limit);
 }
 
-export { API_BASE };
+export { endpoint };

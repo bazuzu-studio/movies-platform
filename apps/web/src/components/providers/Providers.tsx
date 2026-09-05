@@ -4,9 +4,11 @@ import React from "react";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./AuthContext";
 import { FavoritesProvider } from "./FavoritesContext";
+import { QueryProvider } from "./QueryProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
+    <QueryProvider>
     <AuthProvider>
       <FavoritesProvider>
         {children}
@@ -18,5 +20,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         />
       </FavoritesProvider>
     </AuthProvider>
+    </QueryProvider>
   );
 }

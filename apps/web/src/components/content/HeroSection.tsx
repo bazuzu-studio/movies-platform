@@ -38,9 +38,9 @@ export function HeroSection({ item }: { item: ContentItem }) {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             {item.type === "series" && <Badge variant="series">СЕРИАЛ</Badge>}
             {item.isNew && <Badge variant="new">НОВИНКА</Badge>}
-            {item.genres.slice(0, 2).map((g) => (
+            {/* {item.genres.slice(0, 2).map((g) => (
               <GenreChip key={g} label={g} />
-            ))}
+            ))} */}
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.02] mb-2 [text-wrap:balance] drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
@@ -63,7 +63,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
             {item.type === "series" && (
               <span className="flex items-center gap-1">
                 <Tv className="w-3.5 h-3.5" />
-                {item.seasons.length} сезона
+                {/* {item.seasons.length} сезона */}
               </span>
             )}
           </div>

@@ -89,6 +89,20 @@ export const Content: CollectionConfig = {
       name: 'description',
       type: 'richText',
     },
+// apps/cms/collections/content/config.ts — добавить в массив fields
+{
+  name: 'shikimoriId',
+  type: 'text',
+  index: true,
+  admin: { position: 'sidebar', description: 'Для дедупликации при импорте из Kodik' },
+},
+{
+  name: 'kodikId',
+  type: 'text',
+  index: true,
+  admin: { position: 'sidebar', description: 'ID материала в Kodik' },
+},
+
     {
       name: 'releaseYear',
       type: 'number',

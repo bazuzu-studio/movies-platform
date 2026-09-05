@@ -1,0 +1,11 @@
+# graphql/queries/get-favorites.graphql
+query GetFavorites($where: Favorite_where) {
+  Favorites(where: $where, limit: 500) {
+    docs {
+      id
+      content {
+        id
+      }
+    }
+  }
+}

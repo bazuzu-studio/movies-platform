@@ -16,17 +16,27 @@ export function LoginClient() {
   const [pass, setPass] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !pass) {
       setError("Заполните все поля");
       return;
     }
-    // TODO: заменить на POST /api/users/login (ТЗ, раздел 9)
-    login(email, pass);
-    toast.success("Добро пожаловать!");
-    router.push("/");
+
+    setIsSubmitting(true);
+    try {
+      // login() ходит в GraphQL (loginUser) и выставляет httpOnly cookie
+      // на стороне Payload — см. AuthContext.tsx
+      await login(email, pass);
+      toast.success("Добро пожаловать!");
+      router.push("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Неверный email или пароль");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -87,8 +97,8 @@ export function LoginClient() {
           Забыли пароль?
         </Link>
 
-        <Btn type="submit" size="lg" className="w-full justify-center mt-1">
-          Войти
+        <Btn type="submit" size="lg" className="w-full justify-center mt-1" disabled={isSubmitting}>
+          {isSubmitting ? "Входим..." : "Войти"}
         </Btn>
 
         <div className="text-center text-sm text-[#71717A] mt-1">

@@ -3,6 +3,7 @@ import { protectRoles } from './hooks/protectRoles'
 import { editor } from '@/access/editor'
 import user from '@/access/user'
 import { admin } from '@/access/admin'
+import { publicOrEditor } from '@/access/publicOrEditor'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -13,7 +14,7 @@ export const Users: CollectionConfig = {
   access: {
     // create не ограничиваем через access — регистрация должна быть
     // открыта всем гостям. Всю защиту делает protectRoles на уровне поля.
-    create: editor, // это ограничивает создание ЧЕРЕЗ АДМИНКУ; публичная
+    create: publicOrEditor, // это ограничивает создание ЧЕРЕЗ АДМИНКУ; публичная
     // регистрация обычно идёт через отдельный auth-эндпоинт Payload,
     // который create-access не проверяет — см. документацию Authentication.
     read: user,

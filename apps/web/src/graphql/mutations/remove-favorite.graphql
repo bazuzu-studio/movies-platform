@@ -1,0 +1,6 @@
+# graphql/mutations/remove-favorite.graphql
+mutation RemoveFavorite($id: Int!) {
+  deleteFavorite(id: $id) {
+    id
+  }
+}

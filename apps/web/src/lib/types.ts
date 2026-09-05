@@ -55,8 +55,22 @@ export interface Series extends BaseContent {
 
 export type ContentItem = Movie | Series;
 
+/**
+ * Соответствует коллекции Users в Payload CMS (ТЗ, раздел 8/9).
+ *
+ * id — числовой (Int в GraphQL-схеме), используется для фильтрации
+ * в запросах вида { user: { equals: user.id } } (см. FavoritesContext).
+ *
+ * roles — массив (hasMany: true в конфиге Users), а не одиночная role,
+ * пользователь теоретически может иметь несколько ролей одновременно
+ * (например, ['admin', 'user']).
+ */
+export type UserRole = "admin" | "editor" | "user";
+
 export interface AuthUser {
+  id: number;
   name: string;
   email: string;
+  roles: UserRole[];
   avatar?: string;
 }

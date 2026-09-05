@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { AppChrome } from "@/components/chrome/AppChrome";
 
+
 // next/font самостоятельно скачивает и самостоятельно хостит шрифт при сборке
 // (self-hosted, без раннего внешнего запроса к fonts.googleapis.com):
 // это устраняет layout shift/блокирующий запрос и помогает уложиться вnext/font

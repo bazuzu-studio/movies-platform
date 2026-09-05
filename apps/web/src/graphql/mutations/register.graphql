@@ -1,0 +1,14 @@
+# graphql/mutations/register.graphql
+# Роль НЕ принимается параметром снаружи — регистрация с фронтенда
+# всегда создаёт пользователя с ролью "user".
+# TODO: свериться с реальным именем enum-значения роли в схеме Payload.
+mutation RegisterUser($name: String!, $email: String!, $password: String!) {
+  createUser(
+    data: { name: $name, email: $email, password: $password }
+  ) {
+    id
+    name
+    email
+
+  }
+}

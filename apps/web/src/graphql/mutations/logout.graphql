@@ -1,0 +1,4 @@
+# graphql/mutations/logout.graphql
+mutation LogoutUser {
+  logoutUser
+}

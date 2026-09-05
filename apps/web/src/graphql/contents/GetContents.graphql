@@ -1,0 +1,13 @@
+query GetContent {
+  Contents {
+    docs {
+      id
+      titleEn
+      titleRu
+      slug
+      type
+      releaseYear
+      rating
+    }
+  }
+}

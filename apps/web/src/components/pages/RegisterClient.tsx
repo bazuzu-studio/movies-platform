@@ -19,29 +19,35 @@ export function RegisterClient() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email || !pass || !confirm) {
-      setError("Заполните все поля");
-      return;
-    }
-    if (pass !== confirm) {
-      setError("Пароли не совпадают");
-      return;
-    }
-    if (pass.length < 6) {
-      setError("Пароль должен содержать минимум 6 символов");
-      return;
-    }
-    if (!/[a-zA-Zа-яА-Я]/.test(pass) || !/\d/.test(pass)) {
-      setError("Пароль должен содержать буквы и цифры");
-      return;
-    }
-    // TODO: заменить на POST /api/users (ТЗ, раздел 9)
-    register(name, email, pass);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!name || !email || !pass || !confirm) {
+    setError("Заполните все поля");
+    return;
+  }
+  if (pass !== confirm) {
+    setError("Пароли не совпадают");
+    return;
+  }
+  if (pass.length < 6) {
+    setError("Пароль должен содержать минимум 6 символов");
+    return;
+  }
+  if (!/[a-zA-Zа-яА-Я]/.test(pass) || !/\d/.test(pass)) {
+    setError("Пароль должен содержать буквы и цифры");
+    return;
+  }
+
+  try {
+    // Роль не передаётся отсюда — регистрация всегда создаёт "user",
+    // это зашито в GraphQL-мутации RegisterUserDocument (см. AuthContext).
+    await register(name, email, pass);
     toast.success("Аккаунт создан!");
     router.push("/");
-  };
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Не удалось создать аккаунт");
+  }
+};
 
   return (
     <AuthLayout>

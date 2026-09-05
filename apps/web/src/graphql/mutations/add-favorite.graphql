@@ -1,0 +1,11 @@
+# graphql/mutations/add-favorite.graphql
+mutation AddFavorite($userId: Int!, $contentId: Int!) {
+  createFavorite(
+    data: { user: $userId, content: $contentId }
+  ) {
+    id
+    content {
+      id
+    }
+  }
+}

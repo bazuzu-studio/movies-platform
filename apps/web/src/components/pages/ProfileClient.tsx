@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Edit3, LogOut, Heart } from "lucide-react";
 import { toast } from "sonner";
@@ -14,12 +14,38 @@ import { useFavorites } from "@/components/providers/FavoritesContext";
 
 export function ProfileClient({ all }: { all: ContentItem[] }) {
   const router = useRouter();
-  const { user, logout } = useAuth();
-  const { favorites } = useFavorites();
+  const { user, ready, logout } = useAuth();
+  const { favorites, isLoading: favoritesLoading } = useFavorites();
   const [activeTab, setActiveTab] = useState<"profile" | "favorites">("profile");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const favItems = all.filter((c) => favorites.has(c.id));
 
-  if (!user) return null;
+  console.log(favItems, 'dddd');
+  /**
+   * Редирект вынесен в useEffect, а не в тело рендера — вызов router.push
+   * напрямую во время рендера считается побочным эффектом и может приводить
+   * к предупреждениям/некорректному порядку обновлений в React.
+   */
+  useEffect(() => {
+    if (ready && !user) {
+      router.push("/login");
+    }
+  }, [ready, user, router]);
+
+  // Пока идёт проверка сессии (meUser) или сессии нет — ничего не рендерим.
+  if (!ready || !user) return null;
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      toast("Вы вышли из аккаунта");
+      router.push("/");
+    } catch {
+      toast.error("Не удалось выйти из аккаунта, попробуйте ещё раз");
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
@@ -49,7 +75,9 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
             <div>
               <p className="text-lg font-bold text-white">{user.name}</p>
               <p className="text-sm text-[#71717A]">{user.email}</p>
-              <p className="text-xs text-[#3f3f46] mt-1">{favItems.length} в избранном</p>
+              <p className="text-xs text-[#3f3f46] mt-1">
+                {favoritesLoading ? "..." : `${favItems.length} в избранном`}
+              </p>
             </div>
           </div>
 
@@ -60,16 +88,15 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
             <Btn
               variant="ghost"
               className="w-full justify-center gap-2 text-[#EF4A4F] hover:bg-[#EF4A4F]/10"
-              onClick={() => {
-                logout();
-                toast("Вы вышли из аккаунта");
-                router.push("/");
-              }}
+              onClick={handleLogout}
+              disabled={isLoggingOut}
             >
-              <LogOut className="w-4 h-4" /> Выйти
+              <LogOut className="w-4 h-4" /> {isLoggingOut ? "Выходим..." : "Выйти"}
             </Btn>
           </div>
         </div>
+      ) : favoritesLoading ? (
+        <p className="text-sm text-[#71717A]">Загрузка избранного...</p>
       ) : favItems.length === 0 ? (
         <EmptyState
           icon={Heart}

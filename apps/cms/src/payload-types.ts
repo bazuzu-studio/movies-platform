@@ -74,6 +74,7 @@ export interface Config {
     episodes: Episode;
     favorites: Favorite;
     seasons: Season;
+    'search-results': SearchResult;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -95,6 +96,7 @@ export interface Config {
     episodes: EpisodesSelect<false> | EpisodesSelect<true>;
     favorites: FavoritesSelect<false> | FavoritesSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
+    'search-results': SearchResultsSelect<false> | SearchResultsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -352,6 +354,29 @@ export interface Favorite {
   createdAt: string;
 }
 /**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-results".
+ */
+export interface SearchResult {
+  id: number;
+  title?: string | null;
+  priority?: number | null;
+  doc: {
+    relationTo: 'content';
+    value: number | Content;
+  };
+  titleEn?: string | null;
+  slug?: string | null;
+  type?: string | null;
+  releaseYear?: number | null;
+  rating?: number | null;
+  poster?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -402,6 +427,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'seasons';
         value: number | Season;
+      } | null)
+    | ({
+        relationTo: 'search-results';
+        value: number | SearchResult;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -557,6 +586,23 @@ export interface SeasonsSelect<T extends boolean = true> {
   title?: T;
   releaseYear?: T;
   episodes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-results_select".
+ */
+export interface SearchResultsSelect<T extends boolean = true> {
+  title?: T;
+  priority?: T;
+  doc?: T;
+  titleEn?: T;
+  slug?: T;
+  type?: T;
+  releaseYear?: T;
+  rating?: T;
+  poster?: T;
   updatedAt?: T;
   createdAt?: T;
 }

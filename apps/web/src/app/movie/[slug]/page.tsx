@@ -17,13 +17,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const movie = await getContentBySlug(slug);
   if (!movie || movie.type !== "movie") return {};
 
+  // description теперь приходит из richText-поля CMS и может быть пустым
+  // или длинным — для metadata обрезаем до разумной длины.
+  const description = movie.description
+    ? movie.description.slice(0, 200)
+    : undefined;
+
   return {
     title: movie.titleRu,
-    description: movie.description,
+    description,
     openGraph: {
       title: `${movie.titleRu} (${movie.releaseYear})`,
-      description: movie.description,
-      images: [{ url: movie.backdrop }],
+      description,
+      // backdrop может быть пустой строкой, если файл не загружен в CMS —
+      // в этом случае не отдаём images вовсе, а не битую ссылку.
+      images: movie.backdrop.url ? [{ url: movie.backdrop.url }] : undefined,
       type: "video.movie",
     },
   };

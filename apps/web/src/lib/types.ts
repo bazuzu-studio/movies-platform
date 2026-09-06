@@ -24,6 +24,14 @@ export interface Season {
   episodes: Episode[];
 }
 
+
+interface Media {
+  id: number | string;
+  url: string;
+  
+  // можно добавить path, alt, width, height и т. п., если они есть в схеме
+}
+
 interface BaseContent {
   id: number;
   titleRu: string;
@@ -33,9 +41,10 @@ interface BaseContent {
   description: string;
   releaseYear: number;
   genres: string[];
+  genreIds?: number[]; // ← добавить
   rating: number;
-  poster: string;
-  backdrop: string;
+  poster: Media;
+  backdrop: Media;
   status: PublishStatus;
   director?: string;
   cast?: string[];

@@ -16,11 +16,14 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
   const { isFavorite, toggle } = useFavorites();
   const isFav = isFavorite(movie.id);
 
+  console.log(movie);
+  
+
   return (
     <div>
       <div className="relative h-[300px] sm:h-[420px] overflow-hidden">
         {/* Backdrop — LCP-элемент страницы фильма (ТЗ, п.4.1) */}
-        <Image src={movie.backdrop} alt="" fill priority sizes="100vw" className="object-cover object-center" />
+        <Image src={movie.backdrop?.url} alt="" fill priority sizes="100vw" className="object-cover object-center" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#08080A]/80 to-transparent" />
         <button
@@ -36,7 +39,7 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
           <div className="shrink-0 w-48 sm:w-56 lg:w-64 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-[#121214] relative">
               <Image
-                src={movie.poster}
+                src={movie.poster?.url ?? "/default-poster.jpg"}
                 alt={movie.titleRu}
                 fill
                 sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 256px"

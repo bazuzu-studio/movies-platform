@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${series.titleRu} (${series.releaseYear})`,
       description: series.description,
-      images: [{ url: series.backdrop }],
+      images: [{ url: series.backdrop?.url }],
       type: "video.tv_show",
     },
   };

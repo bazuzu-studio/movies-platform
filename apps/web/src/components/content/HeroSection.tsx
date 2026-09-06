@@ -15,13 +15,15 @@ export function HeroSection({ item }: { item: ContentItem }) {
   const isFav = isFavorite(item.id);
   const href = item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`;
 
+
+  
   return (
     <div className="relative w-full h-[420px] sm:h-[520px] lg:h-[600px] overflow-hidden">
       {/* Это изображение — LCP-элемент главной страницы (ТЗ, п.4.1: LCP ≤ 2.5с),
           поэтому используем next/image с priority (без lazy-загрузки и с
           автоматическими WebP/AVIF + responsive sizes) вместо обычного <img>. */}
       <Image
-        src={item.backdrop}
+        src={item.backdrop.url}
         alt={item.titleRu}
         fill
         priority

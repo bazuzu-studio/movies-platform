@@ -15,15 +15,19 @@ import { useFavorites } from "@/components/providers/FavoritesContext";
 export function SeriesDetailClient({ series, similar }: { series: Series; similar: ContentItem[] }) {
   const router = useRouter();
   const { isFavorite, toggle } = useFavorites();
-  const [activeSeason, setActiveSeason] = useState(1);
+  // Стартуем с номера первого реально существующего сезона, а не с
+  // хардкода 1 — у сериала может не быть сезона №1 (или сезонов вовсе).
+  const [activeSeason, setActiveSeason] = useState(series.seasons[0]?.seasonNumber ?? 1);
   const isFav = isFavorite(series.id);
   const currentSeason = series.seasons.find((s) => s.seasonNumber === activeSeason) ?? series.seasons[0];
 
+   
+  
   return (
     <div>
       <div className="relative h-[300px] sm:h-[420px] overflow-hidden">
         {/* Backdrop — LCP-элемент страницы сериала (ТЗ, п.4.1) */}
-        <Image src={series.backdrop} alt="" fill priority sizes="100vw" className="object-cover object-center" />
+        <Image src={series.backdrop.url} alt="" fill priority sizes="100vw" className="object-cover object-center" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#08080A]/80 to-transparent" />
         <button
@@ -39,7 +43,7 @@ export function SeriesDetailClient({ series, similar }: { series: Series; simila
           <div className="shrink-0 w-48 sm:w-56 lg:w-64 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-[#121214] relative">
               <Image
-                src={series.poster}
+                src={series.poster?.url  ?? "/default-poster.jpg"}
                 alt={series.titleRu}
                 fill
                 sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 256px"
@@ -70,7 +74,7 @@ export function SeriesDetailClient({ series, similar }: { series: Series; simila
                 {series.seasons.length} сезона
               </span>
               <span className="text-[#71717A]">
-                {series.seasons.reduce((a, s) => a + s.episodes.length, 0)} эпизодов
+                {series.seasons.reduce((a, s) => a + (s.episodes?.length ?? 0), 0)} эпизодов
               </span>
             </div>
 
@@ -100,33 +104,44 @@ export function SeriesDetailClient({ series, similar }: { series: Series; simila
           </div>
         </div>
 
-        <div className="mt-14">
-          <div className="flex items-center gap-3 mb-6 flex-wrap">
-            <h2 className="text-xl font-bold text-white">Эпизоды</h2>
-            <div className="flex gap-2 flex-wrap">
-              {series.seasons.map((s) => (
-                <button
-                  key={s.seasonNumber}
-                  onClick={() => setActiveSeason(s.seasonNumber)}
-                  className={cn(
-                    "px-4 py-1.5 rounded-lg text-sm font-medium border transition-all",
-                    activeSeason === s.seasonNumber
-                      ? "bg-[#EF4A4F]/15 border-[#EF4A4F]/40 text-[#EF4A4F]"
-                      : "border-white/8 text-[#71717A] hover:text-white hover:border-white/16"
-                  )}
-                >
-                  Сезон {s.seasonNumber}
-                </button>
-              ))}
+        {series.seasons.length > 0 ? (
+          <div className="mt-14">
+            <div className="flex items-center gap-3 mb-6 flex-wrap">
+              <h2 className="text-xl font-bold text-white">Эпизоды</h2>
+              <div className="flex gap-2 flex-wrap">
+                {series.seasons.map((s) => (
+                  <button
+                    key={s.seasonNumber}
+                    onClick={() => setActiveSeason(s.seasonNumber)}
+                    className={cn(
+                      "px-4 py-1.5 rounded-lg text-sm font-medium border transition-all",
+                      activeSeason === s.seasonNumber
+                        ? "bg-[#EF4A4F]/15 border-[#EF4A4F]/40 text-[#EF4A4F]"
+                        : "border-white/8 text-[#71717A] hover:text-white hover:border-white/16"
+                    )}
+                  >
+                    Сезон {s.seasonNumber}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="grid gap-3">
-            {currentSeason.episodes.map((ep) => (
-              <EpisodeCard key={ep.episodeNumber} episode={ep} />
-            ))}
+            {currentSeason && currentSeason.episodes.length > 0 ? (
+              <div className="grid gap-3">
+                {currentSeason.episodes.map((ep) => (
+                  <EpisodeCard key={ep.episodeNumber} episode={ep} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[#71717A]">Для этого сезона пока нет эпизодов.</p>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="mt-14">
+            <h2 className="text-xl font-bold text-white mb-2">Эпизоды</h2>
+            <p className="text-sm text-[#71717A]">Сезоны для этого сериала пока не добавлены.</p>
+          </div>
+        )}
 
         {similar.length > 0 && (
           <div className="mt-14">

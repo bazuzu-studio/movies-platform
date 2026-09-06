@@ -4,6 +4,7 @@ import { MovieCard } from "./MovieCard";
 import { SkeletonCard } from "@/components/ui/States";
 
 export function ContentGrid({ items, loading }: { items: ContentItem[]; loading?: boolean }) {
+  
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">

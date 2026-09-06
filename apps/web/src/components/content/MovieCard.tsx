@@ -15,6 +15,8 @@ export function MovieCard({ item }: { item: ContentItem }) {
   const isFav = isFavorite(item.id);
   const href = item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`;
 
+
+
   return (
     <Link href={href} className="group relative block">
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[#121214] ring-1 ring-white/[0.06] shadow-[var(--shadow-card)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:ring-[#EF4A4F]/40 group-hover:shadow-[var(--shadow-glow)]">
@@ -22,8 +24,9 @@ export function MovieCard({ item }: { item: ContentItem }) {
             "из коробки" (ТЗ, п.4.1) — карточка встречается десятками на
             странице каталога, поэтому корректный sizes важен для реальной
             экономии трафика. */}
+
         <Image
-          src={item.poster}
+          src={item.poster?.url ?? "/default-poster.jpg"}
           alt={item.titleRu}
           fill
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"

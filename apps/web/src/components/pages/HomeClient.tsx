@@ -10,6 +10,9 @@ export function HomeClient({ heroItem, all }: { heroItem: ContentItem; all: Cont
   const series = (all.filter((c) => c.type === "series") as Series[]).slice(0, 6);
   const newArrivals = all.filter((c) => c.isNew);
 
+
+  
+
   return (
     <div className="pb-20 md:pb-0">
       <HeroSection item={heroItem} />

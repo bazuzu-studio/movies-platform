@@ -29,6 +29,7 @@ export type Access = {
   payload_kv?: Maybe<Payload_KvAccess>;
   payload_locked_documents?: Maybe<Payload_Locked_DocumentsAccess>;
   payload_preferences?: Maybe<Payload_PreferencesAccess>;
+  search_results?: Maybe<Search_ResultsAccess>;
   seasons?: Maybe<SeasonsAccess>;
   users?: Maybe<UsersAccess>;
 };
@@ -4094,6 +4095,7 @@ export type Mutation = {
   createPayloadKv?: Maybe<PayloadKv>;
   createPayloadLockedDocument?: Maybe<PayloadLockedDocument>;
   createPayloadPreference?: Maybe<PayloadPreference>;
+  createSearchResult?: Maybe<SearchResult>;
   createSeason?: Maybe<Season>;
   createUser?: Maybe<User>;
   deleteContent?: Maybe<Content>;
@@ -4104,6 +4106,7 @@ export type Mutation = {
   deletePayloadKv?: Maybe<PayloadKv>;
   deletePayloadLockedDocument?: Maybe<PayloadLockedDocument>;
   deletePayloadPreference?: Maybe<PayloadPreference>;
+  deleteSearchResult?: Maybe<SearchResult>;
   deleteSeason?: Maybe<Season>;
   deleteUser?: Maybe<User>;
   duplicateContent?: Maybe<Content>;
@@ -4114,6 +4117,7 @@ export type Mutation = {
   duplicatePayloadKv?: Maybe<PayloadKv>;
   duplicatePayloadLockedDocument?: Maybe<PayloadLockedDocument>;
   duplicatePayloadPreference?: Maybe<PayloadPreference>;
+  duplicateSearchResult?: Maybe<SearchResult>;
   duplicateSeason?: Maybe<Season>;
   forgotPasswordUser: Scalars['Boolean']['output'];
   loginUser?: Maybe<UsersLoginResult>;
@@ -4130,6 +4134,7 @@ export type Mutation = {
   updatePayloadKv?: Maybe<PayloadKv>;
   updatePayloadLockedDocument?: Maybe<PayloadLockedDocument>;
   updatePayloadPreference?: Maybe<PayloadPreference>;
+  updateSearchResult?: Maybe<SearchResult>;
   updateSeason?: Maybe<Season>;
   updateUser?: Maybe<User>;
   verifyEmailUser?: Maybe<Scalars['Boolean']['output']>;
@@ -4180,6 +4185,12 @@ export type MutationCreatePayloadLockedDocumentArgs = {
 
 export type MutationCreatePayloadPreferenceArgs = {
   data: MutationPayloadPreferenceInput;
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type MutationCreateSearchResultArgs = {
+  data: MutationSearchResultInput;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -4244,6 +4255,12 @@ export type MutationDeletePayloadPreferenceArgs = {
 };
 
 
+export type MutationDeleteSearchResultArgs = {
+  id: Scalars['Int']['input'];
+  trash?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type MutationDeleteSeasonArgs = {
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4300,6 +4317,12 @@ export type MutationDuplicatePayloadLockedDocumentArgs = {
 
 export type MutationDuplicatePayloadPreferenceArgs = {
   data: MutationPayloadPreferenceInput;
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDuplicateSearchResultArgs = {
+  data: MutationSearchResultInput;
   id: Scalars['Int']['input'];
 };
 
@@ -4409,6 +4432,15 @@ export type MutationUpdatePayloadLockedDocumentArgs = {
 export type MutationUpdatePayloadPreferenceArgs = {
   autosave?: InputMaybe<Scalars['Boolean']['input']>;
   data: MutationPayloadPreferenceUpdateInput;
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['Int']['input'];
+  trash?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type MutationUpdateSearchResultArgs = {
+  autosave?: InputMaybe<Scalars['Boolean']['input']>;
+  data: MutationSearchResultUpdateInput;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4710,6 +4742,7 @@ export enum PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo {
   Favorites = 'favorites',
   Genres = 'genres',
   Media = 'media',
+  SearchResults = 'search_results',
   Seasons = 'seasons',
   Users = 'users'
 }
@@ -4723,7 +4756,7 @@ export enum PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo {
   Users = 'users'
 }
 
-export type PayloadLockedDocument_Document = Content | Episode | Favorite | Genre | Media | Season | User;
+export type PayloadLockedDocument_Document = Content | Episode | Favorite | Genre | Media | SearchResult | Season | User;
 
 export type PayloadLockedDocument_DocumentRelationshipInput = {
   relationTo?: InputMaybe<PayloadLockedDocument_DocumentRelationshipInputRelationTo>;
@@ -4736,6 +4769,7 @@ export enum PayloadLockedDocument_DocumentRelationshipInputRelationTo {
   Favorites = 'favorites',
   Genres = 'genres',
   Media = 'media',
+  SearchResults = 'search_results',
   Seasons = 'seasons',
   Users = 'users'
 }
@@ -4746,6 +4780,7 @@ export enum PayloadLockedDocument_Document_RelationTo {
   Favorites = 'favorites',
   Genres = 'genres',
   Media = 'media',
+  SearchResults = 'search_results',
   Seasons = 'seasons',
   Users = 'users'
 }
@@ -4799,6 +4834,7 @@ export enum PayloadLockedDocument_Document_Relation_RelationTo {
   Favorites = 'favorites',
   Genres = 'genres',
   Media = 'media',
+  SearchResults = 'search_results',
   Seasons = 'seasons',
   Users = 'users'
 }
@@ -5752,6 +5788,8 @@ export type Query = {
   PayloadLockedDocuments?: Maybe<PayloadLockedDocuments>;
   PayloadPreference?: Maybe<PayloadPreference>;
   PayloadPreferences?: Maybe<PayloadPreferences>;
+  SearchResult?: Maybe<SearchResult>;
+  SearchResults?: Maybe<SearchResults>;
   Season?: Maybe<Season>;
   Seasons?: Maybe<Seasons>;
   User?: Maybe<User>;
@@ -5764,6 +5802,7 @@ export type Query = {
   countPayloadKvs?: Maybe<CountPayloadKvs>;
   countPayloadLockedDocuments?: Maybe<CountPayloadLockedDocuments>;
   countPayloadPreferences?: Maybe<CountPayloadPreferences>;
+  countSearchResults?: Maybe<CountSearchResults>;
   countSeasons?: Maybe<CountSeasons>;
   countUsers?: Maybe<CountUsers>;
   countallMedia?: Maybe<CountallMedia>;
@@ -5775,6 +5814,7 @@ export type Query = {
   docAccessPayloadKv?: Maybe<Payload_KvDocAccess>;
   docAccessPayloadLockedDocument?: Maybe<Payload_Locked_DocumentsDocAccess>;
   docAccessPayloadPreference?: Maybe<Payload_PreferencesDocAccess>;
+  docAccessSearchResult?: Maybe<Search_ResultsDocAccess>;
   docAccessSeason?: Maybe<SeasonsDocAccess>;
   docAccessUser?: Maybe<UsersDocAccess>;
   initializedUser?: Maybe<Scalars['Boolean']['output']>;
@@ -5932,6 +5972,26 @@ export type QueryPayloadPreferencesArgs = {
 };
 
 
+export type QuerySearchResultArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['Int']['input'];
+  select?: InputMaybe<Scalars['Boolean']['input']>;
+  trash?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type QuerySearchResultsArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pagination?: InputMaybe<Scalars['Boolean']['input']>;
+  select?: InputMaybe<Scalars['Boolean']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  trash?: InputMaybe<Scalars['Boolean']['input']>;
+  where?: InputMaybe<SearchResult_Where>;
+};
+
+
 export type QuerySeasonArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['Int']['input'];
@@ -6033,6 +6093,13 @@ export type QueryCountPayloadPreferencesArgs = {
 };
 
 
+export type QueryCountSearchResultsArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+  trash?: InputMaybe<Scalars['Boolean']['input']>;
+  where?: InputMaybe<SearchResult_Where>;
+};
+
+
 export type QueryCountSeasonsArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -6094,6 +6161,11 @@ export type QueryDocAccessPayloadPreferenceArgs = {
 };
 
 
+export type QueryDocAccessSearchResultArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryDocAccessSeasonArgs = {
   id: Scalars['Int']['input'];
 };
@@ -6118,6 +6190,941 @@ export type QueryVersionsContentsArgs = {
   sort?: InputMaybe<Scalars['String']['input']>;
   trash?: InputMaybe<Scalars['Boolean']['input']>;
   where?: InputMaybe<VersionsContent_Where>;
+};
+
+export type SearchResult = {
+  __typename?: 'SearchResult';
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  doc?: Maybe<SearchResult_Doc_Relationship>;
+  id: Scalars['Int']['output'];
+  poster?: Maybe<Media>;
+  priority?: Maybe<Scalars['Float']['output']>;
+  rating?: Maybe<Scalars['Float']['output']>;
+  releaseYear?: Maybe<Scalars['Float']['output']>;
+  slug?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  titleEn?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SearchResultDocArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type SearchResultUpdate_DocRelationshipInput = {
+  relationTo?: InputMaybe<SearchResultUpdate_DocRelationshipInputRelationTo>;
+  value?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export enum SearchResultUpdate_DocRelationshipInputRelationTo {
+  Content = 'content'
+}
+
+export type SearchResult_Doc = Content;
+
+export type SearchResult_DocRelationshipInput = {
+  relationTo?: InputMaybe<SearchResult_DocRelationshipInputRelationTo>;
+  value?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export enum SearchResult_DocRelationshipInputRelationTo {
+  Content = 'content'
+}
+
+export enum SearchResult_Doc_RelationTo {
+  Content = 'content'
+}
+
+export type SearchResult_Doc_Relationship = {
+  __typename?: 'SearchResult_Doc_Relationship';
+  relationTo?: Maybe<SearchResult_Doc_RelationTo>;
+  value?: Maybe<SearchResult_Doc>;
+};
+
+export type SearchResult_CreatedAt_Operator = {
+  equals?: InputMaybe<Scalars['DateTime']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
+  less_than?: InputMaybe<Scalars['DateTime']['input']>;
+  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
+  like?: InputMaybe<Scalars['DateTime']['input']>;
+  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type SearchResult_Doc_Relation = {
+  relationTo?: InputMaybe<SearchResult_Doc_Relation_RelationTo>;
+  value?: InputMaybe<Scalars['JSON']['input']>;
+};
+
+export enum SearchResult_Doc_Relation_RelationTo {
+  Content = 'content'
+}
+
+export type SearchResult_Id_Operator = {
+  equals?: InputMaybe<Scalars['Int']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['Int']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['Int']['input']>;
+  less_than?: InputMaybe<Scalars['Int']['input']>;
+  less_than_equal?: InputMaybe<Scalars['Int']['input']>;
+  not_equals?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type SearchResult_Poster_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  equals?: InputMaybe<Scalars['JSON']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  not_equals?: InputMaybe<Scalars['JSON']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+};
+
+export type SearchResult_Priority_Operator = {
+  equals?: InputMaybe<Scalars['Float']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['Float']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  less_than?: InputMaybe<Scalars['Float']['input']>;
+  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  not_equals?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type SearchResult_Rating_Operator = {
+  equals?: InputMaybe<Scalars['Float']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['Float']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  less_than?: InputMaybe<Scalars['Float']['input']>;
+  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  not_equals?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type SearchResult_ReleaseYear_Operator = {
+  equals?: InputMaybe<Scalars['Float']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['Float']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  less_than?: InputMaybe<Scalars['Float']['input']>;
+  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
+  not_equals?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type SearchResult_Slug_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type SearchResult_TitleEn_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type SearchResult_Title_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type SearchResult_Type_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type SearchResult_UpdatedAt_Operator = {
+  equals?: InputMaybe<Scalars['DateTime']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
+  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
+  less_than?: InputMaybe<Scalars['DateTime']['input']>;
+  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
+  like?: InputMaybe<Scalars['DateTime']['input']>;
+  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type SearchResult_Where = {
+  AND?: InputMaybe<Array<InputMaybe<SearchResult_Where_And>>>;
+  OR?: InputMaybe<Array<InputMaybe<SearchResult_Where_Or>>>;
+  createdAt?: InputMaybe<SearchResult_CreatedAt_Operator>;
+  doc?: InputMaybe<SearchResult_Doc_Relation>;
+  id?: InputMaybe<SearchResult_Id_Operator>;
+  poster?: InputMaybe<SearchResult_Poster_Operator>;
+  priority?: InputMaybe<SearchResult_Priority_Operator>;
+  rating?: InputMaybe<SearchResult_Rating_Operator>;
+  releaseYear?: InputMaybe<SearchResult_ReleaseYear_Operator>;
+  slug?: InputMaybe<SearchResult_Slug_Operator>;
+  title?: InputMaybe<SearchResult_Title_Operator>;
+  titleEn?: InputMaybe<SearchResult_TitleEn_Operator>;
+  type?: InputMaybe<SearchResult_Type_Operator>;
+  updatedAt?: InputMaybe<SearchResult_UpdatedAt_Operator>;
+};
+
+export type SearchResult_Where_And = {
+  AND?: InputMaybe<Array<InputMaybe<SearchResult_Where_And>>>;
+  OR?: InputMaybe<Array<InputMaybe<SearchResult_Where_Or>>>;
+  createdAt?: InputMaybe<SearchResult_CreatedAt_Operator>;
+  doc?: InputMaybe<SearchResult_Doc_Relation>;
+  id?: InputMaybe<SearchResult_Id_Operator>;
+  poster?: InputMaybe<SearchResult_Poster_Operator>;
+  priority?: InputMaybe<SearchResult_Priority_Operator>;
+  rating?: InputMaybe<SearchResult_Rating_Operator>;
+  releaseYear?: InputMaybe<SearchResult_ReleaseYear_Operator>;
+  slug?: InputMaybe<SearchResult_Slug_Operator>;
+  title?: InputMaybe<SearchResult_Title_Operator>;
+  titleEn?: InputMaybe<SearchResult_TitleEn_Operator>;
+  type?: InputMaybe<SearchResult_Type_Operator>;
+  updatedAt?: InputMaybe<SearchResult_UpdatedAt_Operator>;
+};
+
+export type SearchResult_Where_Or = {
+  AND?: InputMaybe<Array<InputMaybe<SearchResult_Where_And>>>;
+  OR?: InputMaybe<Array<InputMaybe<SearchResult_Where_Or>>>;
+  createdAt?: InputMaybe<SearchResult_CreatedAt_Operator>;
+  doc?: InputMaybe<SearchResult_Doc_Relation>;
+  id?: InputMaybe<SearchResult_Id_Operator>;
+  poster?: InputMaybe<SearchResult_Poster_Operator>;
+  priority?: InputMaybe<SearchResult_Priority_Operator>;
+  rating?: InputMaybe<SearchResult_Rating_Operator>;
+  releaseYear?: InputMaybe<SearchResult_ReleaseYear_Operator>;
+  slug?: InputMaybe<SearchResult_Slug_Operator>;
+  title?: InputMaybe<SearchResult_Title_Operator>;
+  titleEn?: InputMaybe<SearchResult_TitleEn_Operator>;
+  type?: InputMaybe<SearchResult_Type_Operator>;
+  updatedAt?: InputMaybe<SearchResult_UpdatedAt_Operator>;
+};
+
+export type SearchResults = {
+  __typename?: 'SearchResults';
+  docs: Array<SearchResult>;
+  hasNextPage: Scalars['Boolean']['output'];
+  hasPrevPage: Scalars['Boolean']['output'];
+  limit: Scalars['Int']['output'];
+  nextPage?: Maybe<Scalars['Int']['output']>;
+  offset?: Maybe<Scalars['Int']['output']>;
+  page: Scalars['Int']['output'];
+  pagingCounter: Scalars['Int']['output'];
+  prevPage?: Maybe<Scalars['Int']['output']>;
+  totalDocs: Scalars['Int']['output'];
+  totalPages: Scalars['Int']['output'];
+};
+
+export type SearchResultsCreateAccess = {
+  __typename?: 'SearchResultsCreateAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsCreateDocAccess = {
+  __typename?: 'SearchResultsCreateDocAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsDeleteAccess = {
+  __typename?: 'SearchResultsDeleteAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsDeleteDocAccess = {
+  __typename?: 'SearchResultsDeleteDocAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsDocAccessFields = {
+  __typename?: 'SearchResultsDocAccessFields';
+  createdAt?: Maybe<SearchResultsDocAccessFields_CreatedAt>;
+  doc?: Maybe<SearchResultsDocAccessFields_Doc>;
+  poster?: Maybe<SearchResultsDocAccessFields_Poster>;
+  priority?: Maybe<SearchResultsDocAccessFields_Priority>;
+  rating?: Maybe<SearchResultsDocAccessFields_Rating>;
+  releaseYear?: Maybe<SearchResultsDocAccessFields_ReleaseYear>;
+  slug?: Maybe<SearchResultsDocAccessFields_Slug>;
+  title?: Maybe<SearchResultsDocAccessFields_Title>;
+  titleEn?: Maybe<SearchResultsDocAccessFields_TitleEn>;
+  type?: Maybe<SearchResultsDocAccessFields_Type>;
+  updatedAt?: Maybe<SearchResultsDocAccessFields_UpdatedAt>;
+};
+
+export type SearchResultsDocAccessFields_CreatedAt = {
+  __typename?: 'SearchResultsDocAccessFields_createdAt';
+  create?: Maybe<SearchResultsDocAccessFields_CreatedAt_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_CreatedAt_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_CreatedAt_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_CreatedAt_Update>;
+};
+
+export type SearchResultsDocAccessFields_CreatedAt_Create = {
+  __typename?: 'SearchResultsDocAccessFields_createdAt_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_CreatedAt_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_createdAt_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_CreatedAt_Read = {
+  __typename?: 'SearchResultsDocAccessFields_createdAt_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_CreatedAt_Update = {
+  __typename?: 'SearchResultsDocAccessFields_createdAt_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Doc = {
+  __typename?: 'SearchResultsDocAccessFields_doc';
+  create?: Maybe<SearchResultsDocAccessFields_Doc_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Doc_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Doc_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Doc_Update>;
+};
+
+export type SearchResultsDocAccessFields_Doc_Create = {
+  __typename?: 'SearchResultsDocAccessFields_doc_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Doc_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_doc_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Doc_Read = {
+  __typename?: 'SearchResultsDocAccessFields_doc_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Doc_Update = {
+  __typename?: 'SearchResultsDocAccessFields_doc_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Poster = {
+  __typename?: 'SearchResultsDocAccessFields_poster';
+  create?: Maybe<SearchResultsDocAccessFields_Poster_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Poster_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Poster_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Poster_Update>;
+};
+
+export type SearchResultsDocAccessFields_Poster_Create = {
+  __typename?: 'SearchResultsDocAccessFields_poster_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Poster_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_poster_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Poster_Read = {
+  __typename?: 'SearchResultsDocAccessFields_poster_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Poster_Update = {
+  __typename?: 'SearchResultsDocAccessFields_poster_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Priority = {
+  __typename?: 'SearchResultsDocAccessFields_priority';
+  create?: Maybe<SearchResultsDocAccessFields_Priority_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Priority_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Priority_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Priority_Update>;
+};
+
+export type SearchResultsDocAccessFields_Priority_Create = {
+  __typename?: 'SearchResultsDocAccessFields_priority_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Priority_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_priority_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Priority_Read = {
+  __typename?: 'SearchResultsDocAccessFields_priority_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Priority_Update = {
+  __typename?: 'SearchResultsDocAccessFields_priority_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Rating = {
+  __typename?: 'SearchResultsDocAccessFields_rating';
+  create?: Maybe<SearchResultsDocAccessFields_Rating_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Rating_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Rating_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Rating_Update>;
+};
+
+export type SearchResultsDocAccessFields_Rating_Create = {
+  __typename?: 'SearchResultsDocAccessFields_rating_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Rating_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_rating_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Rating_Read = {
+  __typename?: 'SearchResultsDocAccessFields_rating_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Rating_Update = {
+  __typename?: 'SearchResultsDocAccessFields_rating_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_ReleaseYear = {
+  __typename?: 'SearchResultsDocAccessFields_releaseYear';
+  create?: Maybe<SearchResultsDocAccessFields_ReleaseYear_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_ReleaseYear_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_ReleaseYear_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_ReleaseYear_Update>;
+};
+
+export type SearchResultsDocAccessFields_ReleaseYear_Create = {
+  __typename?: 'SearchResultsDocAccessFields_releaseYear_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_ReleaseYear_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_releaseYear_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_ReleaseYear_Read = {
+  __typename?: 'SearchResultsDocAccessFields_releaseYear_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_ReleaseYear_Update = {
+  __typename?: 'SearchResultsDocAccessFields_releaseYear_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Slug = {
+  __typename?: 'SearchResultsDocAccessFields_slug';
+  create?: Maybe<SearchResultsDocAccessFields_Slug_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Slug_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Slug_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Slug_Update>;
+};
+
+export type SearchResultsDocAccessFields_Slug_Create = {
+  __typename?: 'SearchResultsDocAccessFields_slug_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Slug_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_slug_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Slug_Read = {
+  __typename?: 'SearchResultsDocAccessFields_slug_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Slug_Update = {
+  __typename?: 'SearchResultsDocAccessFields_slug_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Title = {
+  __typename?: 'SearchResultsDocAccessFields_title';
+  create?: Maybe<SearchResultsDocAccessFields_Title_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Title_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Title_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Title_Update>;
+};
+
+export type SearchResultsDocAccessFields_TitleEn = {
+  __typename?: 'SearchResultsDocAccessFields_titleEn';
+  create?: Maybe<SearchResultsDocAccessFields_TitleEn_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_TitleEn_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_TitleEn_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_TitleEn_Update>;
+};
+
+export type SearchResultsDocAccessFields_TitleEn_Create = {
+  __typename?: 'SearchResultsDocAccessFields_titleEn_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_TitleEn_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_titleEn_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_TitleEn_Read = {
+  __typename?: 'SearchResultsDocAccessFields_titleEn_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_TitleEn_Update = {
+  __typename?: 'SearchResultsDocAccessFields_titleEn_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Title_Create = {
+  __typename?: 'SearchResultsDocAccessFields_title_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Title_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_title_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Title_Read = {
+  __typename?: 'SearchResultsDocAccessFields_title_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Title_Update = {
+  __typename?: 'SearchResultsDocAccessFields_title_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Type = {
+  __typename?: 'SearchResultsDocAccessFields_type';
+  create?: Maybe<SearchResultsDocAccessFields_Type_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_Type_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_Type_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_Type_Update>;
+};
+
+export type SearchResultsDocAccessFields_Type_Create = {
+  __typename?: 'SearchResultsDocAccessFields_type_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Type_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_type_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Type_Read = {
+  __typename?: 'SearchResultsDocAccessFields_type_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_Type_Update = {
+  __typename?: 'SearchResultsDocAccessFields_type_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_UpdatedAt = {
+  __typename?: 'SearchResultsDocAccessFields_updatedAt';
+  create?: Maybe<SearchResultsDocAccessFields_UpdatedAt_Create>;
+  delete?: Maybe<SearchResultsDocAccessFields_UpdatedAt_Delete>;
+  read?: Maybe<SearchResultsDocAccessFields_UpdatedAt_Read>;
+  update?: Maybe<SearchResultsDocAccessFields_UpdatedAt_Update>;
+};
+
+export type SearchResultsDocAccessFields_UpdatedAt_Create = {
+  __typename?: 'SearchResultsDocAccessFields_updatedAt_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_UpdatedAt_Delete = {
+  __typename?: 'SearchResultsDocAccessFields_updatedAt_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_UpdatedAt_Read = {
+  __typename?: 'SearchResultsDocAccessFields_updatedAt_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsDocAccessFields_UpdatedAt_Update = {
+  __typename?: 'SearchResultsDocAccessFields_updatedAt_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields = {
+  __typename?: 'SearchResultsFields';
+  createdAt?: Maybe<SearchResultsFields_CreatedAt>;
+  doc?: Maybe<SearchResultsFields_Doc>;
+  poster?: Maybe<SearchResultsFields_Poster>;
+  priority?: Maybe<SearchResultsFields_Priority>;
+  rating?: Maybe<SearchResultsFields_Rating>;
+  releaseYear?: Maybe<SearchResultsFields_ReleaseYear>;
+  slug?: Maybe<SearchResultsFields_Slug>;
+  title?: Maybe<SearchResultsFields_Title>;
+  titleEn?: Maybe<SearchResultsFields_TitleEn>;
+  type?: Maybe<SearchResultsFields_Type>;
+  updatedAt?: Maybe<SearchResultsFields_UpdatedAt>;
+};
+
+export type SearchResultsFields_CreatedAt = {
+  __typename?: 'SearchResultsFields_createdAt';
+  create?: Maybe<SearchResultsFields_CreatedAt_Create>;
+  delete?: Maybe<SearchResultsFields_CreatedAt_Delete>;
+  read?: Maybe<SearchResultsFields_CreatedAt_Read>;
+  update?: Maybe<SearchResultsFields_CreatedAt_Update>;
+};
+
+export type SearchResultsFields_CreatedAt_Create = {
+  __typename?: 'SearchResultsFields_createdAt_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_CreatedAt_Delete = {
+  __typename?: 'SearchResultsFields_createdAt_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_CreatedAt_Read = {
+  __typename?: 'SearchResultsFields_createdAt_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_CreatedAt_Update = {
+  __typename?: 'SearchResultsFields_createdAt_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Doc = {
+  __typename?: 'SearchResultsFields_doc';
+  create?: Maybe<SearchResultsFields_Doc_Create>;
+  delete?: Maybe<SearchResultsFields_Doc_Delete>;
+  read?: Maybe<SearchResultsFields_Doc_Read>;
+  update?: Maybe<SearchResultsFields_Doc_Update>;
+};
+
+export type SearchResultsFields_Doc_Create = {
+  __typename?: 'SearchResultsFields_doc_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Doc_Delete = {
+  __typename?: 'SearchResultsFields_doc_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Doc_Read = {
+  __typename?: 'SearchResultsFields_doc_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Doc_Update = {
+  __typename?: 'SearchResultsFields_doc_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Poster = {
+  __typename?: 'SearchResultsFields_poster';
+  create?: Maybe<SearchResultsFields_Poster_Create>;
+  delete?: Maybe<SearchResultsFields_Poster_Delete>;
+  read?: Maybe<SearchResultsFields_Poster_Read>;
+  update?: Maybe<SearchResultsFields_Poster_Update>;
+};
+
+export type SearchResultsFields_Poster_Create = {
+  __typename?: 'SearchResultsFields_poster_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Poster_Delete = {
+  __typename?: 'SearchResultsFields_poster_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Poster_Read = {
+  __typename?: 'SearchResultsFields_poster_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Poster_Update = {
+  __typename?: 'SearchResultsFields_poster_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Priority = {
+  __typename?: 'SearchResultsFields_priority';
+  create?: Maybe<SearchResultsFields_Priority_Create>;
+  delete?: Maybe<SearchResultsFields_Priority_Delete>;
+  read?: Maybe<SearchResultsFields_Priority_Read>;
+  update?: Maybe<SearchResultsFields_Priority_Update>;
+};
+
+export type SearchResultsFields_Priority_Create = {
+  __typename?: 'SearchResultsFields_priority_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Priority_Delete = {
+  __typename?: 'SearchResultsFields_priority_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Priority_Read = {
+  __typename?: 'SearchResultsFields_priority_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Priority_Update = {
+  __typename?: 'SearchResultsFields_priority_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Rating = {
+  __typename?: 'SearchResultsFields_rating';
+  create?: Maybe<SearchResultsFields_Rating_Create>;
+  delete?: Maybe<SearchResultsFields_Rating_Delete>;
+  read?: Maybe<SearchResultsFields_Rating_Read>;
+  update?: Maybe<SearchResultsFields_Rating_Update>;
+};
+
+export type SearchResultsFields_Rating_Create = {
+  __typename?: 'SearchResultsFields_rating_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Rating_Delete = {
+  __typename?: 'SearchResultsFields_rating_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Rating_Read = {
+  __typename?: 'SearchResultsFields_rating_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Rating_Update = {
+  __typename?: 'SearchResultsFields_rating_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_ReleaseYear = {
+  __typename?: 'SearchResultsFields_releaseYear';
+  create?: Maybe<SearchResultsFields_ReleaseYear_Create>;
+  delete?: Maybe<SearchResultsFields_ReleaseYear_Delete>;
+  read?: Maybe<SearchResultsFields_ReleaseYear_Read>;
+  update?: Maybe<SearchResultsFields_ReleaseYear_Update>;
+};
+
+export type SearchResultsFields_ReleaseYear_Create = {
+  __typename?: 'SearchResultsFields_releaseYear_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_ReleaseYear_Delete = {
+  __typename?: 'SearchResultsFields_releaseYear_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_ReleaseYear_Read = {
+  __typename?: 'SearchResultsFields_releaseYear_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_ReleaseYear_Update = {
+  __typename?: 'SearchResultsFields_releaseYear_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Slug = {
+  __typename?: 'SearchResultsFields_slug';
+  create?: Maybe<SearchResultsFields_Slug_Create>;
+  delete?: Maybe<SearchResultsFields_Slug_Delete>;
+  read?: Maybe<SearchResultsFields_Slug_Read>;
+  update?: Maybe<SearchResultsFields_Slug_Update>;
+};
+
+export type SearchResultsFields_Slug_Create = {
+  __typename?: 'SearchResultsFields_slug_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Slug_Delete = {
+  __typename?: 'SearchResultsFields_slug_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Slug_Read = {
+  __typename?: 'SearchResultsFields_slug_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Slug_Update = {
+  __typename?: 'SearchResultsFields_slug_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Title = {
+  __typename?: 'SearchResultsFields_title';
+  create?: Maybe<SearchResultsFields_Title_Create>;
+  delete?: Maybe<SearchResultsFields_Title_Delete>;
+  read?: Maybe<SearchResultsFields_Title_Read>;
+  update?: Maybe<SearchResultsFields_Title_Update>;
+};
+
+export type SearchResultsFields_TitleEn = {
+  __typename?: 'SearchResultsFields_titleEn';
+  create?: Maybe<SearchResultsFields_TitleEn_Create>;
+  delete?: Maybe<SearchResultsFields_TitleEn_Delete>;
+  read?: Maybe<SearchResultsFields_TitleEn_Read>;
+  update?: Maybe<SearchResultsFields_TitleEn_Update>;
+};
+
+export type SearchResultsFields_TitleEn_Create = {
+  __typename?: 'SearchResultsFields_titleEn_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_TitleEn_Delete = {
+  __typename?: 'SearchResultsFields_titleEn_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_TitleEn_Read = {
+  __typename?: 'SearchResultsFields_titleEn_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_TitleEn_Update = {
+  __typename?: 'SearchResultsFields_titleEn_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Title_Create = {
+  __typename?: 'SearchResultsFields_title_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Title_Delete = {
+  __typename?: 'SearchResultsFields_title_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Title_Read = {
+  __typename?: 'SearchResultsFields_title_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Title_Update = {
+  __typename?: 'SearchResultsFields_title_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Type = {
+  __typename?: 'SearchResultsFields_type';
+  create?: Maybe<SearchResultsFields_Type_Create>;
+  delete?: Maybe<SearchResultsFields_Type_Delete>;
+  read?: Maybe<SearchResultsFields_Type_Read>;
+  update?: Maybe<SearchResultsFields_Type_Update>;
+};
+
+export type SearchResultsFields_Type_Create = {
+  __typename?: 'SearchResultsFields_type_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Type_Delete = {
+  __typename?: 'SearchResultsFields_type_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Type_Read = {
+  __typename?: 'SearchResultsFields_type_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_Type_Update = {
+  __typename?: 'SearchResultsFields_type_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_UpdatedAt = {
+  __typename?: 'SearchResultsFields_updatedAt';
+  create?: Maybe<SearchResultsFields_UpdatedAt_Create>;
+  delete?: Maybe<SearchResultsFields_UpdatedAt_Delete>;
+  read?: Maybe<SearchResultsFields_UpdatedAt_Read>;
+  update?: Maybe<SearchResultsFields_UpdatedAt_Update>;
+};
+
+export type SearchResultsFields_UpdatedAt_Create = {
+  __typename?: 'SearchResultsFields_updatedAt_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_UpdatedAt_Delete = {
+  __typename?: 'SearchResultsFields_updatedAt_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_UpdatedAt_Read = {
+  __typename?: 'SearchResultsFields_updatedAt_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsFields_UpdatedAt_Update = {
+  __typename?: 'SearchResultsFields_updatedAt_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type SearchResultsReadAccess = {
+  __typename?: 'SearchResultsReadAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsReadDocAccess = {
+  __typename?: 'SearchResultsReadDocAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsUpdateAccess = {
+  __typename?: 'SearchResultsUpdateAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+export type SearchResultsUpdateDocAccess = {
+  __typename?: 'SearchResultsUpdateDocAccess';
+  permission: Scalars['Boolean']['output'];
+  where?: Maybe<Scalars['JSONObject']['output']>;
 };
 
 export type Season = {
@@ -7675,6 +8682,11 @@ export type CountPayloadPreferences = {
   totalDocs?: Maybe<Scalars['Int']['output']>;
 };
 
+export type CountSearchResults = {
+  __typename?: 'countSearchResults';
+  totalDocs?: Maybe<Scalars['Int']['output']>;
+};
+
 export type CountSeasons = {
   __typename?: 'countSeasons';
   totalDocs?: Maybe<Scalars['Int']['output']>;
@@ -7926,6 +8938,34 @@ export type MutationPayloadPreferenceUpdateInput = {
   value?: InputMaybe<Scalars['JSON']['input']>;
 };
 
+export type MutationSearchResultInput = {
+  createdAt?: InputMaybe<Scalars['String']['input']>;
+  doc?: InputMaybe<SearchResult_DocRelationshipInput>;
+  poster?: InputMaybe<Scalars['Int']['input']>;
+  priority?: InputMaybe<Scalars['Float']['input']>;
+  rating?: InputMaybe<Scalars['Float']['input']>;
+  releaseYear?: InputMaybe<Scalars['Float']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  titleEn?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationSearchResultUpdateInput = {
+  createdAt?: InputMaybe<Scalars['String']['input']>;
+  doc?: InputMaybe<SearchResultUpdate_DocRelationshipInput>;
+  poster?: InputMaybe<Scalars['Int']['input']>;
+  priority?: InputMaybe<Scalars['Float']['input']>;
+  rating?: InputMaybe<Scalars['Float']['input']>;
+  releaseYear?: InputMaybe<Scalars['Float']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  titleEn?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type MutationSeasonInput = {
   content?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['String']['input']>;
@@ -8042,6 +9082,24 @@ export type Payload_PreferencesDocAccess = {
   fields?: Maybe<PayloadPreferencesDocAccessFields>;
   read?: Maybe<PayloadPreferencesReadDocAccess>;
   update?: Maybe<PayloadPreferencesUpdateDocAccess>;
+};
+
+export type Search_ResultsAccess = {
+  __typename?: 'search_resultsAccess';
+  create?: Maybe<SearchResultsCreateAccess>;
+  delete?: Maybe<SearchResultsDeleteAccess>;
+  fields?: Maybe<SearchResultsFields>;
+  read?: Maybe<SearchResultsReadAccess>;
+  update?: Maybe<SearchResultsUpdateAccess>;
+};
+
+export type Search_ResultsDocAccess = {
+  __typename?: 'search_resultsDocAccess';
+  create?: Maybe<SearchResultsCreateDocAccess>;
+  delete?: Maybe<SearchResultsDeleteDocAccess>;
+  fields?: Maybe<SearchResultsDocAccessFields>;
+  read?: Maybe<SearchResultsReadDocAccess>;
+  update?: Maybe<SearchResultsUpdateDocAccess>;
 };
 
 export type SeasonsAccess = {
@@ -8460,6 +9518,10 @@ export type VersionsContents = {
   totalPages: Scalars['Int']['output'];
 };
 
+export type Content_Status =
+  | 'draft'
+  | 'published';
+
 export type Content_Type =
   | 'movie'
   | 'series';
@@ -8542,10 +9604,200 @@ export type Favorite_Where_Or = {
   user?: Favorite_User_Operator | null | undefined;
 };
 
+export type SearchResult_CreatedAt_Operator = {
+  equals?: unknown;
+  exists?: boolean | null | undefined;
+  greater_than?: unknown;
+  greater_than_equal?: unknown;
+  less_than?: unknown;
+  less_than_equal?: unknown;
+  like?: unknown;
+  not_equals?: unknown;
+};
+
+export type SearchResult_Doc_Relation = {
+  relationTo?: SearchResult_Doc_Relation_RelationTo | null | undefined;
+  value?: unknown;
+};
+
+export type SearchResult_Doc_Relation_RelationTo =
+  | 'content';
+
+export type SearchResult_Id_Operator = {
+  equals?: number | null | undefined;
+  exists?: boolean | null | undefined;
+  greater_than?: number | null | undefined;
+  greater_than_equal?: number | null | undefined;
+  less_than?: number | null | undefined;
+  less_than_equal?: number | null | undefined;
+  not_equals?: number | null | undefined;
+};
+
+export type SearchResult_Poster_Operator = {
+  all?: Array<unknown> | null | undefined;
+  equals?: unknown;
+  exists?: boolean | null | undefined;
+  in?: Array<unknown> | null | undefined;
+  not_equals?: unknown;
+  not_in?: Array<unknown> | null | undefined;
+};
+
+export type SearchResult_Priority_Operator = {
+  equals?: number | null | undefined;
+  exists?: boolean | null | undefined;
+  greater_than?: number | null | undefined;
+  greater_than_equal?: number | null | undefined;
+  less_than?: number | null | undefined;
+  less_than_equal?: number | null | undefined;
+  not_equals?: number | null | undefined;
+};
+
+export type SearchResult_Rating_Operator = {
+  equals?: number | null | undefined;
+  exists?: boolean | null | undefined;
+  greater_than?: number | null | undefined;
+  greater_than_equal?: number | null | undefined;
+  less_than?: number | null | undefined;
+  less_than_equal?: number | null | undefined;
+  not_equals?: number | null | undefined;
+};
+
+export type SearchResult_ReleaseYear_Operator = {
+  equals?: number | null | undefined;
+  exists?: boolean | null | undefined;
+  greater_than?: number | null | undefined;
+  greater_than_equal?: number | null | undefined;
+  less_than?: number | null | undefined;
+  less_than_equal?: number | null | undefined;
+  not_equals?: number | null | undefined;
+};
+
+export type SearchResult_Slug_Operator = {
+  all?: Array<string | null | undefined> | null | undefined;
+  contains?: string | null | undefined;
+  equals?: string | null | undefined;
+  exists?: boolean | null | undefined;
+  in?: Array<string | null | undefined> | null | undefined;
+  like?: string | null | undefined;
+  not_equals?: string | null | undefined;
+  not_in?: Array<string | null | undefined> | null | undefined;
+};
+
+export type SearchResult_TitleEn_Operator = {
+  all?: Array<string | null | undefined> | null | undefined;
+  contains?: string | null | undefined;
+  equals?: string | null | undefined;
+  exists?: boolean | null | undefined;
+  in?: Array<string | null | undefined> | null | undefined;
+  like?: string | null | undefined;
+  not_equals?: string | null | undefined;
+  not_in?: Array<string | null | undefined> | null | undefined;
+};
+
+export type SearchResult_Title_Operator = {
+  all?: Array<string | null | undefined> | null | undefined;
+  contains?: string | null | undefined;
+  equals?: string | null | undefined;
+  exists?: boolean | null | undefined;
+  in?: Array<string | null | undefined> | null | undefined;
+  like?: string | null | undefined;
+  not_equals?: string | null | undefined;
+  not_in?: Array<string | null | undefined> | null | undefined;
+};
+
+export type SearchResult_Type_Operator = {
+  all?: Array<string | null | undefined> | null | undefined;
+  contains?: string | null | undefined;
+  equals?: string | null | undefined;
+  exists?: boolean | null | undefined;
+  in?: Array<string | null | undefined> | null | undefined;
+  like?: string | null | undefined;
+  not_equals?: string | null | undefined;
+  not_in?: Array<string | null | undefined> | null | undefined;
+};
+
+export type SearchResult_UpdatedAt_Operator = {
+  equals?: unknown;
+  exists?: boolean | null | undefined;
+  greater_than?: unknown;
+  greater_than_equal?: unknown;
+  less_than?: unknown;
+  less_than_equal?: unknown;
+  like?: unknown;
+  not_equals?: unknown;
+};
+
+export type SearchResult_Where = {
+  AND?: Array<SearchResult_Where_And | null | undefined> | null | undefined;
+  OR?: Array<SearchResult_Where_Or | null | undefined> | null | undefined;
+  createdAt?: SearchResult_CreatedAt_Operator | null | undefined;
+  doc?: SearchResult_Doc_Relation | null | undefined;
+  id?: SearchResult_Id_Operator | null | undefined;
+  poster?: SearchResult_Poster_Operator | null | undefined;
+  priority?: SearchResult_Priority_Operator | null | undefined;
+  rating?: SearchResult_Rating_Operator | null | undefined;
+  releaseYear?: SearchResult_ReleaseYear_Operator | null | undefined;
+  slug?: SearchResult_Slug_Operator | null | undefined;
+  title?: SearchResult_Title_Operator | null | undefined;
+  titleEn?: SearchResult_TitleEn_Operator | null | undefined;
+  type?: SearchResult_Type_Operator | null | undefined;
+  updatedAt?: SearchResult_UpdatedAt_Operator | null | undefined;
+};
+
+export type SearchResult_Where_And = {
+  AND?: Array<SearchResult_Where_And | null | undefined> | null | undefined;
+  OR?: Array<SearchResult_Where_Or | null | undefined> | null | undefined;
+  createdAt?: SearchResult_CreatedAt_Operator | null | undefined;
+  doc?: SearchResult_Doc_Relation | null | undefined;
+  id?: SearchResult_Id_Operator | null | undefined;
+  poster?: SearchResult_Poster_Operator | null | undefined;
+  priority?: SearchResult_Priority_Operator | null | undefined;
+  rating?: SearchResult_Rating_Operator | null | undefined;
+  releaseYear?: SearchResult_ReleaseYear_Operator | null | undefined;
+  slug?: SearchResult_Slug_Operator | null | undefined;
+  title?: SearchResult_Title_Operator | null | undefined;
+  titleEn?: SearchResult_TitleEn_Operator | null | undefined;
+  type?: SearchResult_Type_Operator | null | undefined;
+  updatedAt?: SearchResult_UpdatedAt_Operator | null | undefined;
+};
+
+export type SearchResult_Where_Or = {
+  AND?: Array<SearchResult_Where_And | null | undefined> | null | undefined;
+  OR?: Array<SearchResult_Where_Or | null | undefined> | null | undefined;
+  createdAt?: SearchResult_CreatedAt_Operator | null | undefined;
+  doc?: SearchResult_Doc_Relation | null | undefined;
+  id?: SearchResult_Id_Operator | null | undefined;
+  poster?: SearchResult_Poster_Operator | null | undefined;
+  priority?: SearchResult_Priority_Operator | null | undefined;
+  rating?: SearchResult_Rating_Operator | null | undefined;
+  releaseYear?: SearchResult_ReleaseYear_Operator | null | undefined;
+  slug?: SearchResult_Slug_Operator | null | undefined;
+  title?: SearchResult_Title_Operator | null | undefined;
+  titleEn?: SearchResult_TitleEn_Operator | null | undefined;
+  type?: SearchResult_Type_Operator | null | undefined;
+  updatedAt?: SearchResult_UpdatedAt_Operator | null | undefined;
+};
+
+export type GetContentBySlugQueryVariables = Exact<{
+  slug: string;
+}>;
+
+
+export type GetContentBySlugQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, originalTitle: string | null, slug: string | null, description: unknown, releaseYear: number | null, duration: number | null, rating: number | null, status: Content_Status | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, description: unknown, releaseDate: unknown, duration: number | null }> } | null }> } | null }> } | null };
+
 export type GetContentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetContentQuery = { Contents: { docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null }> } | null };
+export type GetContentQuery = { Contents: { docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null }> } | null };
+
+export type GetSimilarContentQueryVariables = Exact<{
+  genreIds?: Array<unknown> | unknown | null | undefined;
+  excludeId: number;
+  limit: number;
+}>;
+
+
+export type GetSimilarContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null }> } | null };
 
 export type AddFavoriteMutationVariables = Exact<{
   userId: number;
@@ -8596,8 +9848,17 @@ export type MeUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeUserQuery = { meUser: { user: { id: number, name: string | null, email: unknown } | null } | null };
 
+export type SearchContentQueryVariables = Exact<{
+  where: SearchResult_Where;
+}>;
 
-export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
+
+export type SearchContentQuery = { SearchResults: { docs: Array<{ id: number, title: string | null, titleEn: string | null, slug: string | null, type: string | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null }> } | null };
+
+
+export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseDate"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
+export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
+export const GetSimilarContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSimilarContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"genreIds"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JSON"}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"excludeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"genres"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"genreIds"}}}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"not_equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"excludeId"}}}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"status"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"EnumValue","value":"published"}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-rating","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSimilarContentQuery, GetSimilarContentQueryVariables>;
 export const AddFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"user"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<AddFavoriteMutation, AddFavoriteMutationVariables>;
 export const LoginUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LoginUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"loginUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}},{"kind":"Field","name":{"kind":"Name","value":"exp"}}]}}]}}]} as unknown as DocumentNode<LoginUserMutation, LoginUserMutationVariables>;
 export const LogoutUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LogoutUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logoutUser"}}]}}]} as unknown as DocumentNode<LogoutUserMutation, LogoutUserMutationVariables>;
@@ -8605,3 +9866,4 @@ export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"O
 export const RemoveFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<RemoveFavoriteMutation, RemoveFavoriteMutationVariables>;
 export const GetFavoritesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavorites"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoritesQuery, GetFavoritesQueryVariables>;
 export const MeUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MeUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"meUser"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<MeUserQuery, MeUserQueryVariables>;
+export const SearchContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SearchContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchResult_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"SearchResults"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]} as unknown as DocumentNode<SearchContentQuery, SearchContentQueryVariables>;

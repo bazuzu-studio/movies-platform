@@ -16,6 +16,8 @@ import { Favorites } from './collections/favorites/config'
 import { Seasons } from './collections/seasons/config'
 import { kodikImportEndpoint } from './endpoints/kodik-import'
 
+import { searchPlugin } from '@payloadcms/plugin-search'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -85,6 +87,7 @@ export default buildConfig({
     Favorites,
     Seasons,
   ],
+  
 
   editor: lexicalEditor(),
 
@@ -106,6 +109,31 @@ export default buildConfig({
 
   plugins: [
     s3Storage(s3StorageOptions),
+    searchPlugin({
+      collections: ['content'], // slug коллекции, которую индексируем
+searchOverrides: {
+  slug: 'search-results',
+  fields: ({ defaultFields }) => [
+    ...defaultFields,
+    { name: 'titleEn', type: 'text' },
+    { name: 'slug', type: 'text' },
+    { name: 'type', type: 'text' },
+    { name: 'releaseYear', type: 'number' },
+    { name: 'rating', type: 'number' },
+    { name: 'poster', type: 'upload', relationTo: 'media' },
+  ],
+},
+beforeSync: ({ originalDoc, searchDoc }) => ({
+  ...searchDoc,
+  title: originalDoc.titleRu,
+  titleEn: originalDoc.titleEn,
+  slug: originalDoc.slug,
+  type: originalDoc.type,
+  releaseYear: originalDoc.releaseYear,
+  rating: originalDoc.rating,
+  poster: originalDoc.poster,
+}),
+    }),
   ],
 
   /**

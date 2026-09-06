@@ -20,7 +20,7 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const favItems = all.filter((c) => favorites.has(c.id));
 
-  console.log(favItems, 'dddd');
+
   /**
    * Редирект вынесен в useEffect, а не в тело рендера — вызов router.push
    * напрямую во время рендера считается побочным эффектом и может приводить

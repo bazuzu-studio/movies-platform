@@ -8,6 +8,13 @@ query GetContent {
       type
       releaseYear
       rating
+      poster {
+        url
+      }
+      backdrop {
+        url
+
+      }
     }
   }
 }

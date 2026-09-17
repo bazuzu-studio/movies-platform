@@ -12,8 +12,8 @@ import { useAuth } from "@/components/providers/AuthContext";
 export function FavoritesClient({ all }: { all: ContentItem[] }) {
   const router = useRouter();
   const { ready, isLoggedIn } = useAuth();
-  const { favorites, isLoading } = useFavorites();
-  const items = all.filter((c) => favorites.has(c.id));
+  const { isFavorite, isLoading } = useFavorites();
+  const items = all.filter((c) => isFavorite(c.id));
 
   
 

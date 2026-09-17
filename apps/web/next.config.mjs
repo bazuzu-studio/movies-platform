@@ -2,31 +2,28 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      // TODO: добавить домен хранилища MinIO/S3 из ТЗ (раздел 2), когда
-      // изображения начнут отдаваться с backend, например:
-      // { protocol: "https", hostname: "media.cinehub.example.com" },
-
-       {
-        protocol: "http", // Локальные серверы обычно работают без SSL
-        hostname: "localhost",
-        port: "9000", // Замените на порт вашего бэкенда (например, 5000, 8080 или 4000)
-      },
-      {
-        protocol: "http", // Локальные серверы обычно работают без SSL
-        hostname: "localhost",
-        port: "9001", // Замените на порт вашего бэкенда (например, 5000, 8080 или 4000)
-      },
-      {
-        protocol: "http", // Локальные серверы обычно работают без SSL
-        hostname: "localhost",
-        port: "4000", // Замените на порт вашего бэкенда (например, 5000, 8080 или 4000)
-      },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "http", hostname: "localhost" }, // разрешает картинки с localhost:*
     ],
   },
+  headers: async () => [
+    {
+      source: "/:path*",
+      headers: [
+        {
+          key: "Content-Security-Policy",
+          value:
+            "frame-src 'self' kodikplayer.com; " 
+            // "img-src 'self' data: https: http:; " +
+            // // Самое важное: разрешаем запросы к Payload на localhost:4000
+            // "connect-src 'self' http://localhost:4000; " +
+            // "script-src 'self'; " +
+            // "style-src 'self' 'unsafe-inline'; " +
+            // "font-src 'self';",
+        },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;

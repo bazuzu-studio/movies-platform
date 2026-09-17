@@ -1,0 +1,31 @@
+# src/graphql/contents/GetSimilarContent.graphql
+query GetSimilarContent($genreIds: [JSON!], $excludeId: Int!, $limit: Int!) {
+  Contents(
+    where: {
+      genres: { in: $genreIds }
+      id: { not_equals: $excludeId }
+      
+    }
+    limit: $limit
+    sort: "-rating"
+  ) {
+    docs {
+      id
+      type
+      titleEn
+      titleRu
+      slug
+      releaseYear
+      rating
+      poster {
+        url
+      }
+      genres {
+        id
+        title
+        slug
+      }
+      ageRating
+    }
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon, X, Inbox } from "lucide-react";
@@ -9,6 +9,7 @@ import { SearchContentDocument } from "@/generated/graphql";
 import { EmptyState } from "@/components/ui/States";
 import { ContentGrid } from "@/components/content/ContentGrid";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { mapSearchResultToItem } from "@/lib/content-mapper";
 
 /**
  * Поиск через коллекцию search-results (плагин @payloadcms/plugin-search),
@@ -59,10 +60,12 @@ const { data, isLoading, isFetching } = useQuery({
   enabled: trimmedQuery.length > 0,
   staleTime: 10_000,
 });
-console.log(data);
-
-
-  const results = data?.SearchResults.docs ?? [];
+  // SearchResults.docs — это документы плагина поиска, а не Content:
+  // без маппинга в MovieCard попадали бы undefined titleRu/genres/backdrop.
+  const results = useMemo(
+    () => (data?.SearchResults?.docs ?? []).map(mapSearchResultToItem),
+    [data]
+  );
   const showLoading = isLoading || (isFetching && trimmedQuery !== query.trim());
 
   return (

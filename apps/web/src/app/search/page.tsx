@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SearchClient } from "@/components/pages/SearchClient";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Поиск",
@@ -24,5 +25,5 @@ export default async function SearchPage({
 }) {
   const { q } = await searchParams;
 
-  return <SearchClient initialQuery={q ?? ""} />;
+  return  <Suspense fallback={null}><SearchClient initialQuery={q ?? ""} /></Suspense>;
 }

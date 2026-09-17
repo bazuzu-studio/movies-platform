@@ -1,83 +1,158 @@
 // Типы приближены к будущим коллекциям Payload CMS (ТЗ, раздел 8),
 // чтобы замена мок-данных на реальный API прошла без переписывания компонентов.
 
+/* -------------------------------------------------------------------------- */
+/*                                  Общие типы                               */
+/* -------------------------------------------------------------------------- */
+
 export type ContentType = "movie" | "series";
-export type PublishStatus = "draft" | "published";
+
+
+export type UserRole = "admin" | "editor" | "user";
+
+/* -------------------------------------------------------------------------- */
+/*                                   Media                                    */
+/* -------------------------------------------------------------------------- */
+
+export interface Media {
+  id: number | string;
+  url: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Genre                                    */
+/* -------------------------------------------------------------------------- */
 
 export interface Genre {
   title: string;
   slug: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  Episode                                   */
+/* -------------------------------------------------------------------------- */
+
 export interface Episode {
+  id?: number | string;
   episodeNumber: number;
   title: string;
   description: string;
   releaseDate: string;
-  duration: number; // минуты
+  duration: number;
+
+  /** Ссылка на встраиваемый плеер серии. */
+  embedUrl?: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                   Season                                   */
+/* -------------------------------------------------------------------------- */
+
 export interface Season {
+  id: number | string;
   seasonNumber: number;
   releaseYear: number;
+
+  /** Название сезона. */
   title?: string;
+
+  /** Slug связанного Content. */
+  slug: string;
+
+  /** Постер связанного Content. */
+  poster?: Media;
+
   episodes: Episode[];
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                Base Content                                */
+/* -------------------------------------------------------------------------- */
 
-interface Media {
+export interface BaseContent {
   id: number | string;
-  url: string;
-  
-  // можно добавить path, alt, width, height и т. п., если они есть в схеме
-}
 
-interface BaseContent {
-  id: number;
   titleRu: string;
   titleEn: string;
   originalTitle?: string;
+
   slug: string;
   description: string;
+
   releaseYear: number;
+
   genres: string[];
-  genreIds?: number[]; // ← добавить
+  genreIds?: number[];
+
+  /**
+   * Возрастное ограничение:
+   * 0 / 6 / 12 / 16 / 18.
+   */
+  ageRating?: number | null;
+  playerLink:string;
   rating: number;
+
   poster: Media;
   backdrop: Media;
-  status: PublishStatus;
+
+
   director?: string;
   cast?: string[];
+
   isNew?: boolean;
   isPopular?: boolean;
+
+  /** ID фильма в Кинопоиске. */
+  kinopoiskId?: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                    Movie                                   */
+/* -------------------------------------------------------------------------- */
 
 export interface Movie extends BaseContent {
   type: "movie";
-  duration: number; // минуты
+
+  /** Продолжительность фильма в минутах. */
+  duration: number;
+
+  /**
+   * Ссылка на встраиваемый плеер.
+   * Источник в CMS — поле `playerLink`.
+   */
+  embedUrl?: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                   Series                                   */
+/* -------------------------------------------------------------------------- */
 
 export interface Series extends BaseContent {
   type: "series";
+
   seasons: Season[];
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                Content Item                                */
+/* -------------------------------------------------------------------------- */
+
 export type ContentItem = Movie | Series;
 
-/**
- * Соответствует коллекции Users в Payload CMS (ТЗ, раздел 8/9).
- *
- * id — числовой (Int в GraphQL-схеме), используется для фильтрации
- * в запросах вида { user: { equals: user.id } } (см. FavoritesContext).
- *
- * roles — массив (hasMany: true в конфиге Users), а не одиночная role,
- * пользователь теоретически может иметь несколько ролей одновременно
- * (например, ['admin', 'user']).
- */
-export type UserRole = "admin" | "editor" | "user";
+/* -------------------------------------------------------------------------- */
+/*                                    User                                    */
+/* -------------------------------------------------------------------------- */
 
+/**
+ * Соответствует коллекции Users в Payload CMS.
+ *
+ * `roles` — массив, так как в Payload поле roles может быть hasMany.
+ */
 export interface AuthUser {
-  id: number;
+  id: number | string;
   name: string;
   email: string;
   roles: UserRole[];

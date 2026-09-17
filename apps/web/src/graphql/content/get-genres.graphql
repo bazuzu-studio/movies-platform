@@ -1,0 +1,10 @@
+# src/graphql/content/get-genres.graphql
+query GetGenres {
+  Genres(limit: 100, sort: "title") {
+    docs {
+      id
+      title
+      slug
+    }
+  }
+}

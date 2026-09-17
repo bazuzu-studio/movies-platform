@@ -33,6 +33,11 @@ export const Episodes: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      defaultValue: "Эпизод"
+    },
+    {
+      name:"playerLink",
+      type: 'text',
     },
     {
       name: 'description',
@@ -46,8 +51,13 @@ export const Episodes: CollectionConfig = {
       },
     },
     {
-      name: 'releaseDate',
-      type: 'date',
+      name: 'airingAt',
+      type: 'number',
+      label: 'Время эфира (Unix)',
+      admin: {
+        description: 'Точное время выхода эпизода (если отличается от releaseDate)',
+      },
     },
+
   ],
 }

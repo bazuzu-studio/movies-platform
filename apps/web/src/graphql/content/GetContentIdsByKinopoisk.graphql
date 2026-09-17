@@ -1,0 +1,10 @@
+query GetContentIdsByKinopoisk($kinopoiskId: String!) {
+  Contents(
+    where: { kinopoiskId: { equals: $kinopoiskId } }
+    limit: 50
+  ) {
+    docs {
+      id
+    }
+  }
+}

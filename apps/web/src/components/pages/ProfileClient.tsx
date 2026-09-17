@@ -15,10 +15,10 @@ import { useFavorites } from "@/components/providers/FavoritesContext";
 export function ProfileClient({ all }: { all: ContentItem[] }) {
   const router = useRouter();
   const { user, ready, logout } = useAuth();
-  const { favorites, isLoading: favoritesLoading } = useFavorites();
+  const { isFavorite, isLoading: favoritesLoading } = useFavorites();
   const [activeTab, setActiveTab] = useState<"profile" | "favorites">("profile");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const favItems = all.filter((c) => favorites.has(c.id));
+  const favItems = all.filter((c) => isFavorite(c.id));
 
 
   /**

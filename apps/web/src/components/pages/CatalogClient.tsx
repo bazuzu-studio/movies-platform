@@ -1,284 +1,526 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, SlidersHorizontal, Check, Inbox, X } from "lucide-react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import {
+  Inbox,
+  Search as SearchIcon,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
+
 import type { ContentItem, Genre } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/ui/Btn";
 import { EmptyState } from "@/components/ui/States";
 import { ContentGrid } from "@/components/content/ContentGrid";
+import { CatalogFilterBar } from "@/components/pages/catalog/CatalogFilterBar";
+import { CatalogFilterDrawer } from "@/components/pages/catalog/CatalogFilterDrawer";
+import {
+  SORT_OPTIONS,
+  YEAR_OPTIONS,
+  type SortOption,
+  type TypeFilter,
+  type YearOption,
+  useCatalogFilters,
+} from "@/hooks/useCatalogFilters";
+import { useCountUp } from "@/hooks/useCountUp";
 
-const SORT_OPTIONS = ["Популярные", "Новинки", "По рейтингу", "По алфавиту"] as const;
-type SortOption = (typeof SORT_OPTIONS)[number];
-const YEAR_OPTIONS = ["Все", "2024", "2023", "2022", "2021 и раньше"];
-const RATING_OPTIONS = ["Все", "9+", "8+", "7+"];
-const PER_PAGE = 15;
+const TYPE_OPTIONS = [
+  { value: "all", label: "Все" },
+  { value: "movie", label: "Фильмы" },
+  { value: "series", label: "Сериалы" },
+] as const satisfies ReadonlyArray<{
+  value: TypeFilter;
+  label: string;
+}>;
 
-export function CatalogClient({ items, genres }: { items: ContentItem[]; genres: Genre[] }) {
+const SORT_MAP: Record<SortOption, string> = {
+  Популярные: "popular",
+  Новинки: "newest",
+  "По рейтингу": "rating",
+  "По алфавиту": "alphabetical",
+};
+
+const YEAR_MAP: Record<YearOption, string | undefined> = {
+  Все: undefined,
+  "2026": "2026",
+  "2025": "2025",
+  "2024": "2024",
+  "2023": "2023",
+  "2022": "2022",
+  "2021 и раньше": "2021-or-earlier",
+};
+
+interface CatalogClientProps {
+  items: ContentItem[];
+  genres: Genre[];
+  totalDocs?: number;
+  hasNextPage?: boolean;
+  type?: "movie" | "series";
+}
+
+interface ContentApiResponse {
+  items: ContentItem[];
+  totalDocs: number;
+  hasNextPage: boolean;
+}
+
+
+
+
+export function CatalogClient({
+  items: initialItems,
+  genres,
+  totalDocs: initialTotalDocs = initialItems.length,
+  hasNextPage: initialHasNextPage = false,
+  type: initialType,
+}: CatalogClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialType = searchParams.get("type");
 
-  const [typeFilter, setTypeFilter] = useState<"all" | "movie" | "series">(
-    initialType === "movie" ? "movie" : initialType === "series" ? "series" : "all"
-  );
-  const [genre, setGenre] = useState("Все");
-  const [year, setYear] = useState("Все");
-  const [rating, setRating] = useState("Все");
-  const [sort, setSort] = useState<SortOption>("Популярные");
-  const [page, setPage] = useState(1);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
 
-  const filtered = useMemo(() => {
-    let list = items.filter((c) => {
-      if (typeFilter !== "all" && c.type !== typeFilter) return false;
-      if (genre !== "Все" && !c.genres.includes(genre)) return false;
-      if (year !== "Все") {
-        if (year === "2021 и раньше" && c.releaseYear > 2021) return false;
-        if (year !== "2021 и раньше" && c.releaseYear !== parseInt(year)) return false;
-      }
-      if (rating !== "Все" && c.rating < parseFloat(rating)) return false;
-      if (
-        searchVal &&
-        !c.titleRu.toLowerCase().includes(searchVal.toLowerCase()) &&
-        !c.titleEn.toLowerCase().includes(searchVal.toLowerCase())
-      )
-        return false;
-      return true;
-    });
-    if (sort === "По рейтингу") list = [...list].sort((a, b) => b.rating - a.rating);
-    else if (sort === "По алфавиту") list = [...list].sort((a, b) => a.titleRu.localeCompare(b.titleRu));
-    else if (sort === "Новинки") list = [...list].sort((a, b) => b.releaseYear - a.releaseYear);
-    else list = [...list].sort((a, b) => (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0));
-    return list;
-  }, [items, typeFilter, genre, year, rating, sort, searchVal]);
+  const [items, setItems] = useState<ContentItem[]>(initialItems);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(initialTotalDocs);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
 
-  const paged = filtered.slice(0, page * PER_PAGE);
-  const hasMore = paged.length < filtered.length;
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const setType = (v: "all" | "movie" | "series") => {
-    setTypeFilter(v);
-    setPage(1);
-    router.replace(v === "all" ? "/catalog" : `/catalog?type=${v}`, { scroll: false });
-  };
+  const requestIdRef = useRef(0);
 
-  const genreOptions = ["Все", ...genres.map((g) => g.title)];
+  const urlType = searchParams.get("type");
 
-  const FilterPanel = () => (
-    <div className="flex flex-wrap gap-3">
-      <div className="relative group">
-        <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/5 border border-white/8 text-sm text-[#A1A1AA] hover:border-white/16 hover:text-white transition-colors">
-          <span>{genre === "Все" ? "Жанр" : genre}</span>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
-        <div className="absolute top-full mt-1 left-0 bg-[#1A1A1D] border border-white/10 rounded-xl p-1.5 hidden group-focus-within:flex flex-col min-w-[140px] shadow-2xl z-30">
-          {genreOptions.map((g) => (
-            <button
-              key={g}
-              onClick={() => setGenre(g)}
-              className={cn(
-                "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                genre === g ? "text-white bg-white/8" : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
-              )}
-            >
-              {g}
-              {genre === g && <Check className="w-3.5 h-3.5 text-[#EF4A4F]" />}
-            </button>
-          ))}
-        </div>
-      </div>
+  const normalizedUrlType: TypeFilter =
+    urlType === "movie" || urlType === "series" ? urlType : "all";
 
-      <div className="relative group">
-        <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/5 border border-white/8 text-sm text-[#A1A1AA] hover:border-white/16 hover:text-white transition-colors">
-          <span>{year === "Все" ? "Год" : year}</span>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
-        <div className="absolute top-full mt-1 left-0 bg-[#1A1A1D] border border-white/10 rounded-xl p-1.5 hidden group-focus-within:flex flex-col min-w-[160px] shadow-2xl z-30">
-          {YEAR_OPTIONS.map((y) => (
-            <button
-              key={y}
-              onClick={() => setYear(y)}
-              className={cn(
-                "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                year === y ? "text-white bg-white/8" : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
-              )}
-            >
-              {y}
-              {year === y && <Check className="w-3.5 h-3.5 text-[#EF4A4F]" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative group">
-        <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/5 border border-white/8 text-sm text-[#A1A1AA] hover:border-white/16 hover:text-white transition-colors">
-          <span>{rating === "Все" ? "Рейтинг" : `от ${rating}`}</span>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
-        <div className="absolute top-full mt-1 left-0 bg-[#1A1A1D] border border-white/10 rounded-xl p-1.5 hidden group-focus-within:flex flex-col min-w-[140px] shadow-2xl z-30">
-          {RATING_OPTIONS.map((r) => (
-            <button
-              key={r}
-              onClick={() => setRating(r)}
-              className={cn(
-                "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                rating === r ? "text-white bg-white/8" : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
-              )}
-            >
-              {r === "Все" ? "Все" : `от ${r}`}
-              {rating === r && <Check className="w-3.5 h-3.5 text-[#EF4A4F]" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative group ml-auto">
-        <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/5 border border-white/8 text-sm text-[#A1A1AA] hover:border-white/16 hover:text-white transition-colors">
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span>{sort}</span>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
-        <div className="absolute top-full mt-1 right-0 bg-[#1A1A1D] border border-white/10 rounded-xl p-1.5 hidden group-focus-within:flex flex-col min-w-[180px] shadow-2xl z-30">
-          {SORT_OPTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSort(s)}
-              className={cn(
-                "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                sort === s ? "text-white bg-white/8" : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
-              )}
-            >
-              {s}
-              {sort === s && <Check className="w-3.5 h-3.5 text-[#EF4A4F]" />}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+  const genreOptions = useMemo(
+    () => ["Все", ...genres.map((item) => item.title)],
+    [genres],
   );
 
-  return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
-      <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-6">Каталог</h1>
+  
 
+  // Используем обновлённый hook: без items, без onLoadMore, без rating
+  const {
+    typeFilter,
+    setType,
+
+    genre,
+    setGenre,
+
+    year,
+    setYear,
+
+    age,
+    setAge,
+
+    sort,
+    setSort,
+
+    searchVal,
+    setSearch,
+
+    resetFilters,
+
+    activeFilterCount,
+  } = useCatalogFilters({
+    initialType: urlType,
+    hasNextPage,
+  });
+
+  /*
+   * Серверные фильтры.
+   * При любом изменении фильтра — сбрасываем на page 1 и полностью заменяем каталог.
+   */
+  useEffect(() => {
+    const requestId = ++requestIdRef.current;
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      try {
+        setLoading(true);
+
+        const params = new URLSearchParams();
+        params.set("page", "1");
+        params.set("limit", "50");
+
+        if (typeFilter === "movie" || typeFilter === "series") {
+          params.set("type", typeFilter);
+        }
+
+        if (genre !== "Все") {
+          params.set("genre", genre);
+        }
+
+        const apiYear = YEAR_MAP[year];
+        if (apiYear) {
+          params.set("year", apiYear);
+        }
+
+        // Возраст передаётся как ?age=12 (число без плюса)
+        if (age !== "Все") {
+          // Убираем '+' из значения (например, "12+" → "12")
+          const ageValue = age.replace("+", "");
+          params.set("age", ageValue);
+        }
+
+        params.set("sort", SORT_MAP[sort]);
+
+        if (searchVal) {
+          params.set("search", searchVal);
+        }
+
+        const response = await fetch(`/api/content?${params.toString()}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Content request failed: ${response.status}`);
+        }
+
+        const data = (await response.json()) as ContentApiResponse;
+
+        // Не применяем результат устаревшего запроса
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        setItems(data.items);
+        setCurrentPage(1);
+        setTotalDocs(data.totalDocs);
+        setHasNextPage(data.hasNextPage);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("CatalogClient: failed to load filtered content", error);
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [typeFilter, genre, year, age, sort, searchVal]);
+
+  /*
+   * Синхронизация первоначальных props при смене type через URL.
+   */
+  const previousInitialTypeRef = useRef(initialType);
+
+  useEffect(() => {
+    if (previousInitialTypeRef.current === initialType) {
+      return;
+    }
+
+    previousInitialTypeRef.current = initialType;
+
+    setItems(initialItems);
+    setCurrentPage(1);
+    setTotalDocs(initialTotalDocs);
+    setHasNextPage(initialHasNextPage);
+  }, [initialItems, initialTotalDocs, initialHasNextPage, initialType]);
+
+  /*
+   * Загрузка следующей страницы с текущими фильтрами.
+   */
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || loading || !hasNextPage) {
+      return;
+    }
+
+    const nextPage = currentPage + 1;
+    const requestId = requestIdRef.current;
+
+    try {
+      setLoadingMore(true);
+
+      const params = new URLSearchParams();
+      params.set("page", String(nextPage));
+      params.set("limit", "50");
+
+      if (typeFilter === "movie" || typeFilter === "series") {
+        params.set("type", typeFilter);
+      }
+
+      if (genre !== "Все") {
+        params.set("genre", genre);
+      }
+
+      const apiYear = YEAR_MAP[year];
+      if (apiYear) {
+        params.set("year", apiYear);
+      }
+
+      if (age !== "Все") {
+        const ageValue = age.replace("+", "");
+        params.set("age", ageValue);
+      }
+
+      params.set("sort", SORT_MAP[sort]);
+
+      if (searchVal) {
+        params.set("search", searchVal);
+      }
+
+      const response = await fetch(`/api/content?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Content request failed: ${response.status}`);
+      }
+
+      const data = (await response.json()) as ContentApiResponse;
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      setItems((currentItems) => {
+        const existingIds = new Set(currentItems.map((item) => String(item.id)));
+        const newItems = data.items.filter((item) => !existingIds.has(String(item.id)));
+
+        return [...currentItems, ...newItems];
+      });
+
+      setCurrentPage(nextPage);
+      setTotalDocs(data.totalDocs);
+      setHasNextPage(data.hasNextPage);
+    } catch (error) {
+      console.error("CatalogClient: failed to load more", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [
+    currentPage,
+    genre,
+    hasNextPage,
+    loading,
+    loadingMore,
+    searchVal,
+    sort,
+    typeFilter,
+    year,
+    age,
+  ]);
+
+  const updateTypeInUrl = useCallback(
+    (value: TypeFilter) => {
+      setType(value);
+      setCurrentPage(1);
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (value === "all") {
+        params.delete("type");
+      } else {
+        params.set("type", value);
+      }
+
+      const query = params.toString();
+
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams, setType],
+  );
+
+  const handleReset = useCallback(() => {
+    resetFilters();
+    setType("all");
+    setCurrentPage(1);
+
+    router.push(pathname, { scroll: false });
+  }, [pathname, resetFilters, router, setType]);
+
+  const visibleItems = items;
+  const hasMore = hasNextPage && !loading;
+
+  const prevTotalDocsRef = React.useRef<number | null>(null);
+
+  // Если totalDocs обновился — сбрасываем prevRef, чтобы анимация пошла от старого к новому
+  React.useEffect(() => {
+    prevTotalDocsRef.current = totalDocs;
+  }, [totalDocs]);
+
+  const from = prevTotalDocsRef.current ?? 0;
+  const displayedTotal = useCountUp(from, totalDocs, 600);
+  return (
+    <div className="mx-auto max-w-[1440px] px-4 pt-24 pb-24 sm:px-6 lg:px-8 md:pb-8">
+      <div className="mb-6">
+        <h1 className="mb-6 text-3xl font-black tracking-tight text-white sm:text-4xl">
+          Каталог
+        </h1>
+
+        {/* Поиск */}
         <div className="relative mb-5">
-          <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A] hidden" />
+          <SearchIcon
+            aria-hidden
+            className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]"
+          />
+
           <input
             value={searchVal}
-            onChange={(e) => {
-              setSearchVal(e.target.value);
-              setPage(1);
-            }}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Поиск фильмов и сериалов..."
-            className="w-full bg-white/5 border border-white/8 rounded-xl pl-4 pr-4 py-3 text-sm text-white placeholder:text-[#71717A] outline-none focus:border-[#EF4A4F]/40 transition-colors"
+            aria-label="Поиск фильмов и сериалов"
+            className="w-full rounded-xl border border-white/8 bg-white/5 py-3 pl-11 pr-10 text-sm text-white outline-none transition-colors placeholder:text-[#71717A] focus:border-[#EF4A4F]/40 focus:bg-white/[0.07]"
+          />
+
+          {searchVal && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#71717A] transition-colors hover:text-white"
+              aria-label="Очистить поиск"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Тип */}
+        <div
+          className="mb-5 inline-flex gap-1 rounded-xl bg-white/[0.04] p-1"
+          role="tablist"
+          aria-label="Тип контента"
+        >
+          {TYPE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={typeFilter === option.value}
+              onClick={() => updateTypeInUrl(option.value)}
+              className={cn(
+                "rounded-lg px-5 py-2 text-sm font-medium transition-all duration-200",
+                typeFilter === option.value
+                  ? "bg-white text-[#08080A] shadow-sm"
+                  : "text-[#71717A] hover:text-white",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Desktop filters */}
+        <div className="hidden sm:block">
+          <CatalogFilterBar
+            genreOptions={genreOptions}
+            genre={genre}
+            onGenreChange={setGenre}
+            year={year}
+            onYearChange={setYear}
+            age={age}
+            onAgeChange={setAge}
+            sort={sort}
+            onSortChange={setSort}
           />
         </div>
 
-        <div className="flex gap-1 p-1 bg-white/4 rounded-xl w-fit mb-5">
-          {([["all", "Все"], ["movie", "Фильмы"], ["series", "Сериалы"]] as const).map(([v, l]) => (
-            <button
-              key={v}
-              onClick={() => setType(v)}
-              className={cn(
-                "px-5 py-2 rounded-lg text-sm font-medium transition-all",
-                typeFilter === v ? "bg-white text-[#08080A] shadow-sm" : "text-[#71717A] hover:text-white"
-              )}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-
-        <div className="hidden sm:block">
-          <FilterPanel />
-        </div>
-
-        <div className="sm:hidden">
-          <Btn variant="outline" size="sm" onClick={() => setDrawerOpen(true)}>
-            <SlidersHorizontal className="w-4 h-4" /> Фильтры
+        {/* Mobile filters */}
+        <div className="flex items-center gap-3 sm:hidden">
+          <Btn
+            variant="outline"
+            size="sm"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Фильтры
           </Btn>
+
+          {activeFilterCount > 0 && (
+            <span
+              className="h-2 w-2 animate-pulse rounded-full bg-[#EF4A4F]"
+              aria-label={`Активных фильтров: ${activeFilterCount}`}
+            />
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-sm text-[#71717A]">
-          Найдено: <span className="text-white font-semibold">{filtered.length}</span>
-        </p>
+      {/* Results count totalDocs*/}
+      <div className="mb-5 flex items-center justify-between">
+    <p className="text-sm text-[#71717A]">
+      Найдено:{" "}
+      <span className="font-semibold text-white">{displayedTotal}</span>
+    </p>
+
+
+        {(searchVal || activeFilterCount > 0) && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-sm text-[#A1A1AA] transition-colors hover:text-white"
+          >
+            Сбросить
+          </button>
+        )}
       </div>
 
-      {filtered.length === 0 ? (
+      {/* Results */}
+      {loading && visibleItems.length === 0 ? (
+        <ContentGrid items={[]} loading />
+      ) : visibleItems.length === 0 ? (
         <EmptyState
           icon={Inbox}
           title="Ничего не найдено"
           subtitle="Попробуйте изменить запрос или параметры фильтрации"
           action={{
             label: "Сбросить фильтры",
-            onClick: () => {
-              setGenre("Все");
-              setYear("Все");
-              setRating("Все");
-              setSearchVal("");
-            },
+            onClick: handleReset,
           }}
         />
       ) : (
         <>
-          <ContentGrid items={paged} />
+          <ContentGrid items={visibleItems} />
+
           {hasMore && (
             <div className="mt-10 text-center">
-              <Btn variant="outline" size="lg" onClick={() => setPage((p) => p + 1)}>
-                Показать ещё
+              <Btn
+                variant="outline"
+                size="lg"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? "Загрузка..." : "Показать ещё"}
               </Btn>
             </div>
           )}
         </>
       )}
 
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
-          <div className="relative bg-[#121214] rounded-t-2xl border-t border-white/10 p-6 pb-10 flex flex-col gap-5">
-            <div className="flex items-center justify-between mb-1">
-              <p className="font-bold text-white text-lg">Фильтры</p>
-              <button onClick={() => setDrawerOpen(false)} className="p-1 text-[#71717A]">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {["Жанр", "Год", "Рейтинг"].map((label, li) => {
-              const options = li === 0 ? genreOptions : li === 1 ? YEAR_OPTIONS : RATING_OPTIONS;
-              const current = li === 0 ? genre : li === 1 ? year : rating;
-              const setter = li === 0 ? setGenre : li === 1 ? setYear : setRating;
-              return (
-                <div key={label}>
-                  <p className="text-xs font-semibold text-[#71717A] uppercase tracking-wider mb-2">{label}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {options.map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => setter(opt)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
-                          current === opt
-                            ? "bg-[#EF4A4F]/20 border-[#EF4A4F]/40 text-[#EF4A4F]"
-                            : "border-white/8 text-[#71717A] hover:text-white"
-                        )}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-            <Btn className="mt-2" onClick={() => setDrawerOpen(false)}>
-              Применить
-            </Btn>
-          </div>
-        </div>
-      )}
+      {/* Mobile drawer */}
+      <CatalogFilterDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        genreOptions={genreOptions}
+        genre={genre}
+        onGenreChange={setGenre}
+        year={year}
+        onYearChange={setYear}
+        age={age}
+        onAgeChange={setAge}
+      />
     </div>
   );
 }

@@ -1,0 +1,28 @@
+
+query GetContent($limit: Int, $page: Int, $sort: String, $where: Content_where) {
+  Contents(limit: $limit, page: $page, sort: $sort, where: $where) {
+    docs {
+      id
+      titleEn
+      titleRu
+      slug
+      type
+      releaseYear
+      rating
+      poster {
+        url
+      }
+      backdrop {
+        url
+      }
+      genres {
+        id
+        title
+      }
+      ageRating
+    }
+    totalDocs
+    hasNextPage
+  }
+}
+

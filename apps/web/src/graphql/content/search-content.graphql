@@ -1,0 +1,19 @@
+# graphql/queries/search-content.graphql
+query SearchContent($where: SearchResult_where!) {
+  SearchResults(where: $where, limit: 50) {
+    docs {
+      id
+      title
+      titleEn
+      slug
+      type
+      releaseYear
+      rating
+      poster {
+        id
+        url
+      }
+     
+    }
+  }
+}

@@ -2,8 +2,7 @@
 import {
   QueryClient,
   defaultShouldDehydrateQuery,
-  environmentManager,
-  
+  isServer,
 } from '@tanstack/react-query'
 
 function makeQueryClient() {
@@ -24,7 +23,10 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined
 
 export function getQueryClient() {
-  if (environmentManager.isServer()) {
+  // `isServer` — официальный экспорт @tanstack/react-query (замена
+  // несуществующего `environmentManager.isServer()`, который ломал сборку:
+  // "Module '@tanstack/react-query' has no exported member 'environmentManager'").
+  if (isServer) {
     // На сервере: всегда новый клиент (иначе утечка данных между запросами)
     return makeQueryClient()
   } else {

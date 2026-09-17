@@ -5,15 +5,29 @@ import Link from "next/link";
 import { Mail, Check } from "lucide-react";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
+import { gqlClient } from "@/lib/graphql-client";
+import { ForgotPasswordUserDocument } from "@/generated/graphql";
 
 export function ForgotPasswordClient() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: заменить на вызов эндпоинта восстановления пароля (ТЗ, п.3.1)
-    if (email) setSent(true);
+    if (!email || submitting) return;
+
+    setSubmitting(true);
+    try {
+      await gqlClient.request(ForgotPasswordUserDocument, { email });
+    } catch {
+      // Намеренно игнорируем ошибку: ответ не должен раскрывать,
+      // зарегистрирован ли такой email (user enumeration).
+    } finally {
+      setSubmitting(false);
+      // Показываем "успех" в любом случае — той же причине.
+      setSent(true);
+    }
   };
 
   return (
@@ -51,8 +65,8 @@ export function ForgotPasswordClient() {
               />
             </div>
           </div>
-          <Btn type="submit" size="lg" className="w-full justify-center">
-            Отправить ссылку
+          <Btn type="submit" size="lg" className="w-full justify-center" disabled={submitting}>
+            {submitting ? "Отправка..." : "Отправить ссылку"}
           </Btn>
           <Link href="/login" className="text-sm text-center text-[#71717A] hover:text-white transition-colors">
             Вернуться к входу

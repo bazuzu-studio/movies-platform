@@ -1,0 +1,17 @@
+# graphql/mutations/update-user.graphql
+# Обновление собственного профиля. access.update в коллекции users
+# (см. apps/cms/src/access/user.ts) уже гарантирует, что пользователь
+# может редактировать только свою запись (id: { equals: user.id }),
+# поэтому отдельная проверка id на фронте не нужна — сервер её всё равно
+# сделает повторно.
+mutation UpdateUser($id: Int!, $name: String, $email: String, $password: String) {
+  updateUser(
+    id: $id
+    data: { name: $name, email: $email, password: $password }
+  ) {
+    id
+    name
+    email
+    roles
+  }
+}

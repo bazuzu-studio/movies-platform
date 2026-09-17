@@ -241,6 +241,10 @@ export interface Content {
   /**
    * Для дедупликации при импорте из Kodik
    */
+  kinopoiskId?: string | null;
+  /**
+   * Для дедупликации при импорте из Kodik
+   */
   shikimoriId?: string | null;
   /**
    * ID материала в Kodik
@@ -257,6 +261,14 @@ export interface Content {
   genres?: (number | Genre)[] | null;
   rating?: number | null;
   /**
+   * Прямая ссылка для встроенного плеера (только для фильмов)
+   */
+  playerLink?: string | null;
+  /**
+   * Возрастное ограничение (0, 6, 12, 16, 18). Источник: Kodik material_data.minimal_age
+   */
+  ageRating?: number | null;
+  /**
    * Постер (вертикальный)
    */
   poster?: (number | null) | Media;
@@ -272,6 +284,9 @@ export interface Content {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Служебный статус публикации записи в Payload — не путать с анимешным статусом (онгоинг/вышел) из Kodik, он в эту коллекцию не импортируется
+   */
   status: 'draft' | 'published';
   updatedAt: string;
   createdAt: string;
@@ -313,6 +328,7 @@ export interface Episode {
   season: number | Season;
   episodeNumber: number;
   title: string;
+  playerLink?: string | null;
   description?: {
     root: {
       type: string;
@@ -332,7 +348,10 @@ export interface Episode {
    * Длительность в минутах
    */
   duration?: number | null;
-  releaseDate?: string | null;
+  /**
+   * Точное время выхода эпизода (если отличается от releaseDate)
+   */
+  airingAt?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -538,12 +557,15 @@ export interface ContentSelect<T extends boolean = true> {
   originalTitle?: T;
   slug?: T;
   description?: T;
+  kinopoiskId?: T;
   shikimoriId?: T;
   kodikId?: T;
   releaseYear?: T;
   duration?: T;
   genres?: T;
   rating?: T;
+  playerLink?: T;
+  ageRating?: T;
   poster?: T;
   backdrop?: T;
   seasons?: T;
@@ -560,9 +582,10 @@ export interface EpisodesSelect<T extends boolean = true> {
   season?: T;
   episodeNumber?: T;
   title?: T;
+  playerLink?: T;
   description?: T;
   duration?: T;
-  releaseDate?: T;
+  airingAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

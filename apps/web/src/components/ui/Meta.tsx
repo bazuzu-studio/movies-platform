@@ -6,7 +6,8 @@ export function StarRating({ rating }: { rating: number }) {
   return (
     <span className="inline-flex items-center gap-1">
       <Star className="w-3.5 h-3.5 fill-[#F0B33D] text-[#F0B33D]" />
-      <span className="text-sm font-semibold text-[#F0B33D] tabular-nums">{rating.toFixed(1)}</span>
+      <span className="text-sm font-semibold text-[#F0B33D] tabular-nums">{rating !== null && rating !== undefined ? rating.toFixed(1) : 'N/A'}
+</span>
     </span>
   );
 }

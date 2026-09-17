@@ -1,0 +1,29 @@
+query GetSeasonsByContentIds($contentIds: [JSON]!) {
+  Seasons(
+    where: { content: { in: $contentIds } }
+    sort: "seasonNumber"
+    limit: 100
+  ) {
+    docs {
+      id
+      seasonNumber
+      title
+      releaseYear
+      content {
+        id
+        slug
+        poster { url }
+      }
+      episodes(sort: "episodeNumber", limit: 500) {
+        docs {
+          id
+          episodeNumber
+          title
+          playerLink
+          description
+          duration
+        }
+      }
+    }
+  }
+}

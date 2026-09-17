@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { gqlClient } from "@/lib/graphql-client";
@@ -29,8 +29,8 @@ import { useAuth } from "./AuthContext";
 
 interface FavoritesContextValue {
   favorites: Set<number>;
-  isFavorite: (id: number) => boolean;
-  toggle: (id: number) => void;
+  isFavorite: (id: number | string) => boolean;
+  toggle: (id: number | string) => void;
   isLoading: boolean;
 }
 
@@ -58,7 +58,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const next = new Map<number, number>();
-    for (const doc of data.Favorites.docs) {
+    for (const doc of data.Favorites?.docs ?? []) {
       if (doc.content) {
         next.set(Number(doc.content.id), Number(doc.id));
       }
@@ -89,7 +89,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
    * contentId уже нормализован (см. value ниже, где toggle оборачивается
    * в Number()) — здесь можно спокойно работать с favoritesMap напрямую.
    */
-  const toggle = (contentId: number) => {
+  const toggle = useCallback((contentId: number) => {
     if (!isLoggedIn || !user) {
       toast("Войдите, чтобы добавлять в избранное");
       return;
@@ -132,18 +132,27 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         },
       });
     }
-  };
+  }, [isLoggedIn, user, favoritesMap, addMutation, removeMutation]);
 
   const favorites = useMemo(() => new Set(favoritesMap.keys()), [favoritesMap]);
 
-  const value: FavoritesContextValue = {
-    favorites,
-    // Единственное место, где входящий id приводится к number —
-    // компоненты (MovieCard и т.д.) могут не думать об этом нюансе.
-    isFavorite: (id) => favorites.has(Number(id)),
-    toggle: (id) => toggle(Number(id)),
-    isLoading,
-  };
+  const isFavorite = useCallback((id: number | string) => favorites.has(Number(id)), [favorites]);
+  const toggleNormalized = useCallback((id: number | string) => toggle(Number(id)), [toggle]);
+
+  // Мемоизация value: MovieCard/HeroSection и т. п. читают этот контекст
+  // на каждой карточке — без useMemo здесь любое обновление FavoritesProvider
+  // (например, isLoading) пересоздавало бы value и ре-рендерило все карточки.
+  const value = useMemo<FavoritesContextValue>(
+    () => ({
+      favorites,
+      // Единственное место, где входящий id приводится к number —
+      // компоненты (MovieCard и т.д.) могут не думать об этом нюансе.
+      isFavorite,
+      toggle: toggleNormalized,
+      isLoading,
+    }),
+    [favorites, isFavorite, toggleNormalized, isLoading]
+  );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }

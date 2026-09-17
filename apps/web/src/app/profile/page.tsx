@@ -4,15 +4,13 @@ import { ProfileClient } from "@/components/pages/ProfileClient";
 import { RequireAuth } from "@/components/pages/RequireAuth";
 
 export const metadata: Metadata = {
-  title: "Профиль",
-  robots: { index: false },
+title: "Профиль",
+robots: { index: false },
 };
 
 export default async function ProfilePage() {
-  const all = await getContentList();
-  return (
-    <RequireAuth>
-      <ProfileClient all={all} />
-    </RequireAuth>
-  );
+const { items } = await getContentList(1, 100);
+
+return ( <RequireAuth> <ProfileClient all={items} /> </RequireAuth>
+);
 }

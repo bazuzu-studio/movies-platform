@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -13,7 +13,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {showChrome && <Header />}
+       <Suspense fallback={null}>{showChrome && <Header />}</Suspense>
       <main>{children}</main>
       {showChrome && <Footer />}
     </>

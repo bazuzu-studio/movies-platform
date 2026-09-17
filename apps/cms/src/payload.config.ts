@@ -14,7 +14,6 @@ import { Content } from './collections/content/config'
 import { Episodes } from './collections/episodes/config'
 import { Favorites } from './collections/favorites/config'
 import { Seasons } from './collections/seasons/config'
-import { kodikImportEndpoint } from './endpoints/kodik-import'
 
 import { searchPlugin } from '@payloadcms/plugin-search'
 
@@ -103,9 +102,15 @@ export default buildConfig({
     },
   }),
 
-  sharp,
+  // Приведение типа намеренное: между версиями `sharp` (0.34.x/0.35.x) и
+  // типом `SharpDependency`, который ожидает Payload 3.87.1, разошлись
+  // сигнатуры перегрузок конструктора — это чисто типовое несовпадение,
+  // на рантайм не влияет (sharp как функция работает так же). Если после
+  // обновления Payload/@payloadcms/* ошибка исчезнет сама — каст можно убрать.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sharp: sharp as any,
 
-  endpoints: [kodikImportEndpoint],
+  endpoints: [],
 
   plugins: [
     s3Storage(s3StorageOptions),

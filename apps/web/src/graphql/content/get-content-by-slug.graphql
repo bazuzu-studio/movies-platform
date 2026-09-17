@@ -1,0 +1,50 @@
+# src/graphql/contents/GetContentBySlug.graphql
+query GetContentBySlug($slug: String!) {
+  Contents(where: { slug: { equals: $slug } }, limit: 1) {
+    docs {
+      id
+      type
+      titleEn
+      titleRu
+      originalTitle
+      slug
+      description
+      releaseYear
+      kinopoiskId
+      duration
+      rating
+
+      poster {
+        url
+      }
+      backdrop {
+        url
+      }
+      genres {
+        id
+        title
+        slug
+      }
+      ageRating
+      playerLink
+      seasons(sort: "seasonNumber") {
+        docs {
+          id
+          seasonNumber
+          title
+          releaseYear
+          episodes(sort: "episodeNumber") {
+            docs {
+              id
+              episodeNumber
+              title
+              playerLink
+              description
+              duration
+            }
+          }
+        }
+      }
+    }
+  }
+}

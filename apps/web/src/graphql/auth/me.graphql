@@ -1,0 +1,11 @@
+# graphql/queries/me.graphql
+query MeUser {
+  meUser {
+    user {
+      id
+      name
+      email
+      roles
+    }
+  }
+}

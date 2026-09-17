@@ -17,12 +17,20 @@ export function EditProfileClient() {
 
   if (!user) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: заменить на PATCH /api/users/:id (ТЗ, раздел 9)
-    updateProfile({ name, email });
-    toast.success("Профиль обновлён");
-    router.push("/profile");
+    setSubmitting(true);
+    try {
+      await updateProfile({ name, email, password: password || undefined });
+      toast.success("Профиль обновлён");
+      router.push("/profile");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Не удалось обновить профиль");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -73,8 +81,8 @@ export function EditProfileClient() {
           </div>
         </div>
         <div className="flex gap-3 pt-2">
-          <Btn type="submit" size="lg">
-            Сохранить изменения
+          <Btn type="submit" size="lg" disabled={submitting}>
+            {submitting ? "Сохранение..." : "Сохранить изменения"}
           </Btn>
           <Btn type="button" variant="outline" size="lg" onClick={() => router.push("/profile")}>
             Отмена

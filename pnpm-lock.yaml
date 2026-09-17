@@ -121,6 +121,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.14.2)
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.2.6)

@@ -12,8 +12,8 @@ export function ContentRow({ title, items }: { title: string; items: ContentItem
   if (items.length === 0) return null;
 
   return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between mb-5 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto">
+    <section className="mb-12 mx-auto px-4 ">
+      <div className="flex items-center justify-between mb-5 px-4 sm:px-6 lg:px-8 mx-auto">
         <h2 className="text-xl font-bold text-white">{title}</h2>
         <div className="flex gap-1">
           <button
@@ -32,9 +32,9 @@ export function ContentRow({ title, items }: { title: string; items: ContentItem
           </button>
         </div>
       </div>
-      <div ref={ref} className="flex gap-4 overflow-x-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-2">
+      <div ref={ref} className="flex gap-4 overflow-x-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-2 pt-4">
         {items.map((item) => (
-          <div key={item.id} className="w-[140px] sm:w-[160px] shrink-0">
+          <div key={item.id} className="w-[160px] sm:w-[340px] shrink-0">
             <MovieCard item={item} />
           </div>
         ))}

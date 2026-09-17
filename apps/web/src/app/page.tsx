@@ -1,111 +1,66 @@
 
-// app/page.tsx
+import type { Metadata } from "next";
 
-import type { Metadata } from 'next'
-import { GraphQLClient } from 'graphql-request'
-import { GetContentDocument } from '@/generated/graphql'
-import { HomeClient } from '@/components/pages/HomeClient'
+import { getContentList } from "@/lib/api";
+import { HomeClient } from "@/components/pages/HomeClient";
 
-/**
- * Metadata страницы.
- *
- * TODO:
- * - Добавить description
- * - Добавить Open Graph / Twitter metadata
- * - В будущем можно сделать динамический title
- */
 export const metadata: Metadata = {
-  title: 'Главная',
-}
-
-/**
- * GraphQL client для связи Next.js → Payload CMS.
- *
- * Сейчас URL указан напрямую для локальной разработки.
- *
- * TODO:
- * - Перенести URL в NEXT_PUBLIC_API_URL
- * - Вынести GraphQLClient в отдельный файл
- *   (например: lib/graphql/client.ts)
- * - В production использовать переменную окружения
- */
-const client = new GraphQLClient(
-  'http://localhost:4000/api/graphql'
-)
+  title: "Главная",
+};
 
 export default async function HomePage() {
-  /**
-   * Запрос к Payload CMS через GraphQL.
-   *
-   * GetContentDocument генерируется GraphQL Code Generator
-   * на основе .graphql-запроса.
-   *
-   * Цепочка:
-   *
-   * GraphQL schema
-   *      ↓
-   * Codegen
-   *      ↓
-   * GetContentDocument
-   *      ↓
-   * GraphQLClient
-   *      ↓
-   * Payload CMS
-   */
-  const data = await client.request(GetContentDocument)
+  const [
+    popularContent,
+    newestContent,
+    moviesContent,
+    seriesContent,
+  ] = await Promise.all([
+    // Популярное
+    getContentList(1, 12, {
+      sort: "popular",
+    }),
 
-  /**
-   * Временный лог для проверки подключения.
-   *
-   * TODO:
-   * - Удалить после завершения интеграции
-   * - Не логировать большие ответы API в production
-   */
-  // console.log(
-  //   'GraphQL:',
-  //   JSON.stringify(data, null, 2)
-  // )
+    // Новые поступления
+    getContentList(1, 12, {
+      sort: "newest",
+    }),
 
-  /**
-   * Получаем список контента из Payload.
-   *
-   * TODO:
-   * - Добавить обработку ошибок
-   * - Добавить loading/error state при необходимости
-   * - Проверить типизацию Contents.docs после настройки
-   *   всех GraphQL-полей
-   */
-  const all = data.Contents.docs
+    // Фильмы
+    getContentList(1, 12, {
+      type: "movie",
+      sort: "newest",
+    }),
 
-  /**
-   * Выбираем контент для Hero-блока.
-   *
-   * Сейчас в качестве Hero приоритетно используется сериал.
-   * Если сериалов нет — берём первый элемент.
-   *
-   * TODO:
-   * - Лучше добавить отдельное поле для Hero в CMS
-   * - Или использовать rating / popularity / featured
-   * - Убрать `any` после полной настройки GraphQL-типов
-   */
+    // Сериалы
+    getContentList(1, 12, {
+      type: "series",
+      sort: "newest",
+    }),
+  ]);
+
+  const popular = popularContent.items;
+  const newArrivals = newestContent.items;
+  const movies = moviesContent.items;
+  const series = seriesContent.items;
+
+  // Для Hero-блока приоритетно берём сериал.
+  // Если сериалов нет — первый доступный элемент.
+  // TODO: заменить на отдельное поле "featured"/"isHero"
+  // в CMS, когда оно появится.
   const heroItem =
-    all.find(
-      (content: any) => content.type === 'series'
-    ) ?? all[0]
+    series[0] ??
+    popular[0] ??
+    newArrivals[0] ??
+    movies[0];
 
-  /**
-   * Передаём данные в клиентский компонент.
-   *
-   * Page остаётся Server Component:
-   * - получает данные с CMS на сервере
-   * - не отправляет GraphQL client в браузер
-   * - передаёт готовые данные в HomeClient
-   */
   return (
     <HomeClient
       heroItem={heroItem}
-      all={all}
+      popular={popular}
+      movies={movies}
+      series={series}
+      newArrivals={newArrivals}
     />
-  )
+  );
 }
 

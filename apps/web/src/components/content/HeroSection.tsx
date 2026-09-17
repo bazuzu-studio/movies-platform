@@ -23,7 +23,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
           поэтому используем next/image с priority (без lazy-загрузки и с
           автоматическими WebP/AVIF + responsive sizes) вместо обычного <img>. */}
       <Image
-        src={item.backdrop.url}
+        src={item.backdrop?.url ?? "/default-backdrop.jpg"}
         alt={item.titleRu}
         fill
         priority

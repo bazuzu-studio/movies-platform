@@ -208,7 +208,7 @@ export interface Content {
    */
   type: 'movie' | 'series';
   /**
-   * Название на английском языке — основной идентификатор, источник slug
+   * Название на английском языке — источник slug (может повторяться у разных тайтлов)
    */
   titleEn: string;
   /**
@@ -220,7 +220,7 @@ export interface Content {
    */
   originalTitle?: string | null;
   /**
-   * Генерируется автоматически из titleEn, если оставить пустым
+   * Генерируется автоматически из названия (с транслитерацией), если оставить пустым
    */
   slug: string;
   description?: {
@@ -251,6 +251,10 @@ export interface Content {
    */
   kodikId?: string | null;
   /**
+   * Идентификатор франшизы: записи (сезоны) с одинаковым значением показываются на сайте как сезоны одного сериала. Если пусто — используется kinopoiskId
+   */
+  franchiseId?: string | null;
+  /**
    * Год выпуска (movie) или год начала выхода (series)
    */
   releaseYear: number;
@@ -269,6 +273,10 @@ export interface Content {
    */
   ageRating?: number | null;
   /**
+   * Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте
+   */
+  releaseStatus?: ('anons' | 'ongoing' | 'released') | null;
+  /**
    * Постер (вертикальный)
    */
   poster?: (number | null) | Media;
@@ -285,7 +293,7 @@ export interface Content {
     totalDocs?: number;
   };
   /**
-   * Служебный статус публикации записи в Payload — не путать с анимешным статусом (онгоинг/вышел) из Kodik, он в эту коллекцию не импортируется
+   * Устаревшее служебное поле. Видимость на сайте определяет _status (кнопки «Опубликовать» / «Черновик» в админке), а не это поле. Не путать со статусом релиза (releaseStatus)
    */
   status: 'draft' | 'published';
   updatedAt: string;
@@ -349,7 +357,7 @@ export interface Episode {
    */
   duration?: number | null;
   /**
-   * Точное время выхода эпизода (если отличается от releaseDate)
+   * Время выхода эпизода (Unix-время, секунды). Фронтенд показывает его как дату выхода серии
    */
   airingAt?: number | null;
   updatedAt: string;
@@ -560,12 +568,14 @@ export interface ContentSelect<T extends boolean = true> {
   kinopoiskId?: T;
   shikimoriId?: T;
   kodikId?: T;
+  franchiseId?: T;
   releaseYear?: T;
   duration?: T;
   genres?: T;
   rating?: T;
   playerLink?: T;
   ageRating?: T;
+  releaseStatus?: T;
   poster?: T;
   backdrop?: T;
   seasons?: T;

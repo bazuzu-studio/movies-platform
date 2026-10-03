@@ -5,6 +5,8 @@
 /*                                  Общие типы                               */
 /* -------------------------------------------------------------------------- */
 
+import type { ReleaseStatus } from "./release-status";
+
 export type ContentType = "movie" | "series";
 
 
@@ -65,6 +67,9 @@ export interface Season {
   /** Постер связанного Content. */
   poster?: Media;
 
+  /** Статус релиза связанного Content (у каждого сезона своя запись в CMS). */
+  releaseStatus?: ReleaseStatus;
+
   episodes: Episode[];
 }
 
@@ -92,8 +97,18 @@ export interface BaseContent {
    * 0 / 6 / 12 / 16 / 18.
    */
   ageRating?: number | null;
+
+  /**
+   * Статус релиза: anons / ongoing / released.
+   * undefined — статус неизвестен (например, в результатах поиска).
+   */
+  releaseStatus?: ReleaseStatus;
+
   playerLink:string;
   rating: number;
+
+  /** Идентификатор франшизы: записи с одинаковым значением — сезоны одного сериала. */
+  franchiseId?: string;
 
   poster: Media;
   backdrop: Media;

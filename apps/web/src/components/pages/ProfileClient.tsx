@@ -58,7 +58,7 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
             onClick={() => setActiveTab(v)}
             className={cn(
               "px-5 py-2 rounded-lg text-sm font-medium transition-all",
-              activeTab === v ? "bg-white text-[#08080A] shadow-sm" : "text-[#71717A] hover:text-white"
+              activeTab === v ? "bg-white text-[#08080A] shadow-sm" : "text-[#8E8E98] hover:text-white"
             )}
           >
             {l}
@@ -74,8 +74,8 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
             </div>
             <div>
               <p className="text-lg font-bold text-white">{user.name}</p>
-              <p className="text-sm text-[#71717A]">{user.email}</p>
-              <p className="text-xs text-[#3f3f46] mt-1">
+              <p className="text-sm text-[#8E8E98]">{user.email}</p>
+              <p className="text-xs text-[#6B6B75] mt-1">
                 {favoritesLoading ? "..." : `${favItems.length} в избранном`}
               </p>
             </div>
@@ -96,7 +96,7 @@ export function ProfileClient({ all }: { all: ContentItem[] }) {
           </div>
         </div>
       ) : favoritesLoading ? (
-        <p className="text-sm text-[#71717A]">Загрузка избранного...</p>
+        <p className="text-sm text-[#8E8E98]">Загрузка избранного...</p>
       ) : favItems.length === 0 ? (
         <EmptyState
           icon={Heart}

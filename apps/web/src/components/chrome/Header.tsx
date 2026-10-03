@@ -19,7 +19,8 @@ export function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
+  const initial = (user?.name || user?.email || "?").trim().charAt(0).toUpperCase();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -72,10 +73,10 @@ export function Header() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <Link
             href="/"
-            className="shrink-0 text-xl font-black tracking-tight transition-opacity hover:opacity-90"
+            className={cn("shrink-0 text-xl font-black tracking-tight transition-opacity hover:opacity-90", searchActive && "hidden sm:block")}
           >
-            CINE<span className="bg-[linear-gradient(135deg,#FF6A5A,#EF4A4F)] bg-clip-text text-transparent">
-              HUB
+            ota<span className="bg-[linear-gradient(135deg,#FF6A5A,#EF4A4F)] bg-clip-text text-transparent">
+              kuum
             </span>
           </Link>
 
@@ -96,15 +97,15 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className={cn("flex items-center gap-2", searchActive && "flex-1 justify-end")}>
             {searchActive ? (
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2 sm:flex-none">
                 <input
                   autoFocus
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
                   placeholder="Поиск по названию..."
-                  className="w-48 sm:w-64 bg-[#111113] border border-white/15 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-[#71717A] outline-none focus:border-[#EF4A4F]/50 focus:ring-1 focus:ring-[#EF4A4F]/30"
+                  className="min-w-0 flex-1 sm:w-64 sm:flex-none bg-[#111113] border border-white/15 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-[#8E8E98] outline-none focus:border-[#EF4A4F]/50 focus:ring-1 focus:ring-[#EF4A4F]/30"
                 />
                 <button
                   type="button"
@@ -112,7 +113,7 @@ export function Header() {
                     setSearchActive(false);
                     setSearchVal("");
                   }}
-                  className="p-2 text-[#71717A] hover:text-white"
+                  className="p-2 text-[#8E8E98] hover:text-white"
                   aria-label="Закрыть поиск"
                 >
                   <X className="w-5 h-5" />
@@ -128,15 +129,16 @@ export function Header() {
               </button>
             )}
 
-            {isLoggedIn ? (
+            {searchActive ? null : isLoggedIn ? (
               <Link
                 href="/profile"
+                aria-label="Профиль"
                 className={cn(
                   "w-9 h-9 rounded-full bg-gradient-to-br from-[#EF4A4F] to-[#C73237] flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105 shadow-md shadow-[#EF4A4F]/20",
                   pathname === "/profile" && "ring-2 ring-[#EF4A4F]/60"
                 )}
               >
-                А
+                {initial}
               </Link>
             ) : (
               <Link href="/login">
@@ -147,7 +149,7 @@ export function Header() {
             )}
 
             <button
-              className="md:hidden p-2 text-[#A1A1AA] hover:text-white"
+              className={cn("md:hidden p-2 text-[#A1A1AA] hover:text-white", searchActive && "hidden")}
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Меню"
             >
@@ -205,7 +207,7 @@ export function Header() {
               "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-colors min-w-[44px]",
               isActive(href)
                 ? "text-[#EF4A4F]"
-                : "text-[#71717A] hover:text-white",
+                : "text-[#8E8E98] hover:text-white",
               disabled && "opacity-50 pointer-events-none"
             )}
           >

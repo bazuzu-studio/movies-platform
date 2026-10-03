@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
+import {
+  RELEASE_STATUS_LABEL,
+  parseReleaseStatus,
+  type ReleaseStatus,
+} from "@/lib/release-status";
+
+// «По рейтингу» убран: API такой сортировки не поддерживает, а «Популярные»
+// и так сортируются по рейтингу — пункт молча превращался в «Новинки».
 export const SORT_OPTIONS = [
   "Популярные",
   "Новинки",
-  "По рейтингу",
   "По алфавиту",
 ] as const;
 
@@ -34,9 +41,37 @@ export type AgeOption = (typeof AGE_OPTIONS)[number];
 
 export type TypeFilter = "all" | "movie" | "series";
 
-const DEFAULT_YEAR: YearOption = "Все";
-const DEFAULT_AGE: AgeOption = "Все";
-const DEFAULT_SORT: SortOption = "Новинки";
+export const STATUS_OPTIONS = [
+  "Все",
+  RELEASE_STATUS_LABEL.ongoing,
+  RELEASE_STATUS_LABEL.anons,
+  RELEASE_STATUS_LABEL.released,
+] as const;
+
+export type StatusOption = (typeof STATUS_OPTIONS)[number];
+
+/** Подпись фильтра -> значение release_status в API (undefined = без фильтра). */
+export const STATUS_TO_API: Record<StatusOption, ReleaseStatus | undefined> = {
+  Все: undefined,
+  [RELEASE_STATUS_LABEL.ongoing]: "ongoing",
+  [RELEASE_STATUS_LABEL.anons]: "anons",
+  [RELEASE_STATUS_LABEL.released]: "released",
+};
+
+export const DEFAULT_YEAR: YearOption = "Все";
+export const DEFAULT_AGE: AgeOption = "Все";
+export const DEFAULT_STATUS: StatusOption = "Все";
+export const DEFAULT_SORT: SortOption = "Новинки";
+
+/** Значение ?status= из URL -> подпись фильтра. Неизвестное -> «Все». */
+export const statusOptionFromUrl = (value: string | null): StatusOption => {
+  const status = parseReleaseStatus(value);
+  return status ? RELEASE_STATUS_LABEL[status] : DEFAULT_STATUS;
+};
+
+/** Подпись фильтра -> значение для ?status= (undefined = параметр не нужен). */
+export const statusUrlValue = (option: StatusOption): ReleaseStatus | undefined =>
+  STATUS_TO_API[option];
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -50,11 +85,13 @@ const normalizeType = (value: string | null): TypeFilter => {
 
 interface UseCatalogFiltersOptions {
   initialType?: string | null;
+  initialStatus?: string | null;
   hasNextPage?: boolean;
 }
 
 export function useCatalogFilters({
   initialType,
+  initialStatus,
   hasNextPage = false,
 }: UseCatalogFiltersOptions = {}) {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(
@@ -66,6 +103,9 @@ export function useCatalogFilters({
     useState<YearOption>(DEFAULT_YEAR);
   const [age, setAgeState] =
     useState<AgeOption>(DEFAULT_AGE);
+  const [status, setStatusState] = useState<StatusOption>(
+    statusOptionFromUrl(initialStatus ?? null),
+  );
   const [sort, setSortState] =
     useState<SortOption>(DEFAULT_SORT);
 
@@ -78,6 +118,13 @@ export function useCatalogFilters({
   useEffect(() => {
     setTypeFilter(normalizeType(initialType ?? null));
   }, [initialType]);
+
+  /**
+   * Синхронизация статуса с URL (?status=ongoing).
+   */
+  useEffect(() => {
+    setStatusState(statusOptionFromUrl(initialStatus ?? null));
+  }, [initialStatus]);
 
   /**
    * Debounce поиска.
@@ -96,6 +143,7 @@ export function useCatalogFilters({
     genre !== "Все",
     year !== "Все",
     age !== "Все",
+    status !== DEFAULT_STATUS,
     typeFilter !== "all",
   ].filter(Boolean).length;
 
@@ -127,6 +175,13 @@ export function useCatalogFilters({
     [],
   );
 
+  const setStatus = useCallback(
+    (value: StatusOption) => {
+      setStatusState(value);
+    },
+    [],
+  );
+
   const setSort = useCallback(
     (value: SortOption) => {
       setSortState(value);
@@ -146,6 +201,7 @@ export function useCatalogFilters({
     setGenreState("Все");
     setYearState(DEFAULT_YEAR);
     setAgeState(DEFAULT_AGE);
+    setStatusState(DEFAULT_STATUS);
     setSortState(DEFAULT_SORT);
     setSearchInput("");
     setSearchVal("");
@@ -163,6 +219,9 @@ export function useCatalogFilters({
 
     age,
     setAge,
+
+    status,
+    setStatus,
 
     sort,
     setSort,

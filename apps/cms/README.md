@@ -1,6 +1,6 @@
 # apps/cms — Backend (Payload CMS)
 
-Backend и админ-панель онлайн-кинотеатра на [Payload CMS 3](https://payloadcms.com/) (поверх Next.js). Хранит каталог фильмов/сериалов, жанры, сезоны/эпизоды, пользователей и избранное; отдаёт REST и GraphQL API для [`apps/web`](../web); умеет импортировать аниме-каталог из [Kodik API](https://kodikapi.com/).
+Backend и админ-панель онлайн-кинотеатра на [Payload CMS 3](https://payloadcms.com/) (поверх Next.js). Хранит каталог фильмов/сериалов, жанры, сезоны/эпизоды, пользователей и избранное; отдаёт REST и GraphQL API для [`apps/web`](../web); аниме-каталог из [Kodik API](https://kodikapi.com/) импортирует отдельный пайплайн kodik-pipeline (см. «Импорт из Kodik»).
 
 ## Стек
 
@@ -15,8 +15,8 @@ Backend и админ-панель онлайн-кинотеатра на [Paylo
 
 - Node.js `^18.20.2` или `>=20.9.0`
 - pnpm `^9 || ^10 || ^11`
-- PostgreSQL (локально или через корневой `docker-compose.yml`)
-- S3-совместимое хранилище (MinIO — поднимается тем же `docker-compose.yml`) для загрузки медиафайлов
+- PostgreSQL (локально — через `docker-compose.dev.yml`)
+- S3-совместимое хранилище (MinIO — поднимается тем же `docker-compose.dev.yml`) для загрузки медиафайлов
 
 ## Переменные окружения
 
@@ -26,21 +26,23 @@ Backend и админ-панель онлайн-кинотеатра на [Paylo
 cp .env.example .env
 ```
 
-> В репозитории `.env.example` унаследован от стандартного Payload-темплейта и указывает на MongoDB — **фактически проект использует PostgreSQL** (`@payloadcms/db-postgres`, см. `src/payload.config.ts`). Используйте таблицу ниже, а не значения из `.env.example` по умолчанию.
-
 | Переменная | Обязательна | Описание |
 | --- | --- | --- |
-| `DATABASE_URL` | да | Строка подключения к PostgreSQL, например `postgres://admin:password@127.0.0.1:5432/movies2` |
-| `PAYLOAD_SECRET` | да | Секрет для подписи JWT и шифрования Payload |
-| `PORT` | нет | Порт dev-сервера (по умолчанию задаётся флагом `-p 4000` в скрипте `dev`) |
-| `NEXT_PUBLIC_APP_URL` | нет | URL самой CMS (`serverURL`, используется в `admin` и CORS/CSRF). По умолчанию `http://localhost:4000` |
-| `FRONTEND_URL` | нет | URL приложения `apps/web`, добавляется в разрешённые CORS/CSRF-origin'ы. По умолчанию `http://localhost:3000` |
+| `DATABASE_URL` | да | Строка подключения к PostgreSQL, например `postgresql://postgres:postgres@127.0.0.1:5432/movhub`; в Dokploy — внутренний хост БД |
+| `PAYLOAD_SECRET` | да | Секрет для подписи JWT и шифрования Payload (`openssl rand -hex 32`) |
+| `CMS_URL` | нет | Публичный URL самой CMS (`serverURL`, CORS/CSRF, флаг `Secure` у auth-cookie). По умолчанию `http://localhost:4000`. Старое имя `NEXT_PUBLIC_APP_URL` тоже читается, но `CMS_URL` предпочтительнее |
+| `FRONTEND_URL` | нет | URL приложения `apps/web`, можно несколько через запятую. В dev по умолчанию `http://localhost:3000`, в production — пусто |
+| `COOKIE_DOMAIN` | нет | Домен auth-cookie (например `.otakuum.ru`), если frontend на другом поддомене должен видеть cookie CMS. По умолчанию host-only |
+| `PORT` | нет | Порт dev-сервера (по умолчанию задаётся флагом `-p 4000` в скрипте `dev`); в Docker-образе — `3000` |
 | `S3_BUCKET` | да | Имя S3-бакета для медиафайлов |
-| `S3_ENDPOINT` | да | Endpoint S3/MinIO, например `http://localhost:9000` |
+| `S3_ENDPOINT` | да | Endpoint S3/MinIO, к которому обращается **сервер** CMS, например `http://localhost:9000` (в Dokploy — внутренний адрес вашего MinIO, `http://<internal-host>:9000`) |
 | `S3_REGION` | нет | Регион (по умолчанию `us-east-1`) |
 | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | да | Ключи доступа к S3/MinIO |
-| `S3_PUBLIC_URL` | да | Публичный URL, по которому браузер будет загружать файлы (например `http://localhost:9000/media`) |
-| `KODIK_API_TOKEN` | только для импорта | Токен Kodik API — нужен эндпоинту `/api/import/kodik` |
+| `S3_PUBLIC_URL` | да | Публичный URL, по которому **браузер** получает файлы (`http://localhost:9000/media` локально, публичный домен вашего MinIO, например `https://s3.example.ru/media`, в production) |
+| `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` | только локально | Учётные данные MinIO из `docker-compose.dev.yml` (в Dokploy MinIO — отдельный сервис, эти переменные CMS не нужны) |
+| `MINIO_API_PORT` / `MINIO_CONSOLE_PORT` | нет | Порты MinIO в `docker-compose.dev.yml` (по умолчанию `9000` / `9001`) |
+
+Шаблон — в `.env.example`. Для Dokploy значения задаются во вкладке **Environment** (см. раздел «Деплой в Dokploy»).
 
 Готовый набор значений для локальной разработки со всеми сервисами уже подготовлен в `.env.local` в **корне** монорепозитория — можно скопировать нужные переменные оттуда.
 
@@ -61,10 +63,10 @@ pnpm install
 pnpm dev
 ```
 
-Перед запуском убедитесь, что подняты PostgreSQL и MinIO (см. корневой [`docker-compose.yml`](../../README.md#инфраструктура-docker-compose)):
+Перед запуском убедитесь, что подняты PostgreSQL и MinIO:
 
 ```bash
-docker-compose up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 CMS и Admin Panel будут доступны на [http://localhost:4000/admin](http://localhost:4000/admin). При первом запуске Payload предложит создать первого администратора.
@@ -85,6 +87,8 @@ CMS и Admin Panel будут доступны на [http://localhost:4000/admin
 | `pnpm generate:types` | Сгенерировать `src/payload-types.ts` из текущей конфигурации коллекций |
 | `pnpm generate:importmap` | Сгенерировать import map для Admin Panel (нужно после добавления кастомных admin-компонентов) |
 | `pnpm payload` | Доступ к Payload CLI |
+| `pnpm migrate:create <имя>` | Создать миграцию БД после изменения коллекций (см. «Миграции БД») |
+| `pnpm migrate` / `pnpm migrate:status` | Применить миграции / показать статус |
 | `pnpm test` | Все тесты (`test:int` + `test:e2e`) |
 | `pnpm test:int` | Интеграционные тесты (Vitest) |
 | `pnpm test:e2e` | E2E-тесты (Playwright) |
@@ -105,27 +109,28 @@ CMS и Admin Panel будут доступны на [http://localhost:4000/admin
 
 ## Импорт из Kodik
 
-`POST /api/import/kodik` — импортирует фильмы/сериалы (по умолчанию — аниме: `anime,anime-serial`) из Kodik API в коллекции `content`/`genres`/`seasons`/`episodes`. Доступен ролям `admin` и `editor`, требует настроенного `KODIK_API_TOKEN`.
+Импорт каталога вынесен из CMS в отдельный Python-пайплайн **kodik-pipeline** (Dokploy Compose-сервис с расписанием). Он пишет напрямую в БД CMS (`content`, `genres`, `seasons`, `episodes`, `media`) и не требует токена Kodik в самой CMS.
 
-Тело запроса (`KodikImportRequestBody`):
+| Команда пайплайна | Что делает |
+| --- | --- |
+| `python pipeline.py sync` | Полный импорт каталога (fetch → load), раз в сутки |
+| `python pipeline.py update-ongoing` | Только сериалы со статусом «выходит»: новые серии, ссылки на плеер, статус релиза; раз в час |
+| `python pipeline.py posters` | Постеры → S3/MinIO |
 
-| Поле | Тип | По умолчанию | Описание |
-| --- | --- | --- | --- |
-| `mode` | `'list' \| 'search'` | `'list'` | Постраничный обход каталога или точечный поиск по названию/Shikimori ID |
-| `types` | `string` | `anime,anime-serial` | Типы контента Kodik (через запятую) |
-| `title` | `string` | — | Название для поиска (обязательно для `mode: 'search'`, если нет `shikimoriId`) |
-| `shikimoriId` | `string` | — | Поиск по ID Shikimori |
-| `year` | `number` | — | Фильтр по году (только для `mode: 'list'`) |
-| `maxPages` | `number` | `1` | Сколько страниц `/list` обойти за один вызов (защита от случайного обхода всего каталога) |
-| `downloadImages` | `boolean` | `false` | Скачивать `poster_url` и загружать в коллекцию `media` |
-| `importEpisodes` | `boolean` | `true` | Разбирать `seasons`/`episodes` и создавать соответствующие записи |
-| `dryRun` | `boolean` | `false` | Ничего не писать в БД, только посчитать, что было бы сделано |
+Пайплайн зависит от схемы БД, которую создают миграции CMS: колонки `content.release_status` / `_content_v.version_release_status` (статус релиза), `age_rating`, `player_link`, `kodik_id`, `kinopoisk_id` и др. Поэтому **сначала деплоится CMS (миграции применяются при старте), затем запускается пайплайн.**
 
-Ответ содержит отчёт: количество созданных/обновлённых/пропущенных материалов и список ошибок. Бизнес-логика вынесена в `src/lib/kodik/*` (клиент Kodik API, маппинг материалов в `content`/`genres`/`seasons`/`episodes`, загрузка медиа).
+### Статус релиза (`releaseStatus`)
+
+Поле `content.releaseStatus` (в БД — `release_status`, enum) — **Анонс** (`anons`) / **Выходит** (`ongoing`) / **Вышло** (`released`). Значения совпадают со значениями Kodik (`material_data.anime_status` / `all_status`), поэтому пайплайн пишет их без преобразований. Неизвестные значения не записываются (поле остаётся пустым).
+
+- Заполняется пайплайном при `sync` и `update-ongoing`; ручная правка в админке будет перезаписана при следующем импорте.
+- В Payload API доступно для фильтрации: `GET /api/content?where[releaseStatus][equals]=ongoing`, поле проиндексировано.
+- Не путать со служебным полем `status` (`draft`/`published`).
+- После первого деплоя миграции выполните в пайплайне один `sync`, чтобы проставить статусы всему каталогу; дальше их актуализирует `update-ongoing` (в том числе переводит завершившиеся сериалы `ongoing` → `released`).
 
 ## Хранилище файлов (S3/MinIO)
 
-Коллекция `media` настроена на S3-совместимое хранилище (`src/lib/storage/s3.ts`). URL для отдачи файлов браузеру собирается из `S3_PUBLIC_URL`, доступ к бакету настраивается автоматически сервисом `minio-init` из корневого `docker-compose.yml`.
+Коллекция `media` настроена на S3-совместимое хранилище (`src/lib/storage/s3.ts`). URL для отдачи файлов браузеру собирается из `S3_PUBLIC_URL`, локально бакет создаёт сервис `minio-init` из `docker-compose.dev.yml`; в Dokploy бакет нужно создать в вашем MinIO самостоятельно и открыть на публичное чтение (см. «Деплой в Dokploy»).
 
 ## Тестирование
 
@@ -152,13 +157,15 @@ apps/cms/
 │   │   ├── seasons/
 │   │   └── users/
 │   ├── endpoints/
-│   │   └── kodik-import.ts   # POST /api/import/kodik
+│   │   └── contact-message.ts # POST /api/contact-message (форма обратной связи)
 │   ├── lib/
-│   │   ├── kodik/              # Клиент Kodik API, мапперы материалов/жанров/сезонов/медиа
-│   │   └── storage/             # Конфигурация S3-хранилища
+│   │   ├── email/               # SMTP (Nodemailer)
+│   │   ├── storage/             # Конфигурация S3-хранилища
+│   │   └── urls.ts              # CMS_URL / FRONTEND_URL, CORS/CSRF
 │   ├── app/
 │   │   ├── (payload)/           # Admin Panel и API-роуты Payload
 │   │   └── (frontend)/           # Служебный frontend-роут самого Payload-приложения
+│   ├── migrations/            # Миграции БД (`pnpm migrate:create`), применяются при старте в production
 │   ├── payload-types.ts       # Автогенерируемые типы (`pnpm generate:types`, не редактировать вручную)
 │   └── payload.config.ts       # Главный конфиг Payload (коллекции, БД, S3, CORS, endpoints)
 ├── tests/
@@ -166,10 +173,52 @@ apps/cms/
 │   ├── e2e/                   # E2E-тесты (Playwright)
 │   └── helpers/                 # Общие хелперы для тестов
 ├── Dockerfile
-├── docker-compose.yml       # Локальный docker-compose для этого приложения (альтернатива корневому)
+├── docker-compose.yml       # Деплой в Dokploy: только CMS
+├── docker-compose.dev.yml   # Локальная инфраструктура: PostgreSQL + MinIO
 └── playwright.config.ts / vitest.config.mts
 ```
 
+## Миграции БД
+
+В dev-режиме (`pnpm dev`) схему синхронизирует Drizzle push. В production push отключён, поэтому схема разворачивается **миграциями** из `src/migrations`, а `prodMigrations` в `src/payload.config.ts` применяет их автоматически при старте контейнера.
+
+После любого изменения коллекций/полей:
+
+```bash
+pnpm migrate:create <короткое-имя>   # создаст файл в src/migrations и обновит index.ts
+pnpm generate:types                  # обновит src/payload-types.ts
+git add src/migrations src/payload-types.ts
+```
+
+Закоммитьте миграцию вместе с изменением — при следующем деплое она применится сама.
+
 ## Docker
 
-В `apps/cms` есть собственные `Dockerfile` и `docker-compose.yml` для изолированного локального запуска (например, для сборки production-образа CMS). Для полноценной локальной разработки монорепозитория используйте корневой `docker-compose.yml` — он поднимает PostgreSQL, Redis и MinIO для всей платформы сразу.
+- `Dockerfile` — production-образ (Next.js `output: 'standalone'`, Node 22 Alpine, запуск не от root). Для сборки runtime-переменные не нужны.
+- `docker-compose.yml` — деплой в Dokploy: **только CMS**. PostgreSQL и MinIO в стек не входят.
+- `docker-compose.dev.yml` — инфраструктура для локальной разработки (PostgreSQL + MinIO).
+
+## Деплой в Dokploy
+
+Домен: **cms.otakuum.ru**. В Dokploy запускается только CMS; PostgreSQL и MinIO — отдельные сервисы того же проекта, CMS подключается к ним по внутренним именам.
+
+Рекомендуемый вариант — сервис **Application**:
+
+1. **DNS.** A-запись `cms.otakuum.ru` → IP сервера Dokploy.
+2. **Создать сервис:** тот же Project, где лежат БД и MinIO → *Create Service* → **Application**. Provider — GitHub, репозиторий и ветка.
+3. **Build Type:** `Dockerfile`; Dockerfile Path — `Dockerfile`; Docker Context Path — `.`; Docker Build Stage — пусто.
+4. **Environment:** содержимое `dokploy.env` (шаблон — `.env.example`, блок PRODUCTION).
+5. **Domains:** Host `cms.otakuum.ru`, Path `/`, Container Port `3000`, HTTPS включён, Certificate — Let's Encrypt.
+6. **Deploy.** При первом старте CMS сама применит миграции к БД `movhub`. Затем откройте `https://cms.otakuum.ru/admin` и создайте первого администратора.
+
+Вместо Application можно использовать сервис **Compose** с `./docker-compose.yml`: тогда домен уже описан лейблами и в UI его добавлять не нужно.
+
+Что должно быть готово заранее:
+
+| Что | Требование |
+| --- | --- |
+| PostgreSQL | Сервис запущен (Running), база `movhub` создана. В `DATABASE_URL` — **Internal Host** из карточки БД. CMS и БД должны быть на одном сервере Dokploy |
+| MinIO | Сервис запущен, создан бакет (по умолчанию `media`) |
+| Публичное чтение бакета | Файлы должны открываться браузером без авторизации: `mc anonymous set download <alias>/media` или Access Policy = *Public* в консоли MinIO |
+| Публичный адрес MinIO | Домен с HTTPS, указывающий на MinIO (порт API 9000); он же идёт в `S3_PUBLIC_URL` вместе с именем бакета, например `https://s3.example.ru/media` |
+| `S3_ENDPOINT` | Внутренний адрес MinIO для сервера CMS: `http://<internal-host>:9000` |

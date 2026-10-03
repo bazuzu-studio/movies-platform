@@ -89,9 +89,17 @@ useEffect(() => {
       if (!cancelled) {
         setUser(toAuthUser(data.meUser?.user));
       }
-    } catch {
-      // Нет активной сессии — это ожидаемый случай для гостя, не ошибка.
-      if (!cancelled) setUser(null);
+    } catch (error) {
+      // "Нет сессии" (гость) Payload обычно отдаёт как 200 с user: null,
+      // а не исключение — так что сюда мы обычно попадаем только при
+      // реальном сетевом/CORS-сбое запроса к CMS. Логируем, чтобы такие
+      // случаи не выглядели неотличимо от обычного "просто гость" —
+      // проверьте вкладку Network/Console на otakuum.ru, если после
+      // логина через CMS профиль всё равно пустой.
+      if (!cancelled) {
+        console.error("AuthContext: не удалось проверить сессию (meUser)", error);
+        setUser(null);
+      }
     } finally {
       if (!cancelled) setReady(true);
     }

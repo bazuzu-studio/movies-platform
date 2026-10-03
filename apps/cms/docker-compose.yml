@@ -1,43 +1,85 @@
-version: '3'
+# ─────────────────────────────────────────────────────────────────────────────
+# [Dokploy] Compose: только Payload CMS для cms.otakuum.ru
+#
+# PostgreSQL и MinIO (S3) в этот стек НЕ входят — это отдельные сервисы вашего
+# проекта Dokploy. CMS подключается к ним по внутренним именам через сеть
+# dokploy-network; значения задаются во вкладке Environment (см. dokploy.env).
+#
+# Тот же результат даёт сервис типа Application (Build Type: Dockerfile) —
+# compose нужен только если хотите описать домен лейблами, а не в UI.
+#
+# Маршрутизация (Traefik, лейблы ниже — домен в UI Dokploy для этого compose
+# добавлять НЕ нужно, иначе будут дубли роутеров):
+#   https://cms.otakuum.ru → cms:3000 (админка и API)
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  payload:
-    image: node:20-alpine
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - mongo
-      # - postgres
-    env_file:
-      - .env
+  cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # PostgreSQL: внутренний хост из карточки БД в Dokploy (Internal Host)
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET is required}
+      CMS_URL: ${CMS_URL:-https://cms.otakuum.ru}
+      FRONTEND_URL: ${FRONTEND_URL:-}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+      # Почта (сброс пароля, форма обратной связи). Без SMTP_HOST письма не уходят.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-no-reply@otakuum.ru}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-MovHub}
+      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-}
+      # Мгновенный сброс кэша фронтенда после правок (см. src/lib/revalidate.ts).
+      # REVALIDATE_URL — адрес фронтенда из контейнера CMS, например http://<web>:3000.
+      REVALIDATE_URL: ${REVALIDATE_URL:-}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
+      # true — вернуть публичный доступ к черновикам / включить GraphQL-интроспекцию.
+      CONTENT_PUBLIC_DRAFTS: ${CONTENT_PUBLIC_DRAFTS:-false}
+      GRAPHQL_INTROSPECTION: ${GRAPHQL_INTROSPECTION:-false}
+      # Сколько прокси стоит перед CMS (1 = Traefik, 2 = Cloudflare → Traefik).
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
+      # S3/MinIO: S3_ENDPOINT — внутренний адрес для сервера CMS,
+      # S3_PUBLIC_URL — публичный адрес файлов для браузера (https).
+      S3_BUCKET: ${S3_BUCKET:-media}
+      S3_ENDPOINT: ${S3_ENDPOINT:?S3_ENDPOINT is required}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID is required}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY is required}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:?S3_PUBLIC_URL is required}
+    networks:
+      - dokploy-network # Traefik + внутренние имена БД и MinIO
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      # HTTPS
+      - traefik.http.routers.movhub-cms.rule=Host(`cms.otakuum.ru`)
+      - traefik.http.routers.movhub-cms.entrypoints=websecure
+      - traefik.http.routers.movhub-cms.tls.certresolver=letsencrypt
+      - traefik.http.routers.movhub-cms.service=movhub-cms
+      - traefik.http.services.movhub-cms.loadbalancer.server.port=3000
+      # Лимит запросов к форме обратной связи (20 в минуту на IP, как его видит Traefik)
+      - traefik.http.routers.movhub-cms-contact.rule=Host(`cms.otakuum.ru`) && Path(`/api/contact-message`)
+      - traefik.http.routers.movhub-cms-contact.priority=100
+      - traefik.http.routers.movhub-cms-contact.entrypoints=websecure
+      - traefik.http.routers.movhub-cms-contact.tls.certresolver=letsencrypt
+      - traefik.http.routers.movhub-cms-contact.middlewares=movhub-cms-contact-rl
+      - traefik.http.routers.movhub-cms-contact.service=movhub-cms
+      - traefik.http.middlewares.movhub-cms-contact-rl.ratelimit.average=20
+      - traefik.http.middlewares.movhub-cms-contact-rl.ratelimit.period=1m
+      - traefik.http.middlewares.movhub-cms-contact-rl.ratelimit.burst=20
+      # HTTP → HTTPS
+      - traefik.http.routers.movhub-cms-web.rule=Host(`cms.otakuum.ru`)
+      - traefik.http.routers.movhub-cms-web.entrypoints=web
+      - traefik.http.routers.movhub-cms-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.movhub-cms-web.service=movhub-cms
 
-  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
-    volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-
-volumes:
-  data:
-  # pgdata:
-  node_modules:
+networks:
+  dokploy-network:
+    external: true

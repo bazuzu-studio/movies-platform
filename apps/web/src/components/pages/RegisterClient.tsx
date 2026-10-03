@@ -52,7 +52,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <AuthLayout>
       <h1 className="text-2xl font-bold text-white mb-1">Создайте аккаунт</h1>
-      <p className="text-sm text-[#71717A] mb-6">Присоединяйтесь к CineHub</p>
+      <p className="text-sm text-[#8E8E98] mb-6">Присоединяйтесь к otakuum</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {[
@@ -70,7 +70,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 setError("");
               }}
               placeholder={placeholder}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
             />
           </div>
         ))}
@@ -86,12 +86,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                 setError("");
               }}
               placeholder="Минимум 6 символов, буквы и цифры"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 pr-11 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 pr-11 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#71717A] hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#8E8E98] hover:text-white"
             >
               {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -107,7 +107,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               setError("");
             }}
             placeholder="Повторите пароль"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
           />
         </div>
 
@@ -122,7 +122,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           Зарегистрироваться
         </Btn>
 
-        <div className="text-center text-sm text-[#71717A]">
+        <div className="text-center text-sm text-[#8E8E98]">
           Уже есть аккаунт?{" "}
           <Link href="/login" className="text-[#EF4A4F] hover:text-[#EF4A4F]/80 font-medium">
             Войти

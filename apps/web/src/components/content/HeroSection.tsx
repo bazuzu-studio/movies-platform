@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Calendar, Clock, Tv, Bookmark, BookmarkCheck } from "lucide-react";
 import type { ContentItem } from "@/lib/types";
 import { Btn } from "@/components/ui/Btn";
-import { Badge, GenreChip, StarRating } from "@/components/ui/Meta";
+import { Badge, ReleaseStatusBadge, StarRating } from "@/components/ui/Meta";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 import { formatDuration } from "@/lib/utils";
 
@@ -40,6 +40,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             {item.type === "series" && <Badge variant="series">СЕРИАЛ</Badge>}
             {item.isNew && <Badge variant="new">НОВИНКА</Badge>}
+            <ReleaseStatusBadge status={item.releaseStatus} />
             {/* {item.genres.slice(0, 2).map((g) => (
               <GenreChip key={g} label={g} />
             ))} */}

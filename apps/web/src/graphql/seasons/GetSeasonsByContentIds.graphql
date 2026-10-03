@@ -12,6 +12,7 @@ query GetSeasonsByContentIds($contentIds: [JSON]!) {
       content {
         id
         slug
+        releaseStatus
         poster { url }
       }
       episodes(sort: "episodeNumber", limit: 500) {
@@ -22,6 +23,7 @@ query GetSeasonsByContentIds($contentIds: [JSON]!) {
           playerLink
           description
           duration
+          airingAt
         }
       }
     }

@@ -21,7 +21,7 @@ export function FavoritesClient({ all }: { all: ContentItem[] }) {
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Избранное</h1>
-        <p className="text-[#71717A] mt-1">Фильмы и сериалы, которые вы сохранили</p>
+        <p className="text-[#8E8E98] mt-1">Фильмы и сериалы, которые вы сохранили</p>
       </div>
 
       {!ready ? (
@@ -36,7 +36,7 @@ export function FavoritesClient({ all }: { all: ContentItem[] }) {
           action={{ label: "Войти", onClick: () => router.push("/login") }}
         />
       ) : isLoading ? (
-        <p className="text-sm text-[#71717A]">Загрузка избранного...</p>
+        <p className="text-sm text-[#8E8E98]">Загрузка избранного...</p>
       ) : items.length === 0 ? (
         <EmptyState
           icon={Heart}

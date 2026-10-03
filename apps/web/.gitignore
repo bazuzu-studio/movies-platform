@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+next-env.d.ts.bak
+# src/generated/graphql.ts НЕ игнорируем: сборка в Docker не должна зависеть от CMS

@@ -33,7 +33,7 @@ export function ForgotPasswordClient() {
   return (
     <AuthLayout>
       <h1 className="text-2xl font-bold text-white mb-1">Восстановление пароля</h1>
-      <p className="text-sm text-[#71717A] mb-6">Введите email и мы отправим ссылку</p>
+      <p className="text-sm text-[#8E8E98] mb-6">Введите email и мы отправим ссылку</p>
 
       {sent ? (
         <div className="flex flex-col items-center gap-4 py-4 text-center">
@@ -42,7 +42,7 @@ export function ForgotPasswordClient() {
           </div>
           <div>
             <p className="font-semibold text-white">Ссылка отправлена!</p>
-            <p className="text-sm text-[#71717A] mt-1">Проверьте почту {email}</p>
+            <p className="text-sm text-[#8E8E98] mt-1">Проверьте почту {email}</p>
           </div>
           <Link href="/login">
             <Btn variant="outline" size="sm">
@@ -55,20 +55,20 @@ export function ForgotPasswordClient() {
           <div>
             <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Email</label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A]" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E98]" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
               />
             </div>
           </div>
           <Btn type="submit" size="lg" className="w-full justify-center" disabled={submitting}>
             {submitting ? "Отправка..." : "Отправить ссылку"}
           </Btn>
-          <Link href="/login" className="text-sm text-center text-[#71717A] hover:text-white transition-colors">
+          <Link href="/login" className="text-sm text-center text-[#8E8E98] hover:text-white transition-colors">
             Вернуться к входу
           </Link>
         </form>

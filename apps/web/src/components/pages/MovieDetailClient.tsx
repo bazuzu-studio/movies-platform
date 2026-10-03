@@ -7,8 +7,10 @@ import { ArrowLeft, Calendar, Clock, Film, Bookmark, BookmarkCheck, Play } from 
 import type { Movie, ContentItem } from "@/lib/types";
 import { formatDuration } from "@/lib/utils";
 import { Btn } from "@/components/ui/Btn";
-import { Badge, GenreChip, StarRating } from "@/components/ui/Meta";
-import { MovieCard } from "@/components/content/MovieCard";
+import { Badge, GenreChip, ReleaseStatusBadge, StarRating } from "@/components/ui/Meta";
+import { SimilarContent } from "@/components/content/SimilarContent";
+import { VideoPlayer } from "@/components/content/VideoPlayer";
+import { AgeGate } from "@/components/content/AgeGate";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 
 export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: ContentItem[] }) {
@@ -24,8 +26,9 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
   };
 
   return (
+    <AgeGate ageRating={movie.ageRating}>
     <div>
-      <div className="relative h-[300px] sm:h-[420px] overflow-hidden">
+      <div className="relative h-[220px] sm:h-[420px] overflow-hidden">
         {/* Backdrop — LCP-элемент страницы фильма (ТЗ, п.4.1) */}
         <Image
           src={movie.backdrop?.url || "/default-backdrop.jpg"}
@@ -45,9 +48,9 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
         </button>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10 pb-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-32 relative z-10 pb-8">
         <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-          <div className="shrink-0 w-48 sm:w-56 lg:w-64 mx-auto md:mx-0">
+          <div className="shrink-0 w-36 sm:w-56 lg:w-64 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-[#121214] relative">
               <Image
                 src={movie.poster?.url ?? "/default-poster.jpg"}
@@ -65,17 +68,18 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
             </div>
           </div>
 
-          <div className="flex-1">
-            <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex-1 text-center md:text-left">
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
               {movie.isNew && <Badge variant="new">НОВИНКА</Badge>}
+              <ReleaseStatusBadge status={movie.releaseStatus} />
               {movie.genres.map((g) => (
                 <GenreChip key={g} label={g} />
               ))}
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-1">{movie.titleRu}</h1>
-            <p className="text-[#71717A] text-sm mb-4 font-medium">{movie.titleEn}</p>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-1 [text-wrap:balance]">{movie.titleRu}</h1>
+            <p className="text-[#8E8E98] text-sm mb-4 font-medium">{movie.titleEn}</p>
 
-            <div className="flex flex-wrap items-center gap-5 mb-5 text-sm text-[#A1A1AA]">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 mb-5 text-sm text-[#A1A1AA]">
               <StarRating rating={movie.rating} />
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
@@ -98,32 +102,32 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
               )}
             </div>
 
-            <p className="text-[#A1A1AA] leading-relaxed mb-6 max-w-2xl">{movie.description}</p>
+            <p className="text-[#A1A1AA] leading-relaxed mb-6 max-w-2xl mx-auto md:mx-0 text-left">{movie.description}</p>
 
-            <div className="flex flex-wrap gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-8">
               {hasPlayer && (
-                <Btn size="lg" variant="primary" onClick={scrollToPlayer}>
+                <Btn size="lg" variant="primary" className="w-full sm:w-auto" onClick={scrollToPlayer}>
                   <Play className="w-5 h-5" />
                   Смотреть
                 </Btn>
               )}
-              <Btn size="lg" variant={isFav ? "danger" : "primary"} onClick={() => toggle(movie.id)}>
+              <Btn size="lg" variant={isFav ? "danger" : "outline"} className="w-full sm:w-auto" onClick={() => toggle(movie.id)}>
                 {isFav ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
-                {isFav ? "В избранном" : "Добавить в избранное"}
+                {isFav ? "В избранном" : "В избранное"}
               </Btn>
             </div>
 
             {(movie.director || movie.cast) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-white/3 border border-white/6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-white/3 border border-white/6 text-left">
                 {movie.director && (
                   <div>
-                    <p className="text-xs text-[#71717A] font-medium uppercase tracking-wider mb-1">Режиссёр</p>
+                    <p className="text-xs text-[#8E8E98] font-medium uppercase tracking-wider mb-1">Режиссёр</p>
                     <p className="text-sm text-white font-medium">{movie.director}</p>
                   </div>
                 )}
                 {movie.cast && (
                   <div>
-                    <p className="text-xs text-[#71717A] font-medium uppercase tracking-wider mb-1">В ролях</p>
+                    <p className="text-xs text-[#8E8E98] font-medium uppercase tracking-wider mb-1">В ролях</p>
                     <p className="text-sm text-white font-medium">{movie.cast.join(", ")}</p>
                   </div>
                 )}
@@ -133,37 +137,19 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
         </div>
 
         {/* Плеер — Kodik playerLink (только для фильмов, см. content.player_link). */}
-        <div ref={playerRef} className="mt-10 scroll-mt-24">
+        <div ref={playerRef} className="mt-8 sm:mt-10 scroll-mt-20">
           {hasPlayer ? (
-            <div className="aspect-video w-full rounded-2xl overflow-hidden ring-1 ring-white/10 bg-black">
-              <iframe
-                src={movie.playerLink}
-                title={`Плеер: ${movie.titleRu}`}
-                allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-                allowFullScreen
-                referrerPolicy="origin"
-                className="w-full h-full border-0"
-              />
-            </div>
+            <VideoPlayer embedUrl={movie.embedUrl ?? movie.playerLink} ageRating={movie.ageRating} />
           ) : (
-            <div className="aspect-video w-full rounded-2xl flex items-center justify-center bg-white/3 border border-white/6 text-sm text-[#71717A]">
+            <div className="aspect-video w-full rounded-2xl flex items-center justify-center bg-white/3 border border-white/6 text-sm text-[#8E8E98]">
               Плеер для этого фильма пока недоступен
             </div>
           )}
         </div>
 
-        {similar.length > 0 && (
-          <div className="mt-14">
-            <h2 className="text-xl font-bold text-white mb-5">Вам может понравиться</h2>
-            <p className="text-xs text-[#3f3f46] mb-4">Функция рекомендаций появится в следующей версии</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
-              {similar.map((m) => (
-                <MovieCard key={m.id} item={m} />
-              ))}
-            </div>
-          </div>
-        )}
+        <SimilarContent title="Вам может понравиться" items={similar} />
       </div>
     </div>
+    </AgeGate>
   );
 }

@@ -1,7 +1,10 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
-  schema: 'http://localhost:4000/api/graphql',
+  schema:
+    process.env.CODEGEN_SCHEMA_URL ??
+    process.env.NEXT_PUBLIC_GRAPHQL_API_URL ??
+    'http://localhost:4000/api/graphql',
   documents: ['src/**/*.graphql'],
   generates: {
     './src/generated/graphql.ts': {
@@ -23,7 +26,7 @@ const config: CodegenConfig = {
     },
   },
   hooks: {
-    afterAllFileWrite: ['node scripts/dedupe-generated-graphql.mjs'],
+    afterAllFileWrite: ['node src/scripts/dedupe-generated-graphql.mjs'],
   },
 }
 

@@ -39,7 +39,7 @@ export default function GlobalError({
         </div>
 
         <h1 className="text-2xl font-bold text-white mb-2">Что-то пошло не так</h1>
-        <p className="text-sm text-[#71717A] mb-8">
+        <p className="text-sm text-[#8E8E98] mb-8">
           Произошла непредвиденная ошибка. Попробуйте перезагрузить страницу.
         </p>
 

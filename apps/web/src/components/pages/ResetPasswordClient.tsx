@@ -64,7 +64,7 @@ export function ResetPasswordClient() {
   return (
     <AuthLayout>
       <h1 className="text-2xl font-bold text-white mb-1">Новый пароль</h1>
-      <p className="text-sm text-[#71717A] mb-6">Придумайте новый пароль для входа</p>
+      <p className="text-sm text-[#8E8E98] mb-6">Придумайте новый пароль для входа</p>
 
       {done ? (
         <div className="flex flex-col items-center gap-4 py-4 text-center">
@@ -78,13 +78,13 @@ export function ResetPasswordClient() {
           <div>
             <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Новый пароль</label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A]" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E98]" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Минимум 8 символов"
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
               />
             </div>
           </div>
@@ -92,7 +92,7 @@ export function ResetPasswordClient() {
           <Btn type="submit" size="lg" className="w-full justify-center" disabled={submitting}>
             {submitting ? "Сохранение..." : "Сохранить пароль"}
           </Btn>
-          <Link href="/login" className="text-sm text-center text-[#71717A] hover:text-white transition-colors">
+          <Link href="/login" className="text-sm text-center text-[#8E8E98] hover:text-white transition-colors">
             Вернуться к входу
           </Link>
         </form>

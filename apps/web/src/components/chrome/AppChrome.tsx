@@ -14,7 +14,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
        <Suspense fallback={null}>{showChrome && <Header />}</Suspense>
-      <main>{children}</main>
+      <main className="min-h-[70vh]">{children}</main>
       {showChrome && <Footer />}
     </>
   );

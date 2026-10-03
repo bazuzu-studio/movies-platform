@@ -11,8 +11,10 @@ import { cn } from "@/lib/utils";
 import {
   AgeOption,
   SORT_OPTIONS,
+  STATUS_OPTIONS,
   YEAR_OPTIONS,
   type SortOption,
+  type StatusOption,
   type YearOption,
 } from "@/hooks/useCatalogFilters";
 
@@ -28,6 +30,9 @@ type Props = {
 
   age: AgeOption;
   onAgeChange: (value: AgeOption) => void;
+
+  status: StatusOption;
+  onStatusChange: (value: StatusOption) => void;
 
   sort: SortOption;
   onSortChange: (value: SortOption) => void;
@@ -122,6 +127,7 @@ function Dropdown<T extends string>({
  * - жанр
  * - год
  * - возраст
+ * - статус релиза (выходит / анонс / вышло)
  * - сортировка
  *
  * Компонент не фильтрует данные самостоятельно.
@@ -136,6 +142,8 @@ export function CatalogFilterBar({
   onYearChange,
   age,
   onAgeChange,
+  status,
+  onStatusChange,
   sort,
   onSortChange,
 }: Props) {
@@ -162,6 +170,13 @@ export function CatalogFilterBar({
         value={age}
         options={ageOptions}
         onChange={onAgeChange}
+      />
+
+      <Dropdown
+        label={status === "Все" ? "Статус" : status}
+        value={status}
+        options={STATUS_OPTIONS}
+        onChange={onStatusChange}
       />
 
       <Dropdown

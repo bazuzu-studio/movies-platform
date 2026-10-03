@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getContentList } from "@/lib/api";
+import { getSitemapEntries } from "@/lib/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -7,15 +7,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "daily", priority: 1 },
     { url: `${base}/catalog`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${base}/copyright`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   try {
-    // limit намеренно большой: sitemap должен включать весь каталог,
-    // а не первую страницу (getContentList по умолчанию возвращает 24).
-    const { items } = await getContentList(1, 5000);
+    // Только slug/type/updatedAt и постранично: sitemap должен включать весь
+    // каталог, но без загрузки постеров и жанров каждого тайтла.
+    const entries = await getSitemapEntries();
 
-    const contentRoutes: MetadataRoute.Sitemap = items.map((item) => ({
-      url: `${base}/${item.type === "movie" ? "movie" : "series"}/${item.slug}`,
+    const contentRoutes: MetadataRoute.Sitemap = entries.map((entry) => ({
+      url: `${base}/${entry.type === "movie" ? "movie" : "series"}/${entry.slug}`,
+      lastModified: entry.updatedAt ? new Date(entry.updatedAt) : undefined,
       changeFrequency: "weekly",
       priority: 0.7,
     }));
@@ -24,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     // Если CMS недоступен в момент `next build` — не роняем всю сборку
     // из-за sitemap, отдаём хотя бы статические маршруты.
-    console.error("sitemap: getContentList failed, falling back to static routes", error);
+    console.error("sitemap: getSitemapEntries failed, falling back to static routes", error);
     return staticRoutes;
   }
 }

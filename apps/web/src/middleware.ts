@@ -41,7 +41,11 @@ export function middleware(request: NextRequest) {
   }
 
   const isGuestOnly = GUEST_ONLY_PATHS.some((path) => pathname === path);
-  if (isGuestOnly && hasSession) {
+  // ?expired=1 ставит RequireAuth, когда cookie есть, а сервер сессию не
+  // признал (токен истёк или сменился PAYLOAD_SECRET). Без этого исключения
+  // /login → /profile → /login?… зацикливались бы бесконечно.
+  const sessionExpired = request.nextUrl.searchParams.has("expired");
+  if (isGuestOnly && hasSession && !sessionExpired) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 

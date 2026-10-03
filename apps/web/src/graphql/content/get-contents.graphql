@@ -20,6 +20,7 @@ query GetContent($limit: Int, $page: Int, $sort: String, $where: Content_where) 
         title
       }
       ageRating
+      releaseStatus
     }
     totalDocs
     hasNextPage

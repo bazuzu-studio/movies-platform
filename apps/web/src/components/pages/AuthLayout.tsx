@@ -11,7 +11,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       <div className="relative w-full max-w-sm">
         <div className="text-center mb-8">
           <p className="text-2xl font-black tracking-tight">
-            CINE<span className="text-[#EF4A4F]">HUB</span>
+            ota<span className="text-[#EF4A4F]">kumm</span>
           </p>
         </div>
         <div className="bg-[#121214] border border-white/8 rounded-2xl p-8 shadow-2xl">{children}</div>

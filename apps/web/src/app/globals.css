@@ -16,7 +16,7 @@
   --secondary: #18181B;
   --secondary-foreground: #A1A1AA;
   --muted: #1C1C1F;
-  --muted-foreground: #71717A;
+  --muted-foreground: #8E8E98;
   --accent: #EF4A4F;
   --accent-foreground: #FAFAFA;
   --destructive: #EF4A4F;
@@ -68,7 +68,7 @@
   --secondary: #18181B;
   --secondary-foreground: #A1A1AA;
   --muted: #1C1C1F;
-  --muted-foreground: #71717A;
+  --muted-foreground: #8E8E98;
   --accent: #EF4A4F;
   --accent-foreground: #FAFAFA;
   --destructive: #EF4A4F;
@@ -206,8 +206,24 @@
    CINEMATIC POLISH — grain, scrollbar, selection, focus
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+/* Плавную прокрутку включаем точечно (scrollIntoView/scrollTo с behavior),
+   а не глобально: глобальный smooth заставлял смену страницы «доезжать» наверх
+   с анимацией, особенно заметно на телефонах. */
 html {
-  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
@@ -216,6 +232,7 @@ body {
 }
 
 /* Subtle film-grain texture over the whole app for a premium, non-flat feel */
+@media (min-width: 768px) {
 body::before {
   content: "";
   position: fixed;
@@ -225,6 +242,7 @@ body::before {
   opacity: 0.035;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 }
 
 ::selection {

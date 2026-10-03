@@ -5,11 +5,11 @@ import {
   type ContentListFilters,
   type ContentSort,
 } from "@/lib/api";
+import { RELEASE_STATUSES } from "@/lib/release-status";
 
 const SORT_VALUES: ContentSort[] = [
   "popular",
   "newest",
-  // "rating",  // убрали, так как больше не используется
   "alphabetical",
 ];
 
@@ -104,6 +104,11 @@ export async function GET(request: NextRequest) {
       AGE_VALUES,
     );
 
+    const status = getOptionalValue(
+      searchParams.get("status"),
+      RELEASE_STATUSES,
+    );
+
     const sort =
       getOptionalValue(
         searchParams.get("sort"),
@@ -114,8 +119,8 @@ export async function GET(request: NextRequest) {
       type,
       genre,
       year,
-      age,          // добавили
-      // rating,     // убрали
+      age,
+      status,
       search,
       sort,
     };
@@ -126,7 +131,13 @@ export async function GET(request: NextRequest) {
       filters,
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: {
+        // Данные и так кэшируются в Next (revalidate 60 + тег content);
+        // даём то же самое CDN/браузеру.
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error(
       "GET /api/content failed",

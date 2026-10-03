@@ -2,10 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSafeEmbedUrl } from "@/lib/embed-allowlist";
+import { formatAge } from "@/lib/age";
 
 interface VideoPlayerProps {
   embedUrl: string | undefined | null;
   episodeNumber?: number;
+  /** Возрастное ограничение — показывается знаком в углу плеера. */
+  ageRating?: number | null;
+  /** Вызывается, когда плеер сообщил об окончании серии (Kodik postMessage). */
+  onEnded?: () => void;
   className?: string;
 }
 
@@ -18,12 +23,39 @@ function buildEmbedSrc(base: string, episodeNumber?: number): string {
   return url.toString();
 }
 
-export function VideoPlayer({ embedUrl, episodeNumber, className }: VideoPlayerProps) {
+export function VideoPlayer({ embedUrl, episodeNumber, ageRating, onEnded, className }: VideoPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
   // Форс-ремонт iframe при retry: меняем ключ → React пересоздаёт элемент
   const [retryKey, setRetryKey] = useState(0);
+
+  // Всегда актуальный колбэк без переподписки на message при каждом рендере.
+  const onEndedRef = useRef(onEnded);
+  useEffect(() => {
+    onEndedRef.current = onEnded;
+  }, [onEnded]);
+
+  // Kodik шлёт в родительское окно события вида { key: "kodik_player_video_ended" }.
+  // Принимаем только от нашего iframe (по contentWindow), а не от любого окна.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (!iframeRef.current || e.source !== iframeRef.current.contentWindow) return;
+      let data: unknown = e.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+      if ((data as { key?: string } | null)?.key === "kodik_player_video_ended") {
+        onEndedRef.current?.();
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   const safeUrl = getSafeEmbedUrl(embedUrl);
   const src = safeUrl ? buildEmbedSrc(safeUrl, episodeNumber) : null;
@@ -51,9 +83,6 @@ export function VideoPlayer({ embedUrl, episodeNumber, className }: VideoPlayerP
 
     return () => clearTimeout(timer);
   }, [src, retryKey]);
-
-  console.log(safeUrl);
-  
 
   // Fallback: нет валидного URL
   if (!src) {
@@ -122,6 +151,12 @@ export function VideoPlayer({ embedUrl, episodeNumber, className }: VideoPlayerP
         onLoad={handleLoad}
         title="Видеоплеер"
       />
+
+      {formatAge(ageRating) && (
+        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] font-bold text-white ring-1 ring-white/25">
+          {formatAge(ageRating)}
+        </span>
+      )}
     </div>
   );
 }

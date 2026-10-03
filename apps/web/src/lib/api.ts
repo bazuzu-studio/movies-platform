@@ -1,4 +1,4 @@
-import { GraphQLClient } from "graphql-request";
+import { GraphQLClient, gql } from "graphql-request";
 
 import {
   GetContentDocument,
@@ -18,6 +18,9 @@ import type {
   ContentItem,
   Genre,
 } from "./types";
+
+import { parseReleaseStatus, type ReleaseStatus } from "./release-status";
+import { episodeReleaseDate, episodeTitle } from "./episode";
 
 const endpoint =
   process.env.GRAPHQL_API_URL ??
@@ -83,6 +86,8 @@ export interface ContentListFilters {
     | "2022"
     | "2021-or-earlier";
   age?: "0" | "6" | "12" | "16" | "18";
+  /** Статус релиза: anons / ongoing / released. */
+  status?: ReleaseStatus;
   search?: string;
   sort?: ContentSort;
 }
@@ -106,6 +111,14 @@ function buildContentWhere(
   genreId?: number,
 ) {
   const AND: Record<string, unknown>[] = [];
+
+  /* ------------------------------- Popular --------------------------------- */
+
+  // Postgres при DESC ставит NULL первыми: тайтлы без рейтинга оказывались
+  // бы в начале «Популярных». Исключаем их из этой выдачи.
+  if (filters.sort === "popular") {
+    AND.push({ rating: { greater_than: 0 } });
+  }
 
   /* ---------------------------------- Type --------------------------------- */
 
@@ -162,6 +175,16 @@ function buildContentWhere(
     });
   }
 
+  /* ------------------------------ Release status ---------------------------- */
+
+  if (filters.status) {
+    AND.push({
+      releaseStatus: {
+        equals: filters.status,
+      },
+    });
+  }
+
   /* -------------------------------- Search -------------------------------- */
 
   const search =
@@ -213,7 +236,11 @@ function getContentSort(
 
     case "newest":
     default:
-      return "-updatedAt,-rating";
+      // Раньше сортировали по -updatedAt, но пайплайн обновляет записи
+      // (update-ongoing, перезаливка метаданных), и порядок «Новинок»
+      // менялся без появления новых тайтлов. Теперь: свежие по году выхода,
+      // внутри года — недавно добавленные.
+      return "-releaseYear,-createdAt";
   }
 }
 
@@ -262,10 +289,6 @@ async function getGenreIdByTitle(
     console.warn(`Invalid genre ID for ${title}:`, genre.id);
     return undefined;
   }
-
-  console.log(
-    `Genre ${title} resolved to ID ${id}`,
-  );
 
   return id;
 }
@@ -366,6 +389,9 @@ interface RawEpisode {
 
   /** Эмбед-ссылка на плеер серии. */
   playerLink?: string | null;
+
+  /** Время выхода серии, Unix-секунды (CMS: episodes.airingAt). */
+  airingAt?: number | null;
 }
 
 interface RawSeason {
@@ -377,6 +403,7 @@ interface RawSeason {
   content?: {
     id: string | number;
     slug: string;
+    releaseStatus?: string | null;
     poster?: {
       id: string | number;
       url: string;
@@ -398,15 +425,33 @@ interface RawContentId {
 }
 
 /**
- * GetContentBySlugDocument сейчас типизирован без playerLink
- * (поле появилось в content только для type === "movie", см.
- * content.player_link в БД / kodik_pipeline.load).
- * Пока сгенерированный RawContent не обновлён кодогеном GraphQL,
- * читаем его через это узкое расширение типа, а не через `any`.
+ * RawContent описывает «общую» форму документа Content из CMS. playerLink
+ * (только у фильмов) и franchiseId читаем через это узкое расширение типа,
+ * а не через `any`.
  */
 type RawContentWithPlayerLink = RawContent & {
   playerLink?: string | null;
+  franchiseId?: string | null;
 };
+
+/**
+ * Запрос id всех записей франшизы. Описан здесь (а не в .graphql), чтобы не
+ * требовать перегенерации src/generated/graphql.ts: поле franchiseId появилось
+ * в CMS позже сгенерированной схемы.
+ */
+const GetContentIdsByFranchiseQuery = gql`
+  query GetContentIdsByFranchise($franchiseId: String!) {
+    Contents(where: { franchiseId: { equals: $franchiseId } }, limit: 50) {
+      docs {
+        id
+      }
+    }
+  }
+`;
+
+interface ContentIdsResponse {
+  Contents?: { docs?: RawContentId[] | null } | null;
+}
 
 export async function getContentBySlug(
   slug: string,
@@ -441,7 +486,19 @@ export async function getContentBySlug(
           | (string | number)[]
           = [];
 
-        if (raw.kinopoiskId) {
+        // Сезоны франшизы — отдельные записи Content. Группируем по franchiseId;
+        // если он не задан, откатываемся на kinopoiskId (как раньше).
+        if (raw.franchiseId) {
+          const franchiseData =
+            await serverClient.request<ContentIdsResponse>(
+              GetContentIdsByFranchiseQuery,
+              { franchiseId: raw.franchiseId },
+            );
+
+          contentIds = (franchiseData.Contents?.docs ?? []).map(
+            (doc) => doc.id,
+          );
+        } else if (raw.kinopoiskId) {
           const kinopoiskData =
             await serverClient.request(
               GetContentIdsByKinopoiskDocument,
@@ -507,6 +564,11 @@ export async function getContentBySlug(
             slug:
               season.content?.slug ?? "",
 
+            releaseStatus:
+              parseReleaseStatus(
+                season.content?.releaseStatus,
+              ),
+
             poster:
               season.content?.poster ??
               undefined,
@@ -522,17 +584,19 @@ export async function getContentBySlug(
                   episode.episodeNumber ??
                   0,
 
-                title:
-                  episode.title ??
-                  `Серия ${episode.episodeNumber}`,
+                title: episodeTitle(
+                  episode.title,
+                  episode.episodeNumber ?? 0,
+                ),
 
                 description:
                   episode.description ??
                   "",
 
-                releaseDate:
-                  episode.releaseDate ??
-                  "",
+                releaseDate: episodeReleaseDate(
+                  episode.airingAt,
+                  episode.releaseDate,
+                ),
 
                 duration:
                   episode.duration ?? 0,
@@ -611,22 +675,45 @@ export async function getGenres(): Promise<
 /*                              Similar content                              */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Похожий контент: тот же тип (сериал → сериалы), общий жанр, без самого
+ * тайтла и без других сезонов той же франшизы (они и так показаны в
+ * переключателе сезонов).
+ */
 export async function getSimilarContent(
   item: ContentItem,
-  limit = 5,
+  limit = 12,
 ): Promise<ContentItem[]> {
   if (!item.genreIds?.length) {
     return [];
   }
 
-  try {
+  const baseAnd: Record<string, unknown>[] = [
+    { genres: { in: item.genreIds } },
+    { id: { not_equals: Number(item.id) } },
+    { type: { equals: item.type } },
+  ];
+
+  // Другие сезоны той же франшизы уже показаны в переключателе сезонов.
+  if (item.franchiseId) {
+    baseAnd.push({ franchiseId: { not_equals: item.franchiseId } });
+  }
+
+  if (item.kinopoiskId) {
+    baseAnd.push({ kinopoiskId: { not_equals: item.kinopoiskId } });
+  }
+
+  const fetchSimilar = async (
+    and: Record<string, unknown>[],
+    count: number,
+  ): Promise<ContentItem[]> => {
     const data =
       await serverClient.request(
         GetSimilarContentDocument,
         {
-          genreIds: item.genreIds,
-          excludeId: Number(item.id),
-          limit,
+          where: { AND: and },
+          limit: count,
+          sort: "-rating",
         },
       );
 
@@ -637,6 +724,33 @@ export async function getSimilarContent(
         doc as RawContent,
       ),
     );
+  };
+
+  try {
+    // Сначала тайтлы с рейтингом: при сортировке по убыванию Postgres ставит
+    // записи без рейтинга (NULL) в начало, и «похожие» состояли бы из них.
+    const rated = await fetchSimilar(
+      [...baseAnd, { rating: { greater_than: 0 } }],
+      limit,
+    );
+
+    if (rated.length >= limit) {
+      return rated;
+    }
+
+    // Не хватило — добираем тайтлы без рейтинга.
+    const ratedIds = rated.map((entry) => Number(entry.id));
+    const rest = await fetchSimilar(
+      [
+        ...baseAnd,
+        ...(ratedIds.length > 0
+          ? [{ id: { not_in: ratedIds } }]
+          : []),
+      ],
+      limit - rated.length,
+    );
+
+    return [...rated, ...rest];
   } catch (error) {
     console.error(
       `getSimilarContent(${item.id}) failed`,
@@ -645,4 +759,69 @@ export async function getSimilarContent(
 
     throw error;
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  Sitemap                                   */
+/* -------------------------------------------------------------------------- */
+
+const GetSitemapEntriesQuery = gql`
+  query GetSitemapEntries($limit: Int!, $page: Int!) {
+    Contents(limit: $limit, page: $page, sort: "-updatedAt") {
+      docs {
+        slug
+        type
+        updatedAt
+      }
+      hasNextPage
+    }
+  }
+`;
+
+interface SitemapEntriesResponse {
+  Contents?: {
+    docs?: Array<{
+      slug?: string | null;
+      type?: "movie" | "series" | null;
+      updatedAt?: string | null;
+    }> | null;
+    hasNextPage?: boolean | null;
+  } | null;
+}
+
+export interface SitemapEntry {
+  slug: string;
+  type: "movie" | "series";
+  updatedAt?: string;
+}
+
+/**
+ * Лёгкий список для sitemap.xml: только slug, тип и дата изменения —
+ * без постеров, жанров и описаний, которые тянул getContentList.
+ * Забирает страницами по 1000, максимум 20 страниц.
+ */
+export async function getSitemapEntries(): Promise<SitemapEntry[]> {
+  const entries: SitemapEntry[] = [];
+
+  for (let page = 1; page <= 20; page += 1) {
+    const data =
+      await serverClient.request<SitemapEntriesResponse>(
+        GetSitemapEntriesQuery,
+        { limit: 1000, page },
+      );
+
+    for (const doc of data.Contents?.docs ?? []) {
+      if (doc.slug && (doc.type === "movie" || doc.type === "series")) {
+        entries.push({
+          slug: doc.slug,
+          type: doc.type,
+          updatedAt: doc.updatedAt ?? undefined,
+        });
+      }
+    }
+
+    if (!data.Contents?.hasNextPage) break;
+  }
+
+  return entries;
 }

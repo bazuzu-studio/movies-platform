@@ -37,7 +37,7 @@ export function EditProfileClient() {
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
       <button
         onClick={() => router.push("/profile")}
-        className="flex items-center gap-2 text-sm text-[#71717A] hover:text-white mb-6 transition-colors"
+        className="flex items-center gap-2 text-sm text-[#8E8E98] hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Назад к профилю
       </button>
@@ -69,12 +69,12 @@ export function EditProfileClient() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Оставьте пустым, чтобы не менять"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#3f3f46] outline-none focus:border-[#EF4A4F]/50 transition-colors pr-12"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#71717A] hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#8E8E98] hover:text-white"
             >
               {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>

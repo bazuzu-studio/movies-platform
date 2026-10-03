@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ClientError } from "graphql-request";
 import { gqlClient } from "@/lib/graphql-client";
 import {
   GetFavoritesDocument,
@@ -119,16 +120,30 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       addMutation.mutate(contentId, {
         onSuccess: () => toast.success("Добавлено в избранное"),
         onError: (error) => {
+          // CMS отвечает ValidationError: понятный текст лежит не в message
+          // («The following field is invalid…»), а в extensions.data.errors,
+          // поэтому ищем его во всём теле ответа.
+          const raw =
+            error instanceof ClientError
+              ? JSON.stringify(error.response.errors ?? [])
+              : error instanceof Error
+                ? error.message
+                : "";
+
+          if (raw.includes("уже добавлен")) {
+            // Запись уже есть на сервере — просто синхронизируем состояние,
+            // а не откатываем кнопку в «не в избранном».
+            queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
+            toast("Этот контент уже в избранном");
+            return;
+          }
+
           setFavoritesMap((prev) => {
             const next = new Map(prev);
             next.delete(contentId);
             return next;
           });
-          const message =
-            error instanceof Error && error.message.includes("уже добавлен")
-              ? "Этот контент уже в избранном"
-              : "Не удалось добавить в избранное";
-          toast.error(message);
+          toast.error("Не удалось добавить в избранное");
         },
       });
     }

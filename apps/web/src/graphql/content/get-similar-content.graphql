@@ -1,14 +1,7 @@
-# src/graphql/contents/GetSimilarContent.graphql
-query GetSimilarContent($genreIds: [JSON!], $excludeId: Int!, $limit: Int!) {
-  Contents(
-    where: {
-      genres: { in: $genreIds }
-      id: { not_equals: $excludeId }
-      
-    }
-    limit: $limit
-    sort: "-rating"
-  ) {
+# Похожие: условия (жанры, тип, исключение самого тайтла и его франшизы)
+# собираются в getSimilarContent (src/lib/api.ts).
+query GetSimilarContent($where: Content_where, $limit: Int!, $sort: String) {
+  Contents(where: $where, limit: $limit, sort: $sort) {
     docs {
       id
       type
@@ -26,6 +19,7 @@ query GetSimilarContent($genreIds: [JSON!], $excludeId: Int!, $limit: Int!) {
         slug
       }
       ageRating
+      releaseStatus
     }
   }
 }

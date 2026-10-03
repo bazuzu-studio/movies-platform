@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import React from "react";
 import "./globals.css";
@@ -17,16 +17,29 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // viewport-fit=cover нужен, чтобы env(safe-area-inset-bottom) работал на
+  // iPhone с «чёлкой»/жестовой полосой — иначе нижняя навигация налезает на неё.
+  viewportFit: "cover",
+  themeColor: "#08080A",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "CineHub — фильмы и сериалы",
-    template: "%s · CineHub",
+    default: "otakuum — фильмы и сериалы",
+    template: "%s · otakuum",
   },
-  description: "Премиальный каталог фильмов и сериалов CineHub. Смотрите описания, рейтинги и добавляйте в избранное.",
+  description: "Премиальный каталог фильмов и сериалов otakuum. Смотрите описания, рейтинги и добавляйте в избранное.",
+  icons: {
+    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
-    siteName: "CineHub",
+    siteName: "otakuum",
   },
 };
 

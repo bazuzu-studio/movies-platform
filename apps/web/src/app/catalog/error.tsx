@@ -39,7 +39,7 @@ export default function CatalogError({
         </div>
 
         <h1 className="text-xl font-bold text-white mb-2">Не удалось загрузить каталог</h1>
-        <p className="text-sm text-[#71717A] mb-6">
+        <p className="text-sm text-[#8E8E98] mb-6">
           Что-то пошло не так при загрузке списка. Попробуйте ещё раз.
         </p>
 

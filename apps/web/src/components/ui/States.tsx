@@ -15,11 +15,11 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 text-center px-4">
       <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/8 flex items-center justify-center">
-        <Icon className="w-7 h-7 text-[#71717A]" />
+        <Icon className="w-7 h-7 text-[#8E8E98]" />
       </div>
       <div>
         <p className="text-lg font-semibold text-white">{title}</p>
-        <p className="text-sm text-[#71717A] mt-1 max-w-xs">{subtitle}</p>
+        <p className="text-sm text-[#8E8E98] mt-1 max-w-xs">{subtitle}</p>
       </div>
       {action && (
         <Btn variant="outline" size="sm" onClick={action.onClick}>

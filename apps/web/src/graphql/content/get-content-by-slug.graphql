@@ -1,4 +1,6 @@
 # src/graphql/contents/GetContentBySlug.graphql
+# Сезоны и серии здесь НЕ запрашиваются: getContentBySlug (src/lib/api.ts)
+# берёт их отдельным запросом GetSeasonsByContentIds сразу по всей франшизе.
 query GetContentBySlug($slug: String!) {
   Contents(where: { slug: { equals: $slug } }, limit: 1) {
     docs {
@@ -11,6 +13,7 @@ query GetContentBySlug($slug: String!) {
       description
       releaseYear
       kinopoiskId
+      franchiseId
       duration
       rating
 
@@ -26,25 +29,8 @@ query GetContentBySlug($slug: String!) {
         slug
       }
       ageRating
+      releaseStatus
       playerLink
-      seasons(sort: "seasonNumber") {
-        docs {
-          id
-          seasonNumber
-          title
-          releaseYear
-          episodes(sort: "episodeNumber") {
-            docs {
-              id
-              episodeNumber
-              title
-              playerLink
-              description
-              duration
-            }
-          }
-        }
-      }
     }
   }
 }

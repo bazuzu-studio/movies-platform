@@ -50,6 +50,7 @@ export type Content = {
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
   rating?: Maybe<Scalars['Float']['output']>;
+  releaseStatus?: Maybe<Content_ReleaseStatus>;
   releaseYear?: Maybe<Scalars['Float']['output']>;
   seasons?: Maybe<Content_Seasons>;
   shikimoriId?: Maybe<Scalars['String']['output']>;
@@ -114,6 +115,7 @@ export type ContentDocAccessFields = {
   playerLink?: Maybe<ContentDocAccessFields_PlayerLink>;
   poster?: Maybe<ContentDocAccessFields_Poster>;
   rating?: Maybe<ContentDocAccessFields_Rating>;
+  releaseStatus?: Maybe<ContentDocAccessFields_ReleaseStatus>;
   releaseYear?: Maybe<ContentDocAccessFields_ReleaseYear>;
   seasons?: Maybe<ContentDocAccessFields_Seasons>;
   shikimoriId?: Maybe<ContentDocAccessFields_ShikimoriId>;
@@ -489,6 +491,34 @@ export type ContentDocAccessFields_Rating_Update = {
   permission: Scalars['Boolean']['output'];
 };
 
+export type ContentDocAccessFields_ReleaseStatus = {
+  __typename?: 'ContentDocAccessFields_releaseStatus';
+  create?: Maybe<ContentDocAccessFields_ReleaseStatus_Create>;
+  delete?: Maybe<ContentDocAccessFields_ReleaseStatus_Delete>;
+  read?: Maybe<ContentDocAccessFields_ReleaseStatus_Read>;
+  update?: Maybe<ContentDocAccessFields_ReleaseStatus_Update>;
+};
+
+export type ContentDocAccessFields_ReleaseStatus_Create = {
+  __typename?: 'ContentDocAccessFields_releaseStatus_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_ReleaseStatus_Delete = {
+  __typename?: 'ContentDocAccessFields_releaseStatus_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_ReleaseStatus_Read = {
+  __typename?: 'ContentDocAccessFields_releaseStatus_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_ReleaseStatus_Update = {
+  __typename?: 'ContentDocAccessFields_releaseStatus_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
 export type ContentDocAccessFields_ReleaseYear = {
   __typename?: 'ContentDocAccessFields_releaseYear';
   create?: Maybe<ContentDocAccessFields_ReleaseYear_Create>;
@@ -756,6 +786,7 @@ export type ContentFields = {
   playerLink?: Maybe<ContentFields_PlayerLink>;
   poster?: Maybe<ContentFields_Poster>;
   rating?: Maybe<ContentFields_Rating>;
+  releaseStatus?: Maybe<ContentFields_ReleaseStatus>;
   releaseYear?: Maybe<ContentFields_ReleaseYear>;
   seasons?: Maybe<ContentFields_Seasons>;
   shikimoriId?: Maybe<ContentFields_ShikimoriId>;
@@ -1131,6 +1162,34 @@ export type ContentFields_Rating_Update = {
   permission: Scalars['Boolean']['output'];
 };
 
+export type ContentFields_ReleaseStatus = {
+  __typename?: 'ContentFields_releaseStatus';
+  create?: Maybe<ContentFields_ReleaseStatus_Create>;
+  delete?: Maybe<ContentFields_ReleaseStatus_Delete>;
+  read?: Maybe<ContentFields_ReleaseStatus_Read>;
+  update?: Maybe<ContentFields_ReleaseStatus_Update>;
+};
+
+export type ContentFields_ReleaseStatus_Create = {
+  __typename?: 'ContentFields_releaseStatus_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_ReleaseStatus_Delete = {
+  __typename?: 'ContentFields_releaseStatus_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_ReleaseStatus_Read = {
+  __typename?: 'ContentFields_releaseStatus_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_ReleaseStatus_Update = {
+  __typename?: 'ContentFields_releaseStatus_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
 export type ContentFields_ReleaseYear = {
   __typename?: 'ContentFields_releaseYear';
   create?: Maybe<ContentFields_ReleaseYear_Create>;
@@ -1423,6 +1482,11 @@ export type ContentUpdate__Status_MutationInput =
   | 'draft'
   | 'published';
 
+export type ContentUpdate_ReleaseStatus_MutationInput =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
+
 export type ContentUpdate_Status_MutationInput =
   | 'draft'
   | 'published';
@@ -1461,6 +1525,7 @@ export type ContentVersion_Version = {
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
   rating?: Maybe<Scalars['Float']['output']>;
+  releaseStatus?: Maybe<ContentVersion_Version_ReleaseStatus>;
   releaseYear?: Maybe<Scalars['Float']['output']>;
   seasons?: Maybe<ContentVersion_Version_Seasons>;
   shikimoriId?: Maybe<Scalars['String']['output']>;
@@ -1496,6 +1561,11 @@ export type ContentVersion_Version_Seasons = {
 export type ContentVersion_Version__Status =
   | 'draft'
   | 'published';
+
+export type ContentVersion_Version_ReleaseStatus =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
 
 export type ContentVersion_Version_Status =
   | 'draft'
@@ -1663,6 +1733,30 @@ export type Content_Rating_Operator = {
   not_equals?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type Content_ReleaseStatus =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
+
+export type Content_ReleaseStatus_Input =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
+
+export type Content_ReleaseStatus_MutationInput =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
+
+export type Content_ReleaseStatus_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Content_ReleaseStatus_Input>>>;
+  equals?: InputMaybe<Content_ReleaseStatus_Input>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Content_ReleaseStatus_Input>>>;
+  not_equals?: InputMaybe<Content_ReleaseStatus_Input>;
+  not_in?: InputMaybe<Array<InputMaybe<Content_ReleaseStatus_Input>>>;
+};
+
 export type Content_ReleaseYear_Operator = {
   equals?: InputMaybe<Scalars['Float']['input']>;
   greater_than?: InputMaybe<Scalars['Float']['input']>;
@@ -1781,6 +1875,7 @@ export type Content_Where = {
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
   rating?: InputMaybe<Content_Rating_Operator>;
+  releaseStatus?: InputMaybe<Content_ReleaseStatus_Operator>;
   releaseYear?: InputMaybe<Content_ReleaseYear_Operator>;
   shikimoriId?: InputMaybe<Content_ShikimoriId_Operator>;
   slug?: InputMaybe<Content_Slug_Operator>;
@@ -1808,6 +1903,7 @@ export type Content_Where_And = {
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
   rating?: InputMaybe<Content_Rating_Operator>;
+  releaseStatus?: InputMaybe<Content_ReleaseStatus_Operator>;
   releaseYear?: InputMaybe<Content_ReleaseYear_Operator>;
   shikimoriId?: InputMaybe<Content_ShikimoriId_Operator>;
   slug?: InputMaybe<Content_Slug_Operator>;
@@ -1835,6 +1931,7 @@ export type Content_Where_Or = {
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
   rating?: InputMaybe<Content_Rating_Operator>;
+  releaseStatus?: InputMaybe<Content_ReleaseStatus_Operator>;
   releaseYear?: InputMaybe<Content_ReleaseYear_Operator>;
   shikimoriId?: InputMaybe<Content_ShikimoriId_Operator>;
   slug?: InputMaybe<Content_Slug_Operator>;
@@ -3406,6 +3503,7 @@ export type GenresUpdateDocAccess = {
 
 export type Media = {
   __typename?: 'Media';
+  _objectKey?: Maybe<Scalars['String']['output']>;
   alt: Scalars['String']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   filename?: Maybe<Scalars['String']['output']>;
@@ -3447,6 +3545,7 @@ export type MediaDeleteDocAccess = {
 
 export type MediaDocAccessFields = {
   __typename?: 'MediaDocAccessFields';
+  _objectKey?: Maybe<MediaDocAccessFields__ObjectKey>;
   alt?: Maybe<MediaDocAccessFields_Alt>;
   createdAt?: Maybe<MediaDocAccessFields_CreatedAt>;
   filename?: Maybe<MediaDocAccessFields_Filename>;
@@ -3459,6 +3558,34 @@ export type MediaDocAccessFields = {
   updatedAt?: Maybe<MediaDocAccessFields_UpdatedAt>;
   url?: Maybe<MediaDocAccessFields_Url>;
   width?: Maybe<MediaDocAccessFields_Width>;
+};
+
+export type MediaDocAccessFields__ObjectKey = {
+  __typename?: 'MediaDocAccessFields__objectKey';
+  create?: Maybe<MediaDocAccessFields__ObjectKey_Create>;
+  delete?: Maybe<MediaDocAccessFields__ObjectKey_Delete>;
+  read?: Maybe<MediaDocAccessFields__ObjectKey_Read>;
+  update?: Maybe<MediaDocAccessFields__ObjectKey_Update>;
+};
+
+export type MediaDocAccessFields__ObjectKey_Create = {
+  __typename?: 'MediaDocAccessFields__objectKey_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaDocAccessFields__ObjectKey_Delete = {
+  __typename?: 'MediaDocAccessFields__objectKey_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaDocAccessFields__ObjectKey_Read = {
+  __typename?: 'MediaDocAccessFields__objectKey_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaDocAccessFields__ObjectKey_Update = {
+  __typename?: 'MediaDocAccessFields__objectKey_Update';
+  permission: Scalars['Boolean']['output'];
 };
 
 export type MediaDocAccessFields_Alt = {
@@ -3799,6 +3926,7 @@ export type MediaDocAccessFields_Width_Update = {
 
 export type MediaFields = {
   __typename?: 'MediaFields';
+  _objectKey?: Maybe<MediaFields__ObjectKey>;
   alt?: Maybe<MediaFields_Alt>;
   createdAt?: Maybe<MediaFields_CreatedAt>;
   filename?: Maybe<MediaFields_Filename>;
@@ -3811,6 +3939,34 @@ export type MediaFields = {
   updatedAt?: Maybe<MediaFields_UpdatedAt>;
   url?: Maybe<MediaFields_Url>;
   width?: Maybe<MediaFields_Width>;
+};
+
+export type MediaFields__ObjectKey = {
+  __typename?: 'MediaFields__objectKey';
+  create?: Maybe<MediaFields__ObjectKey_Create>;
+  delete?: Maybe<MediaFields__ObjectKey_Delete>;
+  read?: Maybe<MediaFields__ObjectKey_Read>;
+  update?: Maybe<MediaFields__ObjectKey_Update>;
+};
+
+export type MediaFields__ObjectKey_Create = {
+  __typename?: 'MediaFields__objectKey_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaFields__ObjectKey_Delete = {
+  __typename?: 'MediaFields__objectKey_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaFields__ObjectKey_Read = {
+  __typename?: 'MediaFields__objectKey_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type MediaFields__ObjectKey_Update = {
+  __typename?: 'MediaFields__objectKey_Update';
+  permission: Scalars['Boolean']['output'];
 };
 
 export type MediaFields_Alt = {
@@ -4173,6 +4329,17 @@ export type MediaUpdateDocAccess = {
   where?: Maybe<Scalars['JSONObject']['output']>;
 };
 
+export type Media__ObjectKey_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
 export type Media_Alt_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contains?: InputMaybe<Scalars['String']['input']>;
@@ -4302,6 +4469,7 @@ export type Media_Url_Operator = {
 export type Media_Where = {
   AND?: InputMaybe<Array<InputMaybe<Media_Where_And>>>;
   OR?: InputMaybe<Array<InputMaybe<Media_Where_Or>>>;
+  _objectKey?: InputMaybe<Media__ObjectKey_Operator>;
   alt?: InputMaybe<Media_Alt_Operator>;
   createdAt?: InputMaybe<Media_CreatedAt_Operator>;
   filename?: InputMaybe<Media_Filename_Operator>;
@@ -4320,6 +4488,7 @@ export type Media_Where = {
 export type Media_Where_And = {
   AND?: InputMaybe<Array<InputMaybe<Media_Where_And>>>;
   OR?: InputMaybe<Array<InputMaybe<Media_Where_Or>>>;
+  _objectKey?: InputMaybe<Media__ObjectKey_Operator>;
   alt?: InputMaybe<Media_Alt_Operator>;
   createdAt?: InputMaybe<Media_CreatedAt_Operator>;
   filename?: InputMaybe<Media_Filename_Operator>;
@@ -4338,6 +4507,7 @@ export type Media_Where_And = {
 export type Media_Where_Or = {
   AND?: InputMaybe<Array<InputMaybe<Media_Where_And>>>;
   OR?: InputMaybe<Array<InputMaybe<Media_Where_Or>>>;
+  _objectKey?: InputMaybe<Media__ObjectKey_Operator>;
   alt?: InputMaybe<Media_Alt_Operator>;
   createdAt?: InputMaybe<Media_CreatedAt_Operator>;
   filename?: InputMaybe<Media_Filename_Operator>;
@@ -8016,6 +8186,7 @@ export type User = {
   loginAttempts?: Maybe<Scalars['Float']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   resetPasswordExpiration?: Maybe<Scalars['DateTime']['output']>;
+  resetPasswordRequestedAt?: Maybe<Scalars['DateTime']['output']>;
   resetPasswordToken?: Maybe<Scalars['String']['output']>;
   roles?: Maybe<Array<User_Roles>>;
   salt?: Maybe<Scalars['String']['output']>;
@@ -9046,6 +9217,7 @@ export type MutationContentInput = {
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
   rating?: InputMaybe<Scalars['Float']['input']>;
+  releaseStatus?: InputMaybe<Content_ReleaseStatus_MutationInput>;
   releaseYear: Scalars['Float']['input'];
   shikimoriId?: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
@@ -9070,6 +9242,7 @@ export type MutationContentUpdateInput = {
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
   rating?: InputMaybe<Scalars['Float']['input']>;
+  releaseStatus?: InputMaybe<ContentUpdate_ReleaseStatus_MutationInput>;
   releaseYear?: InputMaybe<Scalars['Float']['input']>;
   shikimoriId?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
@@ -9133,6 +9306,7 @@ export type MutationGenreUpdateInput = {
 };
 
 export type MutationMediaInput = {
+  _objectKey?: InputMaybe<Scalars['String']['input']>;
   alt: Scalars['String']['input'];
   createdAt?: InputMaybe<Scalars['String']['input']>;
   filename?: InputMaybe<Scalars['String']['input']>;
@@ -9148,6 +9322,7 @@ export type MutationMediaInput = {
 };
 
 export type MutationMediaUpdateInput = {
+  _objectKey?: InputMaybe<Scalars['String']['input']>;
   alt?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['String']['input']>;
   filename?: InputMaybe<Scalars['String']['input']>;
@@ -9260,6 +9435,7 @@ export type MutationUserInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   password: Scalars['String']['input'];
   resetPasswordExpiration?: InputMaybe<Scalars['String']['input']>;
+  resetPasswordRequestedAt?: InputMaybe<Scalars['String']['input']>;
   resetPasswordToken?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<Array<InputMaybe<User_Roles_MutationInput>>>;
   salt?: InputMaybe<Scalars['String']['input']>;
@@ -9277,6 +9453,7 @@ export type MutationUserUpdateInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   resetPasswordExpiration?: InputMaybe<Scalars['String']['input']>;
+  resetPasswordRequestedAt?: InputMaybe<Scalars['String']['input']>;
   resetPasswordToken?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<Array<InputMaybe<UserUpdate_Roles_MutationInput>>>;
   salt?: InputMaybe<Scalars['String']['input']>;
@@ -9628,6 +9805,20 @@ export type VersionsContent_Version__Rating_Operator = {
   not_equals?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type VersionsContent_Version__ReleaseStatus_Input =
+  | 'anons'
+  | 'ongoing'
+  | 'released';
+
+export type VersionsContent_Version__ReleaseStatus_Operator = {
+  all?: InputMaybe<Array<InputMaybe<VersionsContent_Version__ReleaseStatus_Input>>>;
+  equals?: InputMaybe<VersionsContent_Version__ReleaseStatus_Input>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<VersionsContent_Version__ReleaseStatus_Input>>>;
+  not_equals?: InputMaybe<VersionsContent_Version__ReleaseStatus_Input>;
+  not_in?: InputMaybe<Array<InputMaybe<VersionsContent_Version__ReleaseStatus_Input>>>;
+};
+
 export type VersionsContent_Version__ReleaseYear_Operator = {
   equals?: InputMaybe<Scalars['Float']['input']>;
   greater_than?: InputMaybe<Scalars['Float']['input']>;
@@ -9734,6 +9925,7 @@ export type VersionsContent_Where = {
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
   version__rating?: InputMaybe<VersionsContent_Version__Rating_Operator>;
+  version__releaseStatus?: InputMaybe<VersionsContent_Version__ReleaseStatus_Operator>;
   version__releaseYear?: InputMaybe<VersionsContent_Version__ReleaseYear_Operator>;
   version__shikimoriId?: InputMaybe<VersionsContent_Version__ShikimoriId_Operator>;
   version__slug?: InputMaybe<VersionsContent_Version__Slug_Operator>;
@@ -9765,6 +9957,7 @@ export type VersionsContent_Where_And = {
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
   version__rating?: InputMaybe<VersionsContent_Version__Rating_Operator>;
+  version__releaseStatus?: InputMaybe<VersionsContent_Version__ReleaseStatus_Operator>;
   version__releaseYear?: InputMaybe<VersionsContent_Version__ReleaseYear_Operator>;
   version__shikimoriId?: InputMaybe<VersionsContent_Version__ShikimoriId_Operator>;
   version__slug?: InputMaybe<VersionsContent_Version__Slug_Operator>;
@@ -9796,6 +9989,7 @@ export type VersionsContent_Where_Or = {
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
   version__rating?: InputMaybe<VersionsContent_Version__Rating_Operator>;
+  version__releaseStatus?: InputMaybe<VersionsContent_Version__ReleaseStatus_Operator>;
   version__releaseYear?: InputMaybe<VersionsContent_Version__ReleaseYear_Operator>;
   version__shikimoriId?: InputMaybe<VersionsContent_Version__ShikimoriId_Operator>;
   version__slug?: InputMaybe<VersionsContent_Version__Slug_Operator>;
@@ -9820,6 +10014,9 @@ export type VersionsContents = {
   totalDocs: Scalars['Int']['output'];
   totalPages: Scalars['Int']['output'];
 };
+
+
+
 
 
 
@@ -9939,7 +10136,7 @@ export type GetContentBySlugQueryVariables = Exact<{
 }>;
 
 
-export type GetContentBySlugQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, originalTitle: string | null, slug: string | null, description: unknown, releaseYear: number | null, kinopoiskId: string | null, duration: number | null, rating: number | null, ageRating: number | null, playerLink: string | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null }> } | null }> } | null }> } | null };
+export type GetContentBySlugQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, originalTitle: string | null, slug: string | null, description: unknown, releaseYear: number | null, kinopoiskId: string | null, franchiseId: string | null, duration: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, playerLink: string | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null }> } | null }> } | null }> } | null };
 
 export type GetContentQueryVariables = Exact<{
   limit?: number | null | undefined;
@@ -9949,7 +10146,7 @@ export type GetContentQueryVariables = Exact<{
 }>;
 
 
-export type GetContentQuery = { Contents: { totalDocs: number, hasNextPage: boolean, docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, ageRating: number | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string }> | null }> } | null };
+export type GetContentQuery = { Contents: { totalDocs: number, hasNextPage: boolean, docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string }> | null }> } | null };
 
 export type GetGenresQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9957,13 +10154,13 @@ export type GetGenresQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetGenresQuery = { Genres: { docs: Array<{ id: number, title: string, slug: string }> } | null };
 
 export type GetSimilarContentQueryVariables = Exact<{
-  genreIds?: Array<unknown> | unknown | null | undefined;
-  excludeId: number;
+  where?: Content_Where | null | undefined;
   limit: number;
+  sort?: string | null | undefined;
 }>;
 
 
-export type GetSimilarContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, poster: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null }> } | null };
+export type GetSimilarContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null }> } | null };
 
 export type SearchContentQueryVariables = Exact<{
   where: SearchResult_Where;
@@ -9999,7 +10196,7 @@ export type GetSeasonsByContentIdsQueryVariables = Exact<{
 }>;
 
 
-export type GetSeasonsByContentIdsQuery = { Seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, content: { id: number, slug: string | null, poster: { url: string | null } | null } | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null }> } | null }> } | null };
+export type GetSeasonsByContentIdsQuery = { Seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, content: { id: number, slug: string | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null } | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null, airingAt: number | null }> } | null }> } | null };
 
 
 export const ForgotPasswordUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ForgotPasswordUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"forgotPasswordUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}]}}]} as unknown as DocumentNode<ForgotPasswordUserMutation, ForgotPasswordUserMutationVariables>;
@@ -10010,12 +10207,12 @@ export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"O
 export const ResetPasswordUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResetPasswordUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resetPasswordUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"token"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<ResetPasswordUserMutation, ResetPasswordUserMutationVariables>;
 export const UpdateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}}]}}]} as unknown as DocumentNode<UpdateUserMutation, UpdateUserMutationVariables>;
 export const GetContentIdsByKinopoiskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentIdsByKinopoisk"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"kinopoiskId"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentIdsByKinopoiskQuery, GetContentIdsByKinopoiskQueryVariables>;
-export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"kinopoiskId"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
-export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalDocs"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
+export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"kinopoiskId"}},{"kind":"Field","name":{"kind":"Name","value":"franchiseId"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
+export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalDocs"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
 export const GetGenresDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetGenres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Genres"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"title","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]} as unknown as DocumentNode<GetGenresQuery, GetGenresQueryVariables>;
-export const GetSimilarContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSimilarContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"genreIds"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JSON"}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"excludeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"genres"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"genreIds"}}}]}},{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"not_equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"excludeId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-rating","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}}]}}]}}]}}]} as unknown as DocumentNode<GetSimilarContentQuery, GetSimilarContentQueryVariables>;
+export const GetSimilarContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSimilarContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]} as unknown as DocumentNode<GetSimilarContentQuery, GetSimilarContentQueryVariables>;
 export const SearchContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SearchContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchResult_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"SearchResults"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]} as unknown as DocumentNode<SearchContentQuery, SearchContentQueryVariables>;
 export const AddFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"user"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<AddFavoriteMutation, AddFavoriteMutationVariables>;
 export const GetFavoritesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavorites"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoritesQuery, GetFavoritesQueryVariables>;
 export const RemoveFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<RemoveFavoriteMutation, RemoveFavoriteMutationVariables>;
-export const GetSeasonsByContentIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeasonsByContentIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JSON"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeasonsByContentIdsQuery, GetSeasonsByContentIdsQueryVariables>;
+export const GetSeasonsByContentIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeasonsByContentIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JSON"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeasonsByContentIdsQuery, GetSeasonsByContentIdsQueryVariables>;

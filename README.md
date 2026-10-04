@@ -9,6 +9,8 @@
 | **web** | [`apps/web`](./apps/web) | Next.js 15 (React 19) + GraphQL Client, публичный фронтенд | `3000` |
 | **cms** | [`apps/cms`](./apps/cms) | Payload CMS 3 (Next.js) + PostgreSQL, админка и API | `4000` |
 
+**Деплой в Dokploy** (web и cms запускаются отдельно) — [DEPLOY.md](./DEPLOY.md).
+
 Подробности по каждому приложению — в их собственных README:
 - [apps/web/README.md](./apps/web/README.md)
 - [apps/cms/README.md](./apps/cms/README.md)
@@ -31,7 +33,7 @@
       (данные)        (кеш/очереди)   (медиафайлы)
 ```
 
-- **apps/cms** — источник истины: коллекции `Content` (фильмы/сериалы), `Genres`, `Seasons`, `Episodes`, `Media`, `Users`, `Favorites`; отдаёт данные через REST и GraphQL API Payload, а также содержит эндпоинт `/api/import/kodik` для импорта каталога из Kodik.
+- **apps/cms** — источник истины: коллекции `Content` (фильмы/сериалы), `Genres`, `Seasons`, `Episodes`, `Media`, `Users`, `Favorites`; отдаёт данные через REST и GraphQL API Payload. Каталог из Kodik в CMS импортирует отдельный сервис kodik-pipeline (прямая запись в БД).
 - **apps/web** — публичное SSR-приложение на Next.js, ходит в `apps/cms` по GraphQL (`graphql-request` + сгенерированные через `graphql-codegen` типы/документы).
 - Инфраструктура (**PostgreSQL**, **Redis**, **MinIO**) поднимается через корневой `docker-compose.yml`.
 
@@ -89,7 +91,9 @@ movies-platform/
 ├── apps/
 │   ├── web/               # Next.js фронтенд
 │   └── cms/               # Payload CMS backend
-├── docker-compose.yml      # PostgreSQL, Redis, MinIO
+├── DEPLOY.md                # деплой web и cms в Dokploy по отдельности
+├── docker-compose.yml      # ЛОКАЛЬНО: PostgreSQL, Redis, MinIO (не для Dokploy)
+├── docker-compose.local.yml # ЛОКАЛЬНО: весь стек в Docker (cms + web + инфраструктура)
 ├── .env.local               # env для docker-compose (инфраструктура)
 ├── turbo.json                # конфигурация Turborepo
 └── pnpm-workspace.yaml        # workspace-пакеты (apps/*, packages/*)

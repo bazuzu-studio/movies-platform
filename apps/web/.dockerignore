@@ -9,3 +9,4 @@ Dockerfile
 docker-compose.yml
 README.md
 *.log
+dokploy.env*

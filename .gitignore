@@ -15,11 +15,15 @@ out/
 apps/cms/build/
 apps/cms/dist/
 
-# env
+# env (секреты не коммитим)
 .env
-
+.env.local
 .env.*.local
+**/.env.local
+dokploy.env
+**/dokploy.env
 !.env.example
+!*.env.example
 
 # misc
 .DS_Store

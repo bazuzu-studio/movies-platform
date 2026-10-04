@@ -5,6 +5,11 @@
 # проекта Dokploy. CMS подключается к ним по внутренним именам через сеть
 # dokploy-network; значения задаются во вкладке Environment (см. dokploy.env).
 #
+# Деплой из монорепозитория (отдельно от web):
+#   Compose Path:  ./apps/cms/docker-compose.yml
+#   Watch Paths:   apps/cms/**        (пуш в apps/web не пересобирает CMS)
+#   Environment:   apps/cms/dokploy.env.example
+#
 # Тот же результат даёт сервис типа Application (Build Type: Dockerfile) —
 # compose нужен только если хотите описать домен лейблами, а не в UI.
 #
@@ -37,8 +42,9 @@ services:
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-MovHub}
       CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-}
       # Мгновенный сброс кэша фронтенда после правок (см. src/lib/revalidate.ts).
-      # REVALIDATE_URL — адрес фронтенда из контейнера CMS, например http://<web>:3000.
-      REVALIDATE_URL: ${REVALIDATE_URL:-}
+      # REVALIDATE_URL — адрес фронтенда из контейнера CMS (alias сервиса web в
+      # dokploy-network). Без REVALIDATE_SECRET сброс кэша выключен.
+      REVALIDATE_URL: ${REVALIDATE_URL:-http://movhub-web:3000}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
       # true — вернуть публичный доступ к черновикам / включить GraphQL-интроспекцию.
       CONTENT_PUBLIC_DRAFTS: ${CONTENT_PUBLIC_DRAFTS:-false}
@@ -53,8 +59,18 @@ services:
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID is required}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY is required}
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:?S3_PUBLIC_URL is required}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s # при первом старте применяются миграции
     networks:
-      - dokploy-network # Traefik + внутренние имена БД и MinIO
+      dokploy-network: # Traefik + внутренние имена БД и MinIO
+        aliases:
+          # Уникальное имя в общей сети (см. web/docker-compose.yml). Фронтенд
+          # может ходить в CMS по GRAPHQL_API_URL=http://movhub-cms:3000/api/graphql
+          - movhub-cms
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network

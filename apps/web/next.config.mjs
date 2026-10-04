@@ -1,10 +1,12 @@
-// Публичный URL S3/MinIO (например https://s3.otakuum.ru/media) — берётся при сборке,
-// чтобы next/image разрешил картинки с этого хоста.
-const s3PublicUrl = process.env.S3_INTERNAL_URL;
-const s3Pattern = (() => {
-  if (!s3PublicUrl) return null;
+// Хосты S3/MinIO, с которых next/image может тянуть картинки. Значения берутся
+// ПРИ СБОРКЕ (remotePatterns вшиваются в образ), поэтому в Dockerfile/compose
+// они передаются как build args:
+//   S3_PUBLIC_URL   — публичный адрес файлов, например https://s3.otakuum.ru/media
+//   S3_INTERNAL_URL — (необязательно) внутренний адрес MinIO в docker-сети
+function patternFromUrl(value) {
+  if (!value) return null;
   try {
-    const u = new URL(s3PublicUrl);
+    const u = new URL(value);
     return {
       protocol: u.protocol.replace(":", ""),
       hostname: u.hostname,
@@ -13,7 +15,13 @@ const s3Pattern = (() => {
   } catch {
     return null;
   }
-})();
+}
+
+const s3Patterns = [process.env.S3_PUBLIC_URL, process.env.S3_INTERNAL_URL]
+  .map(patternFromUrl)
+  .filter(Boolean);
+
+const isProd = process.env.NODE_ENV === "production";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -21,11 +29,15 @@ const nextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
-      { protocol: 'http', hostname: 'minio',  // ← имя сервиса из docker-compose
-        port: '9000', },
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "http", hostname: "localhost" }, // dev: картинки с localhost:*
-      ...(s3Pattern ? [s3Pattern] : []),
+      ...s3Patterns,
+      // Только для локальной разработки (docker-compose.local.yml / pnpm dev)
+      ...(isProd
+        ? []
+        : [
+            { protocol: "http", hostname: "minio", port: "9000" },
+            { protocol: "http", hostname: "localhost" },
+          ]),
     ],
   },
   headers: async () => [

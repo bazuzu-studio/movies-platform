@@ -47,7 +47,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.02] mb-2 [text-wrap:balance] drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
-            {item.titleRu}
+            {item.titleRu} 
           </h1>
           <p className="text-sm text-[#A1A1AA] font-medium mb-3">{item.titleEn}</p>
 

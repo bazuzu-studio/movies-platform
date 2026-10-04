@@ -13,11 +13,14 @@ import { VideoPlayer } from "@/components/content/VideoPlayer";
 import { AgeGate } from "@/components/content/AgeGate";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 
+
 export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: ContentItem[] }) {
   const router = useRouter();
   const { isFavorite, toggle } = useFavorites();
   const isFav = isFavorite(movie.id);
   const playerRef = useRef<HTMLDivElement>(null);
+
+
 
   const hasPlayer = Boolean(movie.playerLink);
 

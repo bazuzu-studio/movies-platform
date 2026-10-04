@@ -1,6 +1,6 @@
 // Публичный URL S3/MinIO (например https://s3.otakuum.ru/media) — берётся при сборке,
 // чтобы next/image разрешил картинки с этого хоста.
-const s3PublicUrl = process.env.S3_PUBLIC_URL;
+const s3PublicUrl = process.env.S3_INTERNAL_URL;
 const s3Pattern = (() => {
   if (!s3PublicUrl) return null;
   try {
@@ -21,6 +21,8 @@ const nextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
+      { protocol: 'http', hostname: 'minio',  // ← имя сервиса из docker-compose
+        port: '9000', },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "http", hostname: "localhost" }, // dev: картинки с localhost:*
       ...(s3Pattern ? [s3Pattern] : []),

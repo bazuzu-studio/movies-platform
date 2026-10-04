@@ -9,6 +9,7 @@ import type { Season } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { plural } from "@/lib/plural";
 
+
 interface SeasonSwitcherProps {
   seasons: Season[];
   /** Номер сезона, который сейчас открыт. */
@@ -65,6 +66,7 @@ export function SeasonSwitcher({ seasons, activeSeason, onSelect }: SeasonSwitch
           const href = season.slug ? `/series/${season.slug}` : "#";
           const label = `Сезон ${number}`;
           const hasCustomTitle = Boolean(season.title && season.title !== label);
+          
 
           return (
             <li

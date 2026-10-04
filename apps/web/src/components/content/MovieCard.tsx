@@ -11,8 +11,10 @@ import { useAgeConfirmed } from "@/lib/age-client";
 import { Badge, ReleaseStatusBadge, StarRating } from "@/components/ui/Meta";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 
+
 function MovieCardComponent({ item }: { item: ContentItem }) {
   const { isFavorite, toggle } = useFavorites();
+
 
   // ContentItem.id может быть string | number,
   // а FavoritesContext сейчас принимает number.

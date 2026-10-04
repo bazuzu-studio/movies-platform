@@ -29,10 +29,6 @@ const endpoint =
 
 /**
  * Отдельный клиент для server-side запросов публичного контента.
- *
- * Публичные запросы не требуют авторизации.
- * Избранное/профиль используют gqlClient из
- * lib/graphql-client.ts с credentials: "include".
  */
 const serverClient = new GraphQLClient(
   endpoint,
@@ -65,6 +61,43 @@ function docsOf<
   return (field?.docs ?? []) as never;
 }
 
+// --------------------------------------------------------------------------
+// НОВАЯ: нормализация URL картинок (подмена localhost → minio)
+// --------------------------------------------------------------------------
+
+function normalizeImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("/")) return url; // относительные пути не трогаем
+
+  const internal = process.env.S3_INTERNAL_URL; // http://minio:9000/media
+  const publicUrl = process.env.S3_PUBLIC_URL;  // http://localhost:9000/media
+
+  if (!internal) return url;
+
+  // Если есть публичный URL — заменяем его целиком на внутренний
+  if (publicUrl) {
+    const fromBase = publicUrl.replace(/\/+$/, "");
+    const toBase = internal.replace(/\/+$/, "");
+
+    if (url.startsWith(fromBase)) {
+      return toBase + url.slice(fromBase.length);
+    }
+  }
+
+  // Фолбэк: меняем хост/порт через URL, сохраняя путь
+  try {
+    const parsed = new URL(url);
+    const internalParsed = new URL(internal);
+
+    parsed.hostname = internalParsed.hostname;
+    parsed.port = internalParsed.port;
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                  Content                                   */
 /* -------------------------------------------------------------------------- */
@@ -72,7 +105,6 @@ function docsOf<
 export type ContentSort =
   | "popular"
   | "newest"
-  // "rating" убран, так как больше не используется
   | "alphabetical";
 
 export interface ContentListFilters {
@@ -86,7 +118,6 @@ export interface ContentListFilters {
     | "2022"
     | "2021-or-earlier";
   age?: "0" | "6" | "12" | "16" | "18";
-  /** Статус релиза: anons / ongoing / released. */
   status?: ReleaseStatus;
   search?: string;
   sort?: ContentSort;
@@ -98,29 +129,15 @@ export interface ContentListResult {
   hasNextPage: boolean;
 }
 
-/**
- * Строит Payload GraphQL where.
- *
- * Важно:
- * - Payload использует AND / OR в верхнем регистре.
- * - relationship genres фильтруется через ID,
- *   а не через "genres.title".
- */
 function buildContentWhere(
   filters: ContentListFilters = {},
   genreId?: number,
 ) {
   const AND: Record<string, unknown>[] = [];
 
-  /* ------------------------------- Popular --------------------------------- */
-
-  // Postgres при DESC ставит NULL первыми: тайтлы без рейтинга оказывались
-  // бы в начале «Популярных». Исключаем их из этой выдачи.
   if (filters.sort === "popular") {
     AND.push({ rating: { greater_than: 0 } });
   }
-
-  /* ---------------------------------- Type --------------------------------- */
 
   if (
     filters.type === "movie" ||
@@ -133,8 +150,6 @@ function buildContentWhere(
     });
   }
 
-  /* --------------------------------- Genre -------------------------------- */
-
   if (genreId !== undefined) {
     AND.push({
       genres: {
@@ -143,13 +158,8 @@ function buildContentWhere(
     });
   }
 
-  /* ---------------------------------- Year --------------------------------- */
-
   if (filters.year) {
-    if (
-      filters.year ===
-      "2021-or-earlier"
-    ) {
+    if (filters.year === "2021-or-earlier") {
       AND.push({
         releaseYear: {
           less_than_equal: 2021,
@@ -164,8 +174,6 @@ function buildContentWhere(
     }
   }
 
-  /* -------------------------------- Age (вместо Rating) -------------------------------- */
-
   if (filters.age) {
     const minAge = Number(filters.age);
     AND.push({
@@ -175,8 +183,6 @@ function buildContentWhere(
     });
   }
 
-  /* ------------------------------ Release status ---------------------------- */
-
   if (filters.status) {
     AND.push({
       releaseStatus: {
@@ -184,8 +190,6 @@ function buildContentWhere(
       },
     });
   }
-
-  /* -------------------------------- Search -------------------------------- */
 
   const search =
     typeof filters.search === "string"
@@ -229,53 +233,30 @@ function getContentSort(
   switch (sort) {
     case "popular":
       return "-rating,-updatedAt";
-
-    // случай "rating" удалён, так как опция больше не существует
     case "alphabetical":
       return "titleRu,-updatedAt";
-
     case "newest":
     default:
-      // Раньше сортировали по -updatedAt, но пайплайн обновляет записи
-      // (update-ongoing, перезаливка метаданных), и порядок «Новинок»
-      // менялся без появления новых тайтлов. Теперь: свежие по году выхода,
-      // внутри года — недавно добавленные.
       return "-releaseYear,-createdAt";
   }
 }
 
-/**
- * Получает ID жанра по его названию.
- *
- * CatalogClient передаёт название жанра,
- * например "Военное", поэтому перед GraphQL-запросом
- * нужно преобразовать его в relationship ID.
- */
 async function getGenreIdByTitle(
   title: string,
 ): Promise<number | undefined> {
-  const normalizedTitle =
-    title.trim().toLowerCase();
+  const normalizedTitle = title.trim().toLowerCase();
 
   if (!normalizedTitle) {
     return undefined;
   }
 
-  const data =
-    await serverClient.request(
-      GetGenresDocument,
-    );
-
-  const genres = docsOf(
-    data.Genres,
-  ) as Array<Genre & { id: number | string }>;
+  const data = await serverClient.request(GetGenresDocument);
+  const genres = docsOf(data.Genres) as Array<Genre & { id: number | string }>;
 
   const genre = genres.find(
     (item) =>
-      item.title.trim().toLowerCase() ===
-      normalizedTitle ||
-      item.slug.trim().toLowerCase() ===
-      normalizedTitle,
+      item.title.trim().toLowerCase() === normalizedTitle ||
+      item.slug.trim().toLowerCase() === normalizedTitle,
   );
 
   if (!genre) {
@@ -284,7 +265,6 @@ async function getGenreIdByTitle(
   }
 
   const id = Number(genre.id);
-
   if (!Number.isInteger(id)) {
     console.warn(`Invalid genre ID for ${title}:`, genre.id);
     return undefined;
@@ -293,20 +273,6 @@ async function getGenreIdByTitle(
   return id;
 }
 
-/**
- * Получает список контента с server-side фильтрацией
- * и пагинацией.
- *
- * Поддерживает оба варианта:
- *
- * getContentList(1, 50, {
- *   type: "movie",
- * })
- *
- * и старый:
- *
- * getContentList(1, 50, "movie")
- */
 export async function getContentList(
   page = 1,
   limit = 24,
@@ -325,52 +291,39 @@ export async function getContentList(
   try {
     let genreId: number | undefined;
 
-    if (
-      typeof filters.genre === "string" &&
-      filters.genre.trim()
-    ) {
-      genreId =
-        await getGenreIdByTitle(
-          filters.genre,
-        );
+    if (typeof filters.genre === "string" && filters.genre.trim()) {
+      genreId = await getGenreIdByTitle(filters.genre);
     }
 
-    const data =
-      await serverClient.request(
-        GetContentDocument,
-        {
-          limit,
-          page,
-          sort: getContentSort(
-            filters.sort,
-          ),
-          where: buildContentWhere(
-            filters,
-            genreId,
-          ),
-        },
-      );
+    const data = await serverClient.request(
+      GetContentDocument,
+      {
+        limit,
+        page,
+        sort: getContentSort(filters.sort),
+        where: buildContentWhere(filters, genreId),
+      },
+    );
 
     const content = data.Contents;
 
+    // --- НОВАЯ: нормализуем картинки ДО маппинга ---
+    const docs = docsOf(content);
+    const items = docs.map((doc) => {
+      const raw = doc as RawContent;
+      if (raw.poster?.url) {
+        raw.poster.url = normalizeImageUrl(raw.poster.url);
+      }
+      return mapContentToItem(raw);
+    });
+
     return {
-      items: docsOf(content).map(
-        (doc) =>
-          mapContentToItem(
-            doc as RawContent,
-          ),
-      ),
-      totalDocs:
-        content?.totalDocs ?? 0,
-      hasNextPage:
-        content?.hasNextPage ?? false,
+      items,
+      totalDocs: content?.totalDocs ?? 0,
+      hasNextPage: content?.hasNextPage ?? false,
     };
   } catch (error) {
-    console.error(
-      "getContentList failed",
-      error,
-    );
-
+    console.error("getContentList failed", error);
     throw error;
   }
 }
@@ -386,11 +339,7 @@ interface RawEpisode {
   description?: string | null;
   releaseDate?: string | null;
   duration?: number | null;
-
-  /** Эмбед-ссылка на плеер серии. */
   playerLink?: string | null;
-
-  /** Время выхода серии, Unix-секунды (CMS: episodes.airingAt). */
   airingAt?: number | null;
 }
 
@@ -399,7 +348,6 @@ interface RawSeason {
   seasonNumber: number | null;
   title?: string | null;
   releaseYear?: number | null;
-
   content?: {
     id: string | number;
     slug: string;
@@ -409,12 +357,10 @@ interface RawSeason {
       url: string;
     } | null;
   } | null;
-
   poster?: {
     id: string | number;
     url: string;
   } | null;
-
   episodes?: {
     docs?: RawEpisode[];
   } | null;
@@ -424,21 +370,11 @@ interface RawContentId {
   id: string | number;
 }
 
-/**
- * RawContent описывает «общую» форму документа Content из CMS. playerLink
- * (только у фильмов) и franchiseId читаем через это узкое расширение типа,
- * а не через `any`.
- */
 type RawContentWithPlayerLink = RawContent & {
   playerLink?: string | null;
   franchiseId?: string | null;
 };
 
-/**
- * Запрос id всех записей франшизы. Описан здесь (а не в .graphql), чтобы не
- * требовать перегенерации src/generated/graphql.ts: поле franchiseId появилось
- * в CMS позже сгенерированной схемы.
- */
 const GetContentIdsByFranchiseQuery = gql`
   query GetContentIdsByFranchise($franchiseId: String!) {
     Contents(where: { franchiseId: { equals: $franchiseId } }, limit: 50) {
@@ -455,192 +391,109 @@ interface ContentIdsResponse {
 
 export async function getContentBySlug(
   slug: string,
-): Promise<
-  ContentItem | undefined
-> {
+): Promise<ContentItem | undefined> {
   try {
-    const data =
-      await serverClient.request(
-        GetContentBySlugDocument,
-        {
-          slug,
-        },
-      );
+    const data = await serverClient.request(
+      GetContentBySlugDocument,
+      { slug },
+    );
 
-    const raw = docsOf(
-      data.Contents,
-    )[0] as
-      | RawContentWithPlayerLink
-      | undefined;
+    const raw = docsOf(data.Contents)[0] as RawContentWithPlayerLink | undefined;
 
     if (!raw) {
       return undefined;
     }
 
-    const item =
-      mapContentToItem(raw);
+    // --- НОВАЯ: нормализуем постер основного контента ---
+    if (raw.poster?.url) {
+      raw.poster.url = normalizeImageUrl(raw.poster.url);
+    }
+
+    const item = mapContentToItem(raw);
 
     if (item?.type === "series") {
       try {
-        let contentIds:
-          | (string | number)[]
-          = [];
+        let contentIds: (string | number)[] = [];
 
-        // Сезоны франшизы — отдельные записи Content. Группируем по franchiseId;
-        // если он не задан, откатываемся на kinopoiskId (как раньше).
         if (raw.franchiseId) {
-          const franchiseData =
-            await serverClient.request<ContentIdsResponse>(
-              GetContentIdsByFranchiseQuery,
-              { franchiseId: raw.franchiseId },
-            );
-
-          contentIds = (franchiseData.Contents?.docs ?? []).map(
-            (doc) => doc.id,
+          const franchiseData = await serverClient.request<ContentIdsResponse>(
+            GetContentIdsByFranchiseQuery,
+            { franchiseId: raw.franchiseId },
           );
+          contentIds = (franchiseData.Contents?.docs ?? []).map((doc) => doc.id);
         } else if (raw.kinopoiskId) {
-          const kinopoiskData =
-            await serverClient.request(
-              GetContentIdsByKinopoiskDocument,
-              {
-                kinopoiskId:
-                  raw.kinopoiskId,
-              },
-            );
-
-          const kinopoiskDocs =
-            (kinopoiskData.Contents?.docs ??
-              []) as RawContentId[];
-
-          contentIds =
-            kinopoiskDocs.map(
-              (doc) => doc.id,
-            );
+          const kinopoiskData = await serverClient.request(
+            GetContentIdsByKinopoiskDocument,
+            { kinopoiskId: raw.kinopoiskId },
+          );
+          const kinopoiskDocs = (kinopoiskData.Contents?.docs ?? []) as RawContentId[];
+          contentIds = kinopoiskDocs.map((doc) => doc.id);
         }
 
-        // Если kinopoiskId нет —
-        // ищем сезоны только текущего content.
-        if (
-          contentIds.length === 0 &&
-          raw.id
-        ) {
+        if (contentIds.length === 0 && raw.id) {
           contentIds = [raw.id];
         }
 
-        const seasonsData =
-          await serverClient.request(
-            GetSeasonsByContentIdsDocument,
-            {
-              contentIds,
-            },
-          );
+        const seasonsData = await serverClient.request(
+          GetSeasonsByContentIdsDocument,
+          { contentIds },
+        );
 
-        const seasonDocs =
-          (seasonsData.Seasons?.docs ??
-            []) as RawSeason[];
+        const seasonDocs = (seasonsData.Seasons?.docs ?? []) as RawSeason[];
 
         item.seasons = seasonDocs
           .filter(
             (season) =>
-              typeof season.seasonNumber ===
-                "number" &&
-              !Number.isNaN(
-                season.seasonNumber,
-              ),
+              typeof season.seasonNumber === "number" &&
+              !Number.isNaN(season.seasonNumber),
           )
-          .map((season) => ({
-            id: season.id,
+          .map((season) => {
+            // --- НОВАЯ: нормализуем постеры сезонов ---
+            if (season.content?.poster?.url) {
+              season.content.poster.url = normalizeImageUrl(season.content.poster.url);
+            }
+            if (season.poster?.url) {
+              season.poster.url = normalizeImageUrl(season.poster.url);
+            }
 
-            seasonNumber:
-              season.seasonNumber as number,
-
-            title:
-              season.title ??
-              `Сезон ${season.seasonNumber}`,
-
-            releaseYear:
-              season.releaseYear ?? 0,
-
-            slug:
-              season.content?.slug ?? "",
-
-            releaseStatus:
-              parseReleaseStatus(
-                season.content?.releaseStatus,
-              ),
-
-            poster:
-              season.content?.poster ??
-              undefined,
-
-            episodes: (
-              (season.episodes?.docs ??
-                []) as RawEpisode[]
-            )
-              .map((episode) => ({
-                id: episode.id,
-
-                episodeNumber:
-                  episode.episodeNumber ??
-                  0,
-
-                title: episodeTitle(
-                  episode.title,
-                  episode.episodeNumber ?? 0,
-                ),
-
-                description:
-                  episode.description ??
-                  "",
-
-                releaseDate: episodeReleaseDate(
-                  episode.airingAt,
-                  episode.releaseDate,
-                ),
-
-                duration:
-                  episode.duration ?? 0,
-
-                embedUrl:
-                  episode.playerLink ??
-                  undefined,
-              }))
-              .sort(
-                (a, b) =>
-                  a.episodeNumber -
-                  b.episodeNumber,
-              ),
-          }))
-          .sort(
-            (a, b) =>
-              a.seasonNumber -
-              b.seasonNumber,
-          );
+            return {
+              id: season.id,
+              seasonNumber: season.seasonNumber as number,
+              title: season.title ?? `Сезон ${season.seasonNumber}`,
+              releaseYear: season.releaseYear ?? 0,
+              slug: season.content?.slug ?? "",
+              releaseStatus: parseReleaseStatus(season.content?.releaseStatus),
+              poster: season.content?.poster ?? undefined,
+              episodes: (
+                (season.episodes?.docs ?? []) as RawEpisode[]
+              )
+                .map((episode) => ({
+                  id: episode.id,
+                  episodeNumber: episode.episodeNumber ?? 0,
+                  title: episodeTitle(episode.title, episode.episodeNumber ?? 0),
+                  description: episode.description ?? "",
+                  releaseDate: episodeReleaseDate(episode.airingAt, episode.releaseDate),
+                  duration: episode.duration ?? 0,
+                  embedUrl: episode.playerLink ?? undefined,
+                }))
+                .sort((a, b) => a.episodeNumber - b.episodeNumber),
+            };
+          })
+          .sort((a, b) => a.seasonNumber - b.seasonNumber);
       } catch (seasonsError) {
         console.error(
           `getContentBySlug: не удалось получить сезоны (kinopoiskId=${raw.kinopoiskId})`,
           seasonsError,
         );
-
         item.seasons = [];
       }
     } else if (item?.type === "movie") {
-      // playerLink — прямая ссылка на плеер, есть только у фильмов
-      // (content.player_link в БД). У сериалов ссылка на плеер живёт
-      // по эпизодам (episode.playerLink → embedUrl выше).
-      // BaseContent.playerLink типизирован как обязательный string,
-      // поэтому при отсутствии ссылки подставляем "", а не undefined
-      // (проверка на плеер в компонентах идёт через Boolean(...)).
       item.playerLink = raw.playerLink ?? "";
     }
 
     return item;
   } catch (error) {
-    console.error(
-      `getContentBySlug(${slug}) failed`,
-      error,
-    );
-
+    console.error(`getContentBySlug(${slug}) failed`, error);
     throw error;
   }
 }
@@ -649,24 +502,12 @@ export async function getContentBySlug(
 /*                                   Genres                                   */
 /* -------------------------------------------------------------------------- */
 
-export async function getGenres(): Promise<
-  Genre[]
-> {
+export async function getGenres(): Promise<Genre[]> {
   try {
-    const data =
-      await serverClient.request(
-        GetGenresDocument,
-      );
-
-    return docsOf(
-      data.Genres,
-    ) as Genre[];
+    const data = await serverClient.request(GetGenresDocument);
+    return docsOf(data.Genres) as Genre[];
   } catch (error) {
-    console.error(
-      "getGenres failed",
-      error,
-    );
-
+    console.error("getGenres failed", error);
     throw error;
   }
 }
@@ -703,32 +544,31 @@ export async function getSimilarContent(
     baseAnd.push({ kinopoiskId: { not_equals: item.kinopoiskId } });
   }
 
-  const fetchSimilar = async (
+ const fetchSimilar = async (
     and: Record<string, unknown>[],
     count: number,
   ): Promise<ContentItem[]> => {
-    const data =
-      await serverClient.request(
-        GetSimilarContentDocument,
-        {
-          where: { AND: and },
-          limit: count,
-          sort: "-rating",
-        },
-      );
-
-    return docsOf(
-      data.Contents,
-    ).map((doc) =>
-      mapContentToItem(
-        doc as RawContent,
-      ),
+    const data = await serverClient.request(
+      GetSimilarContentDocument,
+      {
+        where: { AND: and },
+        limit: count,
+        sort: "-rating",
+      },
     );
+
+    return docsOf(data.Contents).map((doc) => {
+      const raw = doc as RawContent;
+      // Нормализуем постер ДО маппинга
+      if (raw.poster?.url) {
+        raw.poster.url = normalizeImageUrl(raw.poster.url);
+      }
+      return mapContentToItem(raw);
+    });
   };
 
   try {
-    // Сначала тайтлы с рейтингом: при сортировке по убыванию Postgres ставит
-    // записи без рейтинга (NULL) в начало, и «похожие» состояли бы из них.
+    // Сначала тайтлы с рейтингом
     const rated = await fetchSimilar(
       [...baseAnd, { rating: { greater_than: 0 } }],
       limit,
@@ -738,25 +578,19 @@ export async function getSimilarContent(
       return rated;
     }
 
-    // Не хватило — добираем тайтлы без рейтинга.
+    // Добираем без рейтинга
     const ratedIds = rated.map((entry) => Number(entry.id));
     const rest = await fetchSimilar(
       [
         ...baseAnd,
-        ...(ratedIds.length > 0
-          ? [{ id: { not_in: ratedIds } }]
-          : []),
+        ...(ratedIds.length > 0 ? [{ id: { not_in: ratedIds } }] : []),
       ],
       limit - rated.length,
     );
 
     return [...rated, ...rest];
   } catch (error) {
-    console.error(
-      `getSimilarContent(${item.id}) failed`,
-      error,
-    );
-
+    console.error(`getSimilarContent(${item.id}) failed`, error);
     throw error;
   }
 }

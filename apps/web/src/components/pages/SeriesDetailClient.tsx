@@ -19,6 +19,7 @@ import { saveContinue } from "@/lib/continue-watching";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 import { useAuth } from "@/components/providers/AuthContext";
 
+
 export function SeriesDetailClient({
   series,
   similar,
@@ -29,6 +30,10 @@ export function SeriesDetailClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isFavorite, toggle } = useFavorites();
+
+
+
+  
 
   const playerRef = useRef<HTMLDivElement>(null);
 
@@ -132,6 +137,8 @@ export function SeriesDetailClient({
       const params = new URLSearchParams(window.location.search);
       params.set("episode", String(episode.episodeNumber));
       window.history.replaceState(null, "", `?${params.toString()}`);
+
+
 
       setActiveEpisode(episode);
       markWatched(episode.episodeNumber);

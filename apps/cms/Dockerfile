@@ -18,27 +18,34 @@ RUN apk add --no-cache libc6-compat \
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # ─────────────────────────────────────────────
-# deps: установка зависимостей по lock-файлу
-# ─────────────────────────────────────────────
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-  pnpm install --frozen-lockfile
-
-# ─────────────────────────────────────────────
-# builder: сборка Next.js
+# builder: зависимости + сборка Next.js
+#
+# Зависимости ставятся В ЭТОЙ ЖЕ стадии (а не копируются из отдельной `deps`):
+# node_modules у Payload — десятки тысяч файлов-симлинков, и COPY --from между
+# стадиями занимал ~18 с на каждой сборке. Слой с install по-прежнему кэшируется,
+# пока не менялись package.json / pnpm-lock.yaml / pnpm-workspace.yaml.
+#
 # Runtime-переменные (DATABASE_URL, S3_*, PAYLOAD_SECRET, ...) для сборки
 # НЕ нужны: на этом этапе к БД никто не обращается, а S3-конфиг использует
 # заглушки (см. src/lib/storage/s3.ts). Они подставляются при запуске контейнера.
 # ─────────────────────────────────────────────
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+  pnpm install --frozen-lockfile --prefer-offline
+
 COPY . .
 # Папка public может отсутствовать в репозитории — runner копирует её целиком.
 RUN mkdir -p public
-RUN pnpm run build
+
+# Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
+# на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
+ARG BUILD_MEMORY_MB=4096
+# Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
+RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
+  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
 
 # ─────────────────────────────────────────────
 # runner: минимальный образ для запуска

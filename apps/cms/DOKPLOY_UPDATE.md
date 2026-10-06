@@ -8,6 +8,13 @@
 grep -rn "\[Dokploy\]" src next.config.ts pnpm-workspace.yaml Dockerfile docker-compose*.yml
 ```
 
+## Ревизия 7 — SEO-плагин (`@payloadcms/plugin-seo`)
+
+- Добавлен `@payloadcms/plugin-seo` `3.90.2` (lockfile пересобран). В `payload.config.ts` плагин включён для коллекции `content`: группа полей **`meta`** (`title`, `description`, `image`) + превью сниппета и кнопки «Auto-generate» в админке.
+- Автогенерация: title — `«<titleRu> — смотреть онлайн | Otakuum»`, description — по названию и году, image — `backdrop` или `poster`, URL — `FRONTEND_URL/<movies|series>/<slug>`. **Пути `/movies` и `/series` и название сайта — предположение, поправьте под apps/web.**
+- Новая миграция `20261006_120000_add_seo_meta` (колонки `meta_*` в `content` и `version_meta_*` в `_content_v`, FK на `media`, индексы); идемпотентна, применяется автоматически (`prodMigrations`). Снимок `.json` для неё не создавался — при следующем `pnpm migrate:create` Payload сгенерирует его сам.
+- Обновлены `importMap.js` и `payload-types.ts`. `tsc --noEmit` проходит. Не проверено: работа в запущенной админке и применение миграции на реальной БД.
+
 ## Ревизия 6 — статус релиза (анонс / выходит / вышло)
 
 - В коллекцию `content` добавлено поле **`releaseStatus`** (select: `anons` / `ongoing` / `released`, проиндексировано, в сайдбаре админки). Нужно kodik-pipeline: команда `update-ongoing` по нему находит сериалы, у которых выходят серии, и переводит завершившиеся в `released`.

@@ -5,9 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 4000",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build --webpack",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --webpack -p 4000",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev --webpack",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
@@ -26,9 +26,13 @@
     "@payloadcms/next": "3.90.2",
     "@payloadcms/plugin-cloud-storage": "3.90.2",
     "@payloadcms/plugin-search": "3.90.2",
+    "@payloadcms/plugin-seo": "3.90.2",
     "@payloadcms/richtext-lexical": "3.90.2",
     "@payloadcms/storage-s3": "3.90.2",
     "@payloadcms/ui": "3.90.2",
+    "@aws-sdk/client-s3": "^3.726.0",
+    "@aws-sdk/s3-request-presigner": "^3.726.0",
+
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
@@ -58,24 +62,6 @@
   "engines": {
     "node": ">=20.9.0",
     "pnpm": "^9 || ^10 || ^11"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ],
-    "overrides": {
-      "payload": "3.90.2",
-      "@payloadcms/next": "3.90.2",
-      "@payloadcms/ui": "3.90.2",
-      "@payloadcms/plugin-cloud-storage": "3.90.2",
-      "@payloadcms/storage-s3": "3.90.2",
-      "@payloadcms/plugin-search": "3.90.2",
-      "@payloadcms/db-postgres": "3.90.2",
-      "@payloadcms/richtext-lexical": "3.90.2",
-      "@payloadcms/email-nodemailer": "3.90.2"
-    }
   },
   "packageManager": "pnpm@10.34.5"
 }

@@ -298,6 +298,14 @@ export interface Content {
    * Устаревшее служебное поле. Видимость на сайте определяет _status (кнопки «Опубликовать» / «Черновик» в админке), а не это поле. Не путать со статусом релиза (releaseStatus)
    */
   status: 'draft' | 'published';
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -584,6 +592,13 @@ export interface ContentSelect<T extends boolean = true> {
   backdrop?: T;
   seasons?: T;
   status?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

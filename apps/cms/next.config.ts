@@ -1,10 +1,18 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const nextConfig: NextConfig = {
-  // [Dokploy] Самодостаточная сборка (.next/standalone) — нужна для минимального
-  // Docker-образа (см. Dockerfile) и деплоя в Dokploy.
   output: 'standalone',
+
+  turbopack: {
+    root: path.resolve(__dirname, '../../'),
+  },
+
+  serverExternalPackages: [
+    '@aws-sdk/client-s3',
+    '@aws-sdk/s3-request-presigner',
+  ],
 
   images: {
     localPatterns: [
@@ -13,6 +21,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   headers: async () => [
     {
       source: '/:path*',
@@ -23,11 +32,26 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
-  webpack: (webpackConfig) => {
+
+  webpack: (webpackConfig, { isServer }) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
       '.mjs': ['.mts', '.mjs'],
+    }
+
+    // Принудительно делаем AWS SDK external для серверной сборки
+    if (isServer) {
+      if (!webpackConfig.externals) {
+        webpackConfig.externals = []
+      }
+      if (Array.isArray(webpackConfig.externals)) {
+        webpackConfig.externals.push('@aws-sdk/client-s3')
+        webpackConfig.externals.push('@aws-sdk/s3-request-presigner')
+      } else if (typeof webpackConfig.externals === 'object') {
+        webpackConfig.externals['@aws-sdk/client-s3'] = '@aws-sdk/client-s3'
+        webpackConfig.externals['@aws-sdk/s3-request-presigner'] = '@aws-sdk/s3-request-presigner'
+      }
     }
 
     return webpackConfig

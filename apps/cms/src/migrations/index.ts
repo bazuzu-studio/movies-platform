@@ -1,6 +1,7 @@
 import * as migration_20260924_075556_initial from './20260924_075556_initial';
 import * as migration_20260928_193844_add_release_status from './20260928_193844_add_release_status';
 import * as migration_20261003_120000_hardening_and_franchise from './20261003_120000_hardening_and_franchise';
+import * as migration_20261006_120000_add_seo_meta from './20261006_120000_add_seo_meta';
 
 export const migrations = [
   {
@@ -17,5 +18,10 @@ export const migrations = [
     up: migration_20261003_120000_hardening_and_franchise.up,
     down: migration_20261003_120000_hardening_and_franchise.down,
     name: '20261003_120000_hardening_and_franchise'
+  },
+  {
+    up: migration_20261006_120000_add_seo_meta.up,
+    down: migration_20261006_120000_add_seo_meta.down,
+    name: '20261006_120000_add_seo_meta'
   },
 ];

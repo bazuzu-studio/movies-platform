@@ -26,11 +26,33 @@ import { migrations } from './migrations'
 // [Dokploy] URL CMS/frontend и список CORS/CSRF-origin'ов теперь читаются из
 // runtime-переменных CMS_URL / FRONTEND_URL (см. src/lib/urls.ts). Раньше эти
 // значения были захардкожены на localhost и NEXT_PUBLIC_APP_URL.
-import { allowedOrigins, cmsURL } from './lib/urls'
+import { allowedOrigins, cmsURL, frontendURLs } from './lib/urls'
 import { contactMessageEndpoint } from './endpoints/contact-message'
 import { healthEndpoint } from './endpoints/health'
 
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { seoPlugin } from '@payloadcms/plugin-seo'
+import type { GenerateTitle, GenerateDescription, GenerateURL } from '@payloadcms/plugin-seo/types'
+
+// SEO: заголовок/описание/URL для мета-тегов. Если мета-поля не заполнены,
+// фронтенд может использовать эти же правила как fallback.
+// ВНИМАНИЕ: путь страницы на фронтенде (`/movies/...`, `/series/...`) —
+// предположение, поправьте под реальные маршруты apps/web.
+const SITE_NAME = 'Otakuum'
+
+const generateTitle: GenerateTitle = ({ doc }) =>
+  doc?.titleRu ? `${doc.titleRu} — смотреть онлайн | ${SITE_NAME}` : SITE_NAME
+
+const generateDescription: GenerateDescription = ({ doc }) => {
+  const year = doc?.releaseYear ? ` (${doc.releaseYear})` : ''
+  return doc?.titleRu ? `${doc.titleRu}${year} — смотреть онлайн на ${SITE_NAME}.` : ''
+}
+
+const generateURL: GenerateURL = ({ doc }) => {
+  const base = frontendURLs[0] ?? cmsURL
+  const section = doc?.type === 'movie' ? 'movies' : 'series'
+  return `${base}/${section}/${doc?.slug ?? ''}`
+}
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -131,6 +153,15 @@ export default buildConfig({
         rating: originalDoc.rating,
         poster: originalDoc.poster,
       }),
+    }),
+    seoPlugin({
+      collections: ['content'],
+      uploadsCollection: 'media',
+      generateTitle,
+      generateDescription,
+      generateURL,
+      // Картинка по умолчанию — backdrop, иначе постер.
+      generateImage: ({ doc }) => doc?.backdrop ?? doc?.poster,
     }),
   ],
 

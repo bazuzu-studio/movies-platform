@@ -3,6 +3,12 @@
 # [Dokploy] Production-образ Payload CMS (Next.js standalone) для Dokploy.
 # Требует `output: 'standalone'` в next.config.ts (уже включено).
 # Основан на https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
+#
+# ВАЖНО: это монорепозиторий (Turborepo + pnpm workspaces).
+# Приложение CMS лежит в apps/cms/, а lock-файл — в корне.
+# Next.js standalone сохраняет структуру монорепозитория:
+# server.js оказывается в .next/standalone/apps/cms/server.js,
+# а не в .next/standalone/server.js.
 
 ARG NODE_VERSION=22
 ARG PNPM_VERSION=10.34.5
@@ -32,26 +38,34 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS builder
 WORKDIR /app
 
+# Копируем файлы для установки зависимостей (корневой lock + workspace)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
   pnpm install --frozen-lockfile --prefer-offline
 
+# Копируем весь монорепозиторий
 COPY . .
+
 # Папка public может отсутствовать в репозитории — runner копирует её целиком.
-RUN mkdir -p public
+RUN mkdir -p apps/cms/public
+
+# ─────────────────────────────────────────────
+# Сборка из apps/cms, чтобы Next.js нашёл next.config.ts
+# и корректно создал server.js с output: 'standalone'
+# ─────────────────────────────────────────────
+WORKDIR /app/apps/cms
 
 # Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
 # на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
 ARG BUILD_MEMORY_MB=4096
 # Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
-RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-cms,target=/app/apps/cms/.next/cache \
   pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
 
 # ─────────────────────────────────────────────
 # runner: минимальный образ для запуска
 # ─────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner
-WORKDIR /app
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
@@ -61,15 +75,20 @@ ENV NODE_ENV=production \
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+WORKDIR /app
 
-# Каталог для кэша Next.js (пререндер, оптимизация изображений)
-RUN mkdir .next && chown nextjs:nodejs .next
-
-# standalone-сборка + статика. Миграции БД применяются самим приложением
-# при старте (prodMigrations в src/payload.config.ts).
+# standalone-сборка целиком. В монорепозитории внутри будет:
+#   /app/apps/cms/server.js
+#   /app/apps/cms/node_modules/   (минимальный набор)
+#   /app/node_modules/            (общие зависимости)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Статика и public — рядом с server.js, в apps/cms/.
+# Next.js ищет .next/static и public относительно server.js.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/static ./apps/cms/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/public ./apps/cms/public
+
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -79,5 +98,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/api/health" || exit 1
 
-# server.js создаётся `next build` (output: 'standalone')
+# В монорепозитории server.js лежит в apps/cms/
+WORKDIR /app/apps/cms
 CMD ["node", "server.js"]

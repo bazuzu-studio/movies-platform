@@ -548,7 +548,7 @@ export async function getSimilarContent(
     baseAnd.push({ kinopoiskId: { not_equals: item.kinopoiskId } });
   }
 
- const fetchSimilar = async (
+  const fetchSimilar = async (
     and: Record<string, unknown>[],
     count: number,
   ): Promise<ContentItem[]> => {
@@ -563,7 +563,6 @@ export async function getSimilarContent(
 
     return docsOf(data.Contents).map((doc) => {
       const raw = doc as RawContent;
-      // Нормализуем постер ДО маппинга
       if (raw.poster?.url) {
         raw.poster.url = normalizeImageUrl(raw.poster.url);
       }
@@ -582,22 +581,20 @@ export async function getSimilarContent(
       return rated;
     }
 
-    // Добираем без рейтинга
-    const ratedIds = rated.map((entry) => Number(entry.id));
-    const rest = await fetchSimilar(
-      [
-        ...baseAnd,
-        ...(ratedIds.length > 0 ? [{ id: { not_in: ratedIds } }] : []),
-      ],
-      limit - rated.length,
-    );
+    // Добираем без рейтинга — БЕЗ not_in в запросе
+    const rest = await fetchSimilar(baseAnd, limit - rated.length);
 
-    return [...rated, ...rest];
+    // Фильтруем уже полученные результаты, чтобы не дублировать те, что были в rated
+    const ratedIdsSet = new Set(rated.map((entry) => Number(entry.id)));
+    const filteredRest = rest.filter((entry) => !ratedIdsSet.has(Number(entry.id)));
+
+    return [...rated, ...filteredRest].slice(0, limit);
   } catch (error) {
     console.error(`getSimilarContent(${item.id}) failed`, error);
     throw error;
   }
 }
+
 
 /* -------------------------------------------------------------------------- */
 /*                                  Sitemap                                   */

@@ -2,13 +2,13 @@
 #
 # [Dokploy] Production-образ Payload CMS (Next.js standalone) для Dokploy.
 # Требует `output: 'standalone'` в next.config.ts (уже включено).
-# Основан на https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 #
-# ВАЖНО: это монорепозиторий (Turborepo + pnpm workspaces).
-# Приложение CMS лежит в/, а lock-файл — в корне.
-# Next.js standalone сохраняет структуру монорепозитория:
-# server.js оказывается в .next/standalone/server.js,
-# а не в .next/standalone/server.js.
+# Контекст сборки — apps/cms/ (Dockerfile лежит рядом с next.config.ts).
+# Все COPY копируют файлы из apps/cms/ в /app/ — пути плоские.
+#
+# Сборка через --webpack: turbopack.root в next.config.ts (path.resolve(__dirname, '../../'))
+# ломает поиск src/app/ внутри Docker — Turbopack ищет относительно монорепо-root.
+# Webpack игнорирует turbopack.root и корректно находит src/app/ автоматически.
 
 ARG NODE_VERSION=22
 ARG PNPM_VERSION=10.34.5
@@ -38,29 +38,25 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS builder
 WORKDIR /app
 
-# Копируем файлы для установки зависимостей (корневой lock + workspace)
+# Копируем файлы для установки зависимостей.
+# pnpm-lock.yaml и pnpm-workspace.yaml лежат в apps/cms/ (в контексте сборки).
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
   pnpm install --frozen-lockfile --prefer-offline
 
-# Копируем весь монорепозиторий
+# Копируем весь исходный код приложения (src/app/, src/payload.config.ts, и т.д.)
 COPY . .
 
 # Папка public может отсутствовать в репозитории — runner копирует её целиком.
 RUN mkdir -p ./public
 
-# ─────────────────────────────────────────────
-# Сборка из, чтобы Next.js нашёл next.config.ts
-# и корректно создал server.js с output: 'standalone'
-# ─────────────────────────────────────────────
-WORKDIR /app
-
 # Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
 # на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
 ARG BUILD_MEMORY_MB=4096
-# Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
+# --webpack: обходим Turbopack, у которого turbopack.root ломает пути в Docker.
+# Кэш Next.js между деплоями: повторная сборка заметно быстрее.
 RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
-  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
+  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build --webpack
 
 # ─────────────────────────────────────────────
 # runner: минимальный образ для запуска
@@ -77,13 +73,11 @@ RUN addgroup --system --gid 1001 nodejs \
 
 WORKDIR /app
 
-# standalone-сборка целиком. В монорепозитории внутри будет:
-#   /app/server.js
-#   /app/node_modules/   (минимальный набор)
-#   /app/node_modules/            (общие зависимости)
+# standalone-сборка целиком. Контекст — apps/cms/, поэтому server.js
+# оказывается в /app/.next/standalone/server.js (без вложенности apps/cms/).
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# Статика и public — рядом с server.js, в/.
+# Статика и public — рядом с server.js.
 # Next.js ищет .next/static и public относительно server.js.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
@@ -98,6 +92,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/api/health" || exit 1
 
-# В монорепозитории server.js лежит в apps/cms/
-WORKDIR /app
+# server.js создаётся next build (output: 'standalone') и лежит в /app/server.js
+# после COPY --from=builder /app/.next/standalone ./
 CMD ["node", "server.js"]

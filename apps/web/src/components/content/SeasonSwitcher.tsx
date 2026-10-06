@@ -8,12 +8,13 @@ import { Play } from "lucide-react";
 import type { Season } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { plural } from "@/lib/plural";
+import { seasonKey } from "@/lib/seasons";
 
 
 interface SeasonSwitcherProps {
   seasons: Season[];
-  /** Номер сезона, который сейчас открыт. */
-  activeSeason: number;
+  /** Ключ открытого сезона (seasonKey): номер сезона не уникален из-за частей. */
+  activeKey: string;
   /**
    * Переключение сезона без перехода на другую страницу: серии всех сезонов
    * франшизы уже загружены вместе с текущей страницей. Если не передан —
@@ -30,7 +31,7 @@ interface SeasonSwitcherProps {
  * («Выходит»). Лента прокручивается по горизонтали; открытый сезон
  * автоматически центрируется, чтобы на телефоне он не терялся за краем.
  */
-export function SeasonSwitcher({ seasons, activeSeason, onSelect }: SeasonSwitcherProps) {
+export function SeasonSwitcher({ seasons, activeKey, onSelect }: SeasonSwitcherProps) {
   const listRef = useRef<HTMLUListElement>(null);
   const activeRef = useRef<HTMLLIElement>(null);
 
@@ -42,7 +43,7 @@ export function SeasonSwitcher({ seasons, activeSeason, onSelect }: SeasonSwitch
     // Прокручиваем только саму ленту, а не всю страницу (scrollIntoView дёргал бы её).
     const target = active.offsetLeft - (list.clientWidth - active.clientWidth) / 2;
     list.scrollTo({ left: Math.max(0, target), behavior: "auto" });
-  }, [activeSeason]);
+  }, [activeKey]);
 
   if (seasons.length < 2) return null;
 
@@ -61,16 +62,18 @@ export function SeasonSwitcher({ seasons, activeSeason, onSelect }: SeasonSwitch
       >
         {seasons.map((season) => {
           const number = typeof season.seasonNumber === "number" ? season.seasonNumber : 1;
-          const isActive = number === activeSeason;
+          const key = seasonKey(season);
+          const isActive = key === activeKey;
           const episodeCount = season.episodes?.length ?? 0;
           const href = season.slug ? `/series/${season.slug}` : "#";
-          const label = `Сезон ${number}`;
+          // «Сезон 2 · Часть 1» — подпись считается в api.ts (labelSeasons).
+          const label = season.label ?? `Сезон ${number}`;
           const hasCustomTitle = Boolean(season.title && season.title !== label);
           
 
           return (
             <li
-              key={`${number}-${season.id}`}
+              key={key}
               ref={isActive ? activeRef : undefined}
               className="w-[212px] shrink-0 snap-start sm:w-[236px]"
             >

@@ -70,6 +70,18 @@ export interface Season {
   /** Статус релиза связанного Content (у каждого сезона своя запись в CMS). */
   releaseStatus?: ReleaseStatus;
 
+  /** Номер части внутри сезона («Часть 1», «Часть 2»), если сезон разбит. */
+  part?: number;
+
+  /** Готовая подпись: «Сезон 2» или «Сезон 2 · Часть 1». */
+  label?: string;
+
+  /** Данные записи Content этого сезона — для шапки страницы. */
+  description?: string;
+  rating?: number;
+  ageRating?: number | null;
+  backdrop?: Media;
+
   episodes: Episode[];
 }
 

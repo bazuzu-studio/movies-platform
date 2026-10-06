@@ -17,10 +17,13 @@ import {
 import type {
   ContentItem,
   Genre,
+  Season,
 } from "./types";
 
 import { parseReleaseStatus, type ReleaseStatus } from "./release-status";
 import { episodeReleaseDate, episodeTitle } from "./episode";
+import { richTextToPlainText } from "./richtext";
+import { labelSeasons, pickLatestSeason } from "./seasons";
 
 const endpoint =
   process.env.GRAPHQL_API_URL ??
@@ -351,10 +354,19 @@ interface RawSeason {
   content?: {
     id: string | number;
     slug: string;
+    titleRu?: string | null;
+    releaseYear?: number | null;
     releaseStatus?: string | null;
+    rating?: number | null;
+    ageRating?: number | null;
+    description?: unknown;
     poster?: {
-      id: string | number;
-      url: string;
+      id?: string | number;
+      url?: string | null;
+    } | null;
+    backdrop?: {
+      id?: string | number;
+      url?: string | null;
     } | null;
   } | null;
   poster?: {
@@ -445,29 +457,40 @@ export async function getContentBySlug(
 
         const seasonDocs = (seasonsData.Seasons?.docs ?? []) as RawSeason[];
 
-        item.seasons = seasonDocs
+        const mapped = seasonDocs
           .filter(
             (season) =>
               typeof season.seasonNumber === "number" &&
               !Number.isNaN(season.seasonNumber),
           )
           .map((season) => {
-            // --- НОВАЯ: нормализуем постеры сезонов ---
-            if (season.content?.poster?.url) {
-              season.content.poster.url = normalizeImageUrl(season.content.poster.url);
+            const content = season.content;
+
+            // Нормализуем картинки сезона (localhost → minio)
+            if (content?.poster?.url) {
+              content.poster.url = normalizeImageUrl(content.poster.url);
             }
-            if (season.poster?.url) {
-              season.poster.url = normalizeImageUrl(season.poster.url);
+            if (content?.backdrop?.url) {
+              content.backdrop.url = normalizeImageUrl(content.backdrop.url);
             }
 
             return {
               id: season.id,
               seasonNumber: season.seasonNumber as number,
-              title: season.title ?? `Сезон ${season.seasonNumber}`,
-              releaseYear: season.releaseYear ?? 0,
-              slug: season.content?.slug ?? "",
-              releaseStatus: parseReleaseStatus(season.content?.releaseStatus),
-              poster: season.content?.poster ?? undefined,
+              title: season.title ?? undefined,
+              // Год сезона: у записи сезона, а если пусто — у его Content.
+              releaseYear: season.releaseYear ?? content?.releaseYear ?? 0,
+              slug: content?.slug ?? "",
+              releaseStatus: parseReleaseStatus(content?.releaseStatus),
+              poster: content?.poster?.url
+                ? { id: content.poster.id ?? 0, url: content.poster.url }
+                : undefined,
+              backdrop: content?.backdrop?.url
+                ? { id: content.backdrop.id ?? 0, url: content.backdrop.url }
+                : undefined,
+              description: richTextToPlainText(content?.description ?? "") || undefined,
+              rating: content?.rating ?? undefined,
+              ageRating: content?.ageRating ?? undefined,
               episodes: (
                 (season.episodes?.docs ?? []) as RawEpisode[]
               )
@@ -483,7 +506,33 @@ export async function getContentBySlug(
                 .sort((a, b) => a.episodeNumber - b.episodeNumber),
             };
           })
-          .sort((a, b) => a.seasonNumber - b.seasonNumber);
+          // Сначала номер сезона, затем год выхода: «Часть 1» и «Часть 2»
+          // одного сезона идут подряд в порядке выхода.
+          .sort(
+            (a, b) =>
+              a.seasonNumber - b.seasonNumber ||
+              a.releaseYear - b.releaseYear ||
+              a.id.toString().localeCompare(b.id.toString(), undefined, { numeric: true }),
+          );
+
+        item.seasons = labelSeasons(mapped as Season[]);
+
+        // Шапка страницы и SEO описывают ПОСЛЕДНИЙ вышедший сезон, а не тот,
+        // чей slug открыт (иначе у франшизы с 2013 года показывался бы 2013-й).
+        const latest = pickLatestSeason(item.seasons);
+        if (latest) {
+          if (latest.releaseYear) item.releaseYear = latest.releaseYear;
+          if (latest.releaseStatus) item.releaseStatus = latest.releaseStatus;
+          if (latest.rating) item.rating = latest.rating;
+          if (latest.ageRating != null) item.ageRating = latest.ageRating;
+          if (latest.description) item.description = latest.description;
+          if (latest.poster?.url) item.poster = latest.poster;
+          if (latest.backdrop?.url) item.backdrop = latest.backdrop;
+          if (latest.releaseYear) {
+            item.isNew = new Date().getFullYear() - latest.releaseYear <= 1;
+          }
+          if (latest.rating) item.isPopular = latest.rating >= 7.5;
+        }
       } catch (seasonsError) {
         console.error(
           `getContentBySlug: не удалось получить сезоны (kinopoiskId=${raw.kinopoiskId})`,

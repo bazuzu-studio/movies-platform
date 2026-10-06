@@ -1,7 +1,12 @@
+# Все сезоны франшизы. Каждый сезон / «часть» — отдельная запись Content,
+# поэтому, помимо серий, берём данные самой записи (год, постер, описание,
+# рейтинг): по ним страница показывает информацию о ПОСЛЕДНЕМ вышедшем сезоне.
+# Сортировка: номер сезона, затем год — «Часть 1» и «Часть 2» одного сезона
+# идут подряд в порядке выхода.
 query GetSeasonsByContentIds($contentIds: [JSON]!) {
   Seasons(
     where: { content: { in: $contentIds } }
-    sort: "seasonNumber"
+    sort: "seasonNumber,releaseYear"
     limit: 100
   ) {
     docs {
@@ -12,8 +17,14 @@ query GetSeasonsByContentIds($contentIds: [JSON]!) {
       content {
         id
         slug
+        titleRu
+        releaseYear
         releaseStatus
+        rating
+        ageRating
+        description
         poster { url }
+        backdrop { url }
       }
       episodes(sort: "episodeNumber", limit: 500) {
         docs {

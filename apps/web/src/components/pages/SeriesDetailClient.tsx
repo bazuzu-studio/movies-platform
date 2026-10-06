@@ -15,6 +15,7 @@ import { VideoPlayer } from "@/components/content/VideoPlayer";
 import { AgeGate } from "@/components/content/AgeGate";
 import { formatAge } from "@/lib/age";
 import { plural } from "@/lib/plural";
+import { pickLatestSeason, seasonKey } from "@/lib/seasons";
 import { saveContinue } from "@/lib/continue-watching";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 import { useAuth } from "@/components/providers/AuthContext";
@@ -37,23 +38,41 @@ export function SeriesDetailClient({
 
   const playerRef = useRef<HTMLDivElement>(null);
 
-  // Сезон, соответствующий открытой странице (каждый сезон — отдельная запись
-  // Content со своим slug).
-  const pageSeason =
-    series.seasons.find((s) => s.slug === series.slug)?.seasonNumber ??
-    series.seasons[0]?.seasonNumber ??
-    1;
+  // Какой сезон открыть: явно выбранный (?season=slug), иначе ПОСЛЕДНИЙ
+  // вышедший. Раньше открывался сезон по slug страницы — для франшизы,
+  // начавшейся в 2013, это давало 2013 год вместо актуального сезона.
+  const seasonFromUrl = searchParams.get("season");
+  const defaultKey = useMemo(() => {
+    const fromUrl = seasonFromUrl
+      ? series.seasons.find((s) => s.slug === seasonFromUrl)
+      : undefined;
+    const season = fromUrl ?? pickLatestSeason(series.seasons) ?? series.seasons[0];
+    return season ? seasonKey(season) : "";
+  }, [series.seasons, seasonFromUrl]);
 
   // Активный сезон хранится в состоянии: серии всех сезонов франшизы уже
   // пришли с сервера, поэтому переключение не требует перехода на другую
   // страницу (раньше — загрузка, скелетон и прыжок наверх).
-  const [activeSeason, setActiveSeason] = useState(pageSeason);
-  useEffect(() => setActiveSeason(pageSeason), [series.slug, pageSeason]);
+  const [activeKey, setActiveKey] = useState(defaultKey);
+  useEffect(() => setActiveKey(defaultKey), [series.slug, defaultKey]);
+
+  const activeSeasonDoc =
+    series.seasons.find((s) => seasonKey(s) === activeKey) ?? series.seasons[0];
 
   const currentSeason =
-    series.seasons.find((s) => s.seasonNumber === activeSeason) ??
-    series.seasons[0] ??
-    { seasonNumber: activeSeason, episodes: [] as Episode[] };
+    activeSeasonDoc ?? { seasonNumber: 1, episodes: [] as Episode[] };
+
+  // Данные шапки — активного сезона (по умолчанию последнего); если у сезона
+  // поле не заполнено, берём данные тайтла.
+  const view = {
+    releaseYear: activeSeasonDoc?.releaseYear || series.releaseYear,
+    releaseStatus: activeSeasonDoc?.releaseStatus ?? series.releaseStatus,
+    rating: activeSeasonDoc?.rating || series.rating,
+    ageRating: activeSeasonDoc?.ageRating ?? series.ageRating,
+    description: activeSeasonDoc?.description || series.description,
+    poster: activeSeasonDoc?.poster?.url ? activeSeasonDoc.poster : series.poster,
+    backdrop: activeSeasonDoc?.backdrop?.url ? activeSeasonDoc.backdrop : series.backdrop,
+  };
 
   // slug записи Content активного сезона: по нему хранятся «просмотренные»
   // серии и ссылка «продолжить просмотр».
@@ -145,22 +164,25 @@ export function SeriesDetailClient({
       saveContinue({
         slug: seasonSlug,
         titleRu: series.titleRu,
-        posterUrl: series.poster?.url || undefined,
-        ageRating: series.ageRating,
+        posterUrl: view.poster?.url || undefined,
+        ageRating: view.ageRating,
         episode: episode.episodeNumber,
       });
       revealPlayer();
     },
-    [markWatched, revealPlayer, seasonSlug, series.titleRu, series.poster?.url, series.ageRating],
+    [markWatched, revealPlayer, seasonSlug, series.titleRu, view.poster?.url, view.ageRating],
   );
 
   const selectSeason = useCallback((season: Season) => {
     if (!season.slug) return;
-    setActiveSeason(season.seasonNumber);
+    setActiveKey(seasonKey(season));
     setActiveEpisode(null);
-    // Адрес обновляем как у отдельной страницы сезона (обновление страницы и
-    // «поделиться» работают), но без запроса к серверу.
-    window.history.replaceState(null, "", `/series/${season.slug}`);
+    // Выбор сезона пишем в ?season=slug: обновление страницы и «поделиться»
+    // открывают тот же сезон, при этом запроса к серверу нет.
+    const params = new URLSearchParams(window.location.search);
+    params.set("season", season.slug);
+    params.delete("episode");
+    window.history.replaceState(null, "", `?${params.toString()}`);
   }, []);
 
   const sortedEpisodes = useMemo(
@@ -204,15 +226,17 @@ export function SeriesDetailClient({
 
   const safeEmbedUrl = activeEpisode ? activeEpisode.embedUrl : undefined;
   const activeEpisodeNumber = activeEpisode?.episodeNumber;
+  // Части одного сезона считаем как один сезон.
+  const seasonsCount = new Set(series.seasons.map((s) => s.seasonNumber)).size;
   const totalEpisodes = series.seasons.reduce((a, s) => a + (s.episodes?.length ?? 0), 0);
 
   return (
-    <AgeGate ageRating={series.ageRating}>
+    <AgeGate ageRating={view.ageRating}>
     <div className="bg-[#08080A] text-white">
       {/* Hero Section */}
       <div className="relative h-[220px] sm:h-[420px] overflow-hidden">
         <Image
-          src={series.backdrop?.url || "/default-backdrop.jpg"}
+          src={view.backdrop?.url || "/default-backdrop.jpg"}
           alt=""
           fill
           priority
@@ -236,15 +260,15 @@ export function SeriesDetailClient({
           <div className="shrink-0 w-36 sm:w-56 lg:w-64 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-[#121214] relative group">
               <Image
-                src={series.poster?.url ?? "/default-poster.jpg"}
+                src={view.poster?.url || "/default-poster.jpg"}
                 alt={series.titleRu}
                 fill
                 sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 256px"
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              {formatAge(series.ageRating) && (
+              {formatAge(view.ageRating) && (
                 <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-black/70 text-white ring-1 ring-white/20">
-                  {formatAge(series.ageRating)}
+                  {formatAge(view.ageRating)}
                 </span>
               )}
             </div>
@@ -255,7 +279,7 @@ export function SeriesDetailClient({
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
               <Badge variant="series">СЕРИАЛ</Badge>
               {series.isNew && <Badge variant="new">НОВИНКА</Badge>}
-              <ReleaseStatusBadge status={series.releaseStatus} showReleased />
+              <ReleaseStatusBadge status={view.releaseStatus} showReleased />
               {series.genres.map((g, idx) => (
                 <GenreChip key={idx} label={g} />
               ))}
@@ -267,27 +291,27 @@ export function SeriesDetailClient({
             <p className="text-[#8E8E98] text-sm mb-4 font-medium">{series.titleEn}</p>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 mb-5 text-sm text-[#A1A1AA]">
-              <StarRating rating={series.rating} />
+              <StarRating rating={view.rating} />
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                {series.releaseYear || "—"}
+                {view.releaseYear || "—"}
               </span>
               <span className="flex items-center gap-1.5">
                 <Tv className="w-4 h-4" />
-                {series.seasons.length} {plural(series.seasons.length, ["сезон", "сезона", "сезонов"])}
+                {seasonsCount} {plural(seasonsCount, ["сезон", "сезона", "сезонов"])}
               </span>
               <span className="text-[#8E8E98]">
                 {totalEpisodes} {plural(totalEpisodes, ["серия", "серии", "серий"])}
               </span>
-              {formatAge(series.ageRating) && (
+              {formatAge(view.ageRating) && (
                 <span className="px-1.5 py-0.5 rounded border border-[#A1A1AA]/40 text-xs font-semibold">
-                  {formatAge(series.ageRating)}
+                  {formatAge(view.ageRating)}
                 </span>
               )}
             </div>
 
             <p className="text-[#A1A1AA] leading-relaxed mb-6 max-w-2xl line-clamp-4 sm:line-clamp-3 md:mx-0 mx-auto">
-              {series.description}
+              {view.description}
             </p>
 
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 md:justify-start">
@@ -339,14 +363,14 @@ export function SeriesDetailClient({
               Смотреть онлайн
             </h2>
 
-            {series.releaseStatus === "ongoing" && (
+            {view.releaseStatus === "ongoing" && (
               <p className="-mt-2 mb-4 text-sm text-[#8E8E98]">
                 Сериал ещё выходит — новые серии появляются по мере выхода.
               </p>
             )}
 
             {/* Связанные сезоны (отдельные записи франшизы) */}
-            <SeasonSwitcher seasons={series.seasons} activeSeason={activeSeason} onSelect={selectSeason} />
+            <SeasonSwitcher seasons={series.seasons} activeKey={activeKey} onSelect={selectSeason} />
 
             {/* Плеер. На телефоне «прилипает» под шапкой, пока листаешь серии. */}
             <div
@@ -356,7 +380,7 @@ export function SeriesDetailClient({
                 activeEpisode && "sticky top-16 shadow-[0_12px_24px_-12px_rgba(0,0,0,0.9)] lg:static lg:shadow-none",
               )}
             >
-              <VideoPlayer embedUrl={safeEmbedUrl} episodeNumber={activeEpisodeNumber} ageRating={series.ageRating} onEnded={handleEnded} />
+              <VideoPlayer embedUrl={safeEmbedUrl} episodeNumber={activeEpisodeNumber} ageRating={view.ageRating} onEnded={handleEnded} />
 
               {activeEpisode && (
                 <div className="mt-3 flex items-center gap-2">

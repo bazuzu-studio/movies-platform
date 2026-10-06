@@ -5,9 +5,9 @@
 # Основан на https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 #
 # ВАЖНО: это монорепозиторий (Turborepo + pnpm workspaces).
-# Приложение CMS лежит в apps/cms/, а lock-файл — в корне.
+# Приложение CMS лежит в/, а lock-файл — в корне.
 # Next.js standalone сохраняет структуру монорепозитория:
-# server.js оказывается в .next/standalone/apps/cms/server.js,
+# server.js оказывается в .next/standalone/server.js,
 # а не в .next/standalone/server.js.
 
 ARG NODE_VERSION=22
@@ -47,19 +47,19 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 COPY . .
 
 # Папка public может отсутствовать в репозитории — runner копирует её целиком.
-RUN mkdir -p apps/cms/public
+RUN mkdir -p ./public
 
 # ─────────────────────────────────────────────
-# Сборка из apps/cms, чтобы Next.js нашёл next.config.ts
+# Сборка из, чтобы Next.js нашёл next.config.ts
 # и корректно создал server.js с output: 'standalone'
 # ─────────────────────────────────────────────
-WORKDIR /app/apps/cms
+WORKDIR /app
 
 # Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
 # на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
 ARG BUILD_MEMORY_MB=4096
 # Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
-RUN --mount=type=cache,id=next-cache-cms,target=/app/apps/cms/.next/cache \
+RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
   pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
 
 # ─────────────────────────────────────────────
@@ -78,15 +78,15 @@ RUN addgroup --system --gid 1001 nodejs \
 WORKDIR /app
 
 # standalone-сборка целиком. В монорепозитории внутри будет:
-#   /app/apps/cms/server.js
-#   /app/apps/cms/node_modules/   (минимальный набор)
+#   /app/server.js
+#   /app/node_modules/   (минимальный набор)
 #   /app/node_modules/            (общие зависимости)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# Статика и public — рядом с server.js, в apps/cms/.
+# Статика и public — рядом с server.js, в/.
 # Next.js ищет .next/static и public относительно server.js.
-COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/static ./apps/cms/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/public ./apps/cms/public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 RUN chown -R nextjs:nodejs /app
 
@@ -99,5 +99,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/api/health" || exit 1
 
 # В монорепозитории server.js лежит в apps/cms/
-WORKDIR /app/apps/cms
+WORKDIR /app
 CMD ["node", "server.js"]

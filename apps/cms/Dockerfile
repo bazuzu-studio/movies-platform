@@ -1,56 +1,42 @@
 # syntax=docker/dockerfile:1
-#
-# [Dokploy] Production-образ Payload CMS (Next.js standalone) для Dokploy.
-# Требует `output: 'standalone'` в next.config.ts (уже включено).
-# Основан на https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-ARG NODE_VERSION=22
+# ─────────────────────────────────────────────
+# Base: установка Node.js и pnpm
+# ─────────────────────────────────────────────
+FROM node:22-alpine AS base
 ARG PNPM_VERSION=10.34.5
 
-# ─────────────────────────────────────────────
-# base: общая основа (Node + pnpm)
-# ─────────────────────────────────────────────
-FROM node:${NODE_VERSION}-alpine AS base
-ARG PNPM_VERSION
-# libc6-compat нужен нативным зависимостям (sharp и др.) на Alpine (musl).
-RUN apk add --no-cache libc6-compat \
-  && npm install -g pnpm@${PNPM_VERSION}
+RUN npm install -g pnpm@${PNPM_VERSION}
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # ─────────────────────────────────────────────
-# builder: зависимости + сборка Next.js
-#
-# Зависимости ставятся В ЭТОЙ ЖЕ стадии (а не копируются из отдельной `deps`):
-# node_modules у Payload — десятки тысяч файлов-симлинков, и COPY --from между
-# стадиями занимал ~18 с на каждой сборке. Слой с install по-прежнему кэшируется,
-# пока не менялись package.json / pnpm-lock.yaml / pnpm-workspace.yaml.
-#
-# Runtime-переменные (DATABASE_URL, S3_*, PAYLOAD_SECRET, ...) для сборки
-# НЕ нужны: на этом этапе к БД никто не обращается, а S3-конфиг использует
-# заглушки (см. src/lib/storage/s3.ts). Они подставляются при запуске контейнера.
+# Builder: сборка проекта
 # ─────────────────────────────────────────────
 FROM base AS builder
 WORKDIR /app
 
+# Копируем основные файлы для установки зависимостей
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-  pnpm install --frozen-lockfile --prefer-offline
 
+# Монтируем кеш pnpm
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
+
+# Копируем весь проект
 COPY . .
-# Папка public может отсутствовать в репозитории — runner копирует её целиком.
+
+# Создаём публичную папку (если её нет)
 RUN mkdir -p public
 
-# Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
-# на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
+# Сборка Next.js с лимитом памяти
 ARG BUILD_MEMORY_MB=4096
-# Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
-RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
-  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
+RUN --mount=type=cache,id=next-cache,target=/app/.next/cache \
+    pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
 
 # ─────────────────────────────────────────────
-# runner: минимальный образ для запуска
+# Runner: финальный образ для запуска
 # ─────────────────────────────────────────────
-FROM node:${NODE_VERSION}-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
@@ -58,26 +44,22 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
+# Монтируем кеш для статических файлов
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
-
-# Каталог для кэша Next.js (пререндер, оптимизация изображений)
-RUN mkdir .next && chown nextjs:nodejs .next
-
-# standalone-сборка + статика. Миграции БД применяются самим приложением
-# при старте (prodMigrations в src/payload.config.ts).
+# Копируем standalone сборку и статические файлы
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
 EXPOSE 3000
 
-# start-period с запасом: при первом старте применяются миграции.
+# Проверка здоровья
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/api/health" || exit 1
 
-# server.js создаётся `next build` (output: 'standalone')
+# Запуск сервера
 CMD ["node", "server.js"]

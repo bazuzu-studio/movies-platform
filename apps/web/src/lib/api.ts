@@ -409,6 +409,10 @@ export async function getContentBySlug(
       raw.poster.url = normalizeImageUrl(raw.poster.url);
     }
 
+    if (raw.meta?.image?.url) {
+      raw.meta.image.url = normalizeImageUrl(raw.meta.image.url);
+    }
+
     const item = mapContentToItem(raw);
 
     if (item?.type === "series") {

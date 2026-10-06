@@ -1,10 +1,18 @@
 import { richTextToPlainText } from "./richtext";
 import { parseReleaseStatus } from "./release-status";
 import { episodeReleaseDate, episodeTitle } from "./episode";
-import type { ContentItem, Episode, Movie, Season, Series } from "./types";
+import type { ContentItem, Episode, Movie, Season, SeoMeta, Series } from "./types";
 
 export interface RawContent {
   id: number;
+
+  /** SEO-плагин CMS: content.meta. */
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: { url?: string | null } | null;
+  } | null;
+
   type: "movie" | "series";
 
   titleEn: string;
@@ -166,6 +174,13 @@ const POPULAR_RATING_THRESHOLD = 7.5;
   */
 const NEW_ARRIVAL_YEARS_WINDOW = 1;
 
+function mapSeo(meta: RawContent["meta"]): SeoMeta | undefined {
+  const title = meta?.title?.trim() || undefined;
+  const description = meta?.description?.trim() || undefined;
+  const imageUrl = meta?.image?.url || undefined;
+  return title || description || imageUrl ? { title, description, imageUrl } : undefined;
+}
+
 function mapBaseFields(raw: RawContent) {
   const currentYear = new Date().getFullYear();
 
@@ -189,6 +204,7 @@ function mapBaseFields(raw: RawContent) {
     isPopular: (raw.rating ?? 0) >= POPULAR_RATING_THRESHOLD,
     poster: mapMedia(raw.poster),
     backdrop: mapMedia(raw.backdrop),
+    seo: mapSeo(raw.meta),
     kinopoiskId: raw.kinopoiskId ?? undefined,
     franchiseId: raw.franchiseId ?? undefined,
     // Это поле теперь обязательно в типах Movie/Series — добавляем его сюда,

@@ -31,6 +31,15 @@ query GetContentBySlug($slug: String!) {
       ageRating
       releaseStatus
       playerLink
+
+      # SEO-плагин CMS (@payloadcms/plugin-seo): заполняется пайплайном/редакторами
+      meta {
+        title
+        description
+        image {
+          url
+        }
+      }
     }
   }
 }

@@ -42,10 +42,12 @@ export type Content = {
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['JSON']['output']>;
   duration?: Maybe<Scalars['Float']['output']>;
+  franchiseId?: Maybe<Scalars['String']['output']>;
   genres?: Maybe<Array<Genre>>;
   id: Scalars['Int']['output'];
   kinopoiskId?: Maybe<Scalars['String']['output']>;
   kodikId?: Maybe<Scalars['String']['output']>;
+  meta?: Maybe<Content_Meta>;
   originalTitle?: Maybe<Scalars['String']['output']>;
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
@@ -108,9 +110,11 @@ export type ContentDocAccessFields = {
   createdAt?: Maybe<ContentDocAccessFields_CreatedAt>;
   description?: Maybe<ContentDocAccessFields_Description>;
   duration?: Maybe<ContentDocAccessFields_Duration>;
+  franchiseId?: Maybe<ContentDocAccessFields_FranchiseId>;
   genres?: Maybe<ContentDocAccessFields_Genres>;
   kinopoiskId?: Maybe<ContentDocAccessFields_KinopoiskId>;
   kodikId?: Maybe<ContentDocAccessFields_KodikId>;
+  meta?: Maybe<ContentDocAccessFields_Meta>;
   originalTitle?: Maybe<ContentDocAccessFields_OriginalTitle>;
   playerLink?: Maybe<ContentDocAccessFields_PlayerLink>;
   poster?: Maybe<ContentDocAccessFields_Poster>;
@@ -295,6 +299,34 @@ export type ContentDocAccessFields_Duration_Update = {
   permission: Scalars['Boolean']['output'];
 };
 
+export type ContentDocAccessFields_FranchiseId = {
+  __typename?: 'ContentDocAccessFields_franchiseId';
+  create?: Maybe<ContentDocAccessFields_FranchiseId_Create>;
+  delete?: Maybe<ContentDocAccessFields_FranchiseId_Delete>;
+  read?: Maybe<ContentDocAccessFields_FranchiseId_Read>;
+  update?: Maybe<ContentDocAccessFields_FranchiseId_Update>;
+};
+
+export type ContentDocAccessFields_FranchiseId_Create = {
+  __typename?: 'ContentDocAccessFields_franchiseId_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_FranchiseId_Delete = {
+  __typename?: 'ContentDocAccessFields_franchiseId_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_FranchiseId_Read = {
+  __typename?: 'ContentDocAccessFields_franchiseId_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_FranchiseId_Update = {
+  __typename?: 'ContentDocAccessFields_franchiseId_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
 export type ContentDocAccessFields_Genres = {
   __typename?: 'ContentDocAccessFields_genres';
   create?: Maybe<ContentDocAccessFields_Genres_Create>;
@@ -376,6 +408,126 @@ export type ContentDocAccessFields_KodikId_Read = {
 
 export type ContentDocAccessFields_KodikId_Update = {
   __typename?: 'ContentDocAccessFields_kodikId_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta = {
+  __typename?: 'ContentDocAccessFields_meta';
+  create?: Maybe<ContentDocAccessFields_Meta_Create>;
+  delete?: Maybe<ContentDocAccessFields_Meta_Delete>;
+  fields?: Maybe<ContentDocAccessFields_Meta_Fields>;
+  read?: Maybe<ContentDocAccessFields_Meta_Read>;
+  update?: Maybe<ContentDocAccessFields_Meta_Update>;
+};
+
+export type ContentDocAccessFields_Meta_Create = {
+  __typename?: 'ContentDocAccessFields_meta_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Delete = {
+  __typename?: 'ContentDocAccessFields_meta_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Fields = {
+  __typename?: 'ContentDocAccessFields_meta_Fields';
+  description?: Maybe<ContentDocAccessFields_Meta_Description>;
+  image?: Maybe<ContentDocAccessFields_Meta_Image>;
+  title?: Maybe<ContentDocAccessFields_Meta_Title>;
+};
+
+export type ContentDocAccessFields_Meta_Read = {
+  __typename?: 'ContentDocAccessFields_meta_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Update = {
+  __typename?: 'ContentDocAccessFields_meta_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Description = {
+  __typename?: 'ContentDocAccessFields_meta_description';
+  create?: Maybe<ContentDocAccessFields_Meta_Description_Create>;
+  delete?: Maybe<ContentDocAccessFields_Meta_Description_Delete>;
+  read?: Maybe<ContentDocAccessFields_Meta_Description_Read>;
+  update?: Maybe<ContentDocAccessFields_Meta_Description_Update>;
+};
+
+export type ContentDocAccessFields_Meta_Description_Create = {
+  __typename?: 'ContentDocAccessFields_meta_description_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Description_Delete = {
+  __typename?: 'ContentDocAccessFields_meta_description_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Description_Read = {
+  __typename?: 'ContentDocAccessFields_meta_description_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Description_Update = {
+  __typename?: 'ContentDocAccessFields_meta_description_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Image = {
+  __typename?: 'ContentDocAccessFields_meta_image';
+  create?: Maybe<ContentDocAccessFields_Meta_Image_Create>;
+  delete?: Maybe<ContentDocAccessFields_Meta_Image_Delete>;
+  read?: Maybe<ContentDocAccessFields_Meta_Image_Read>;
+  update?: Maybe<ContentDocAccessFields_Meta_Image_Update>;
+};
+
+export type ContentDocAccessFields_Meta_Image_Create = {
+  __typename?: 'ContentDocAccessFields_meta_image_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Image_Delete = {
+  __typename?: 'ContentDocAccessFields_meta_image_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Image_Read = {
+  __typename?: 'ContentDocAccessFields_meta_image_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Image_Update = {
+  __typename?: 'ContentDocAccessFields_meta_image_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Title = {
+  __typename?: 'ContentDocAccessFields_meta_title';
+  create?: Maybe<ContentDocAccessFields_Meta_Title_Create>;
+  delete?: Maybe<ContentDocAccessFields_Meta_Title_Delete>;
+  read?: Maybe<ContentDocAccessFields_Meta_Title_Read>;
+  update?: Maybe<ContentDocAccessFields_Meta_Title_Update>;
+};
+
+export type ContentDocAccessFields_Meta_Title_Create = {
+  __typename?: 'ContentDocAccessFields_meta_title_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Title_Delete = {
+  __typename?: 'ContentDocAccessFields_meta_title_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Title_Read = {
+  __typename?: 'ContentDocAccessFields_meta_title_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentDocAccessFields_Meta_Title_Update = {
+  __typename?: 'ContentDocAccessFields_meta_title_Update';
   permission: Scalars['Boolean']['output'];
 };
 
@@ -779,9 +931,11 @@ export type ContentFields = {
   createdAt?: Maybe<ContentFields_CreatedAt>;
   description?: Maybe<ContentFields_Description>;
   duration?: Maybe<ContentFields_Duration>;
+  franchiseId?: Maybe<ContentFields_FranchiseId>;
   genres?: Maybe<ContentFields_Genres>;
   kinopoiskId?: Maybe<ContentFields_KinopoiskId>;
   kodikId?: Maybe<ContentFields_KodikId>;
+  meta?: Maybe<ContentFields_Meta>;
   originalTitle?: Maybe<ContentFields_OriginalTitle>;
   playerLink?: Maybe<ContentFields_PlayerLink>;
   poster?: Maybe<ContentFields_Poster>;
@@ -966,6 +1120,34 @@ export type ContentFields_Duration_Update = {
   permission: Scalars['Boolean']['output'];
 };
 
+export type ContentFields_FranchiseId = {
+  __typename?: 'ContentFields_franchiseId';
+  create?: Maybe<ContentFields_FranchiseId_Create>;
+  delete?: Maybe<ContentFields_FranchiseId_Delete>;
+  read?: Maybe<ContentFields_FranchiseId_Read>;
+  update?: Maybe<ContentFields_FranchiseId_Update>;
+};
+
+export type ContentFields_FranchiseId_Create = {
+  __typename?: 'ContentFields_franchiseId_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_FranchiseId_Delete = {
+  __typename?: 'ContentFields_franchiseId_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_FranchiseId_Read = {
+  __typename?: 'ContentFields_franchiseId_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_FranchiseId_Update = {
+  __typename?: 'ContentFields_franchiseId_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
 export type ContentFields_Genres = {
   __typename?: 'ContentFields_genres';
   create?: Maybe<ContentFields_Genres_Create>;
@@ -1047,6 +1229,126 @@ export type ContentFields_KodikId_Read = {
 
 export type ContentFields_KodikId_Update = {
   __typename?: 'ContentFields_kodikId_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta = {
+  __typename?: 'ContentFields_meta';
+  create?: Maybe<ContentFields_Meta_Create>;
+  delete?: Maybe<ContentFields_Meta_Delete>;
+  fields?: Maybe<ContentFields_Meta_Fields>;
+  read?: Maybe<ContentFields_Meta_Read>;
+  update?: Maybe<ContentFields_Meta_Update>;
+};
+
+export type ContentFields_Meta_Create = {
+  __typename?: 'ContentFields_meta_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Delete = {
+  __typename?: 'ContentFields_meta_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Fields = {
+  __typename?: 'ContentFields_meta_Fields';
+  description?: Maybe<ContentFields_Meta_Description>;
+  image?: Maybe<ContentFields_Meta_Image>;
+  title?: Maybe<ContentFields_Meta_Title>;
+};
+
+export type ContentFields_Meta_Read = {
+  __typename?: 'ContentFields_meta_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Update = {
+  __typename?: 'ContentFields_meta_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Description = {
+  __typename?: 'ContentFields_meta_description';
+  create?: Maybe<ContentFields_Meta_Description_Create>;
+  delete?: Maybe<ContentFields_Meta_Description_Delete>;
+  read?: Maybe<ContentFields_Meta_Description_Read>;
+  update?: Maybe<ContentFields_Meta_Description_Update>;
+};
+
+export type ContentFields_Meta_Description_Create = {
+  __typename?: 'ContentFields_meta_description_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Description_Delete = {
+  __typename?: 'ContentFields_meta_description_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Description_Read = {
+  __typename?: 'ContentFields_meta_description_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Description_Update = {
+  __typename?: 'ContentFields_meta_description_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Image = {
+  __typename?: 'ContentFields_meta_image';
+  create?: Maybe<ContentFields_Meta_Image_Create>;
+  delete?: Maybe<ContentFields_Meta_Image_Delete>;
+  read?: Maybe<ContentFields_Meta_Image_Read>;
+  update?: Maybe<ContentFields_Meta_Image_Update>;
+};
+
+export type ContentFields_Meta_Image_Create = {
+  __typename?: 'ContentFields_meta_image_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Image_Delete = {
+  __typename?: 'ContentFields_meta_image_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Image_Read = {
+  __typename?: 'ContentFields_meta_image_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Image_Update = {
+  __typename?: 'ContentFields_meta_image_Update';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Title = {
+  __typename?: 'ContentFields_meta_title';
+  create?: Maybe<ContentFields_Meta_Title_Create>;
+  delete?: Maybe<ContentFields_Meta_Title_Delete>;
+  read?: Maybe<ContentFields_Meta_Title_Read>;
+  update?: Maybe<ContentFields_Meta_Title_Update>;
+};
+
+export type ContentFields_Meta_Title_Create = {
+  __typename?: 'ContentFields_meta_title_Create';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Title_Delete = {
+  __typename?: 'ContentFields_meta_title_Delete';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Title_Read = {
+  __typename?: 'ContentFields_meta_title_Read';
+  permission: Scalars['Boolean']['output'];
+};
+
+export type ContentFields_Meta_Title_Update = {
+  __typename?: 'ContentFields_meta_title_Update';
   permission: Scalars['Boolean']['output'];
 };
 
@@ -1518,9 +1820,11 @@ export type ContentVersion_Version = {
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['JSON']['output']>;
   duration?: Maybe<Scalars['Float']['output']>;
+  franchiseId?: Maybe<Scalars['String']['output']>;
   genres?: Maybe<Array<Genre>>;
   kinopoiskId?: Maybe<Scalars['String']['output']>;
   kodikId?: Maybe<Scalars['String']['output']>;
+  meta?: Maybe<ContentVersion_Version_Meta>;
   originalTitle?: Maybe<Scalars['String']['output']>;
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
@@ -1551,6 +1855,13 @@ export type ContentVersion_VersionSeasonsArgs = {
   where?: InputMaybe<Season_Where>;
 };
 
+export type ContentVersion_Version_Meta = {
+  __typename?: 'ContentVersion_Version_Meta';
+  description?: Maybe<Scalars['String']['output']>;
+  image?: Maybe<Media>;
+  title?: Maybe<Scalars['String']['output']>;
+};
+
 export type ContentVersion_Version_Seasons = {
   __typename?: 'ContentVersion_Version_Seasons';
   docs: Array<Season>;
@@ -1574,6 +1885,13 @@ export type ContentVersion_Version_Status =
 export type ContentVersion_Version_Type =
   | 'movie'
   | 'series';
+
+export type Content_Meta = {
+  __typename?: 'Content_Meta';
+  description?: Maybe<Scalars['String']['output']>;
+  image?: Maybe<Media>;
+  title?: Maybe<Scalars['String']['output']>;
+};
 
 export type Content_Seasons = {
   __typename?: 'Content_Seasons';
@@ -1651,6 +1969,17 @@ export type Content_Duration_Operator = {
   not_equals?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type Content_FranchiseId_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
 export type Content_Genres_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
   equals?: InputMaybe<Scalars['JSON']['input']>;
@@ -1682,6 +2011,34 @@ export type Content_KinopoiskId_Operator = {
 };
 
 export type Content_KodikId_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type Content_Meta__Description_Operator = {
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Content_Meta__Image_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  equals?: InputMaybe<Scalars['JSON']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  not_equals?: InputMaybe<Scalars['JSON']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+};
+
+export type Content_Meta__Title_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contains?: InputMaybe<Scalars['String']['input']>;
   equals?: InputMaybe<Scalars['String']['input']>;
@@ -1867,10 +2224,14 @@ export type Content_Where = {
   createdAt?: InputMaybe<Content_CreatedAt_Operator>;
   description?: InputMaybe<Content_Description_Operator>;
   duration?: InputMaybe<Content_Duration_Operator>;
+  franchiseId?: InputMaybe<Content_FranchiseId_Operator>;
   genres?: InputMaybe<Content_Genres_Operator>;
   id?: InputMaybe<Content_Id_Operator>;
   kinopoiskId?: InputMaybe<Content_KinopoiskId_Operator>;
   kodikId?: InputMaybe<Content_KodikId_Operator>;
+  meta__description?: InputMaybe<Content_Meta__Description_Operator>;
+  meta__image?: InputMaybe<Content_Meta__Image_Operator>;
+  meta__title?: InputMaybe<Content_Meta__Title_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -1895,10 +2256,14 @@ export type Content_Where_And = {
   createdAt?: InputMaybe<Content_CreatedAt_Operator>;
   description?: InputMaybe<Content_Description_Operator>;
   duration?: InputMaybe<Content_Duration_Operator>;
+  franchiseId?: InputMaybe<Content_FranchiseId_Operator>;
   genres?: InputMaybe<Content_Genres_Operator>;
   id?: InputMaybe<Content_Id_Operator>;
   kinopoiskId?: InputMaybe<Content_KinopoiskId_Operator>;
   kodikId?: InputMaybe<Content_KodikId_Operator>;
+  meta__description?: InputMaybe<Content_Meta__Description_Operator>;
+  meta__image?: InputMaybe<Content_Meta__Image_Operator>;
+  meta__title?: InputMaybe<Content_Meta__Title_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -1923,10 +2288,14 @@ export type Content_Where_Or = {
   createdAt?: InputMaybe<Content_CreatedAt_Operator>;
   description?: InputMaybe<Content_Description_Operator>;
   duration?: InputMaybe<Content_Duration_Operator>;
+  franchiseId?: InputMaybe<Content_FranchiseId_Operator>;
   genres?: InputMaybe<Content_Genres_Operator>;
   id?: InputMaybe<Content_Id_Operator>;
   kinopoiskId?: InputMaybe<Content_KinopoiskId_Operator>;
   kodikId?: InputMaybe<Content_KodikId_Operator>;
+  meta__description?: InputMaybe<Content_Meta__Description_Operator>;
+  meta__image?: InputMaybe<Content_Meta__Image_Operator>;
+  meta__title?: InputMaybe<Content_Meta__Title_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -9210,9 +9579,11 @@ export type MutationContentInput = {
   createdAt?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['JSON']['input']>;
   duration?: InputMaybe<Scalars['Float']['input']>;
+  franchiseId?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   kinopoiskId?: InputMaybe<Scalars['String']['input']>;
   kodikId?: InputMaybe<Scalars['String']['input']>;
+  meta?: InputMaybe<MutationContent_MetaInput>;
   originalTitle?: InputMaybe<Scalars['String']['input']>;
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
@@ -9235,9 +9606,11 @@ export type MutationContentUpdateInput = {
   createdAt?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['JSON']['input']>;
   duration?: InputMaybe<Scalars['Float']['input']>;
+  franchiseId?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   kinopoiskId?: InputMaybe<Scalars['String']['input']>;
   kodikId?: InputMaybe<Scalars['String']['input']>;
+  meta?: InputMaybe<MutationContentUpdate_MetaInput>;
   originalTitle?: InputMaybe<Scalars['String']['input']>;
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
@@ -9251,6 +9624,18 @@ export type MutationContentUpdateInput = {
   titleRu?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<ContentUpdate_Type_MutationInput>;
   updatedAt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationContentUpdate_MetaInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['Int']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationContent_MetaInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['Int']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationEpisodeInput = {
@@ -9733,6 +10118,17 @@ export type VersionsContent_Version__Duration_Operator = {
   not_equals?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type VersionsContent_Version__FranchiseId_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
 export type VersionsContent_Version__Genres_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
   equals?: InputMaybe<Scalars['JSON']['input']>;
@@ -9754,6 +10150,34 @@ export type VersionsContent_Version__KinopoiskId_Operator = {
 };
 
 export type VersionsContent_Version__KodikId_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type VersionsContent_Version__Meta__Description_Operator = {
+  contains?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  like?: InputMaybe<Scalars['String']['input']>;
+  not_equals?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type VersionsContent_Version__Meta__Image_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  equals?: InputMaybe<Scalars['JSON']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  not_equals?: InputMaybe<Scalars['JSON']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+};
+
+export type VersionsContent_Version__Meta__Title_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contains?: InputMaybe<Scalars['String']['input']>;
   equals?: InputMaybe<Scalars['String']['input']>;
@@ -9918,9 +10342,13 @@ export type VersionsContent_Where = {
   version__createdAt?: InputMaybe<VersionsContent_Version__CreatedAt_Operator>;
   version__description?: InputMaybe<VersionsContent_Version__Description_Operator>;
   version__duration?: InputMaybe<VersionsContent_Version__Duration_Operator>;
+  version__franchiseId?: InputMaybe<VersionsContent_Version__FranchiseId_Operator>;
   version__genres?: InputMaybe<VersionsContent_Version__Genres_Operator>;
   version__kinopoiskId?: InputMaybe<VersionsContent_Version__KinopoiskId_Operator>;
   version__kodikId?: InputMaybe<VersionsContent_Version__KodikId_Operator>;
+  version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
+  version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
+  version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -9950,9 +10378,13 @@ export type VersionsContent_Where_And = {
   version__createdAt?: InputMaybe<VersionsContent_Version__CreatedAt_Operator>;
   version__description?: InputMaybe<VersionsContent_Version__Description_Operator>;
   version__duration?: InputMaybe<VersionsContent_Version__Duration_Operator>;
+  version__franchiseId?: InputMaybe<VersionsContent_Version__FranchiseId_Operator>;
   version__genres?: InputMaybe<VersionsContent_Version__Genres_Operator>;
   version__kinopoiskId?: InputMaybe<VersionsContent_Version__KinopoiskId_Operator>;
   version__kodikId?: InputMaybe<VersionsContent_Version__KodikId_Operator>;
+  version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
+  version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
+  version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -9982,9 +10414,13 @@ export type VersionsContent_Where_Or = {
   version__createdAt?: InputMaybe<VersionsContent_Version__CreatedAt_Operator>;
   version__description?: InputMaybe<VersionsContent_Version__Description_Operator>;
   version__duration?: InputMaybe<VersionsContent_Version__Duration_Operator>;
+  version__franchiseId?: InputMaybe<VersionsContent_Version__FranchiseId_Operator>;
   version__genres?: InputMaybe<VersionsContent_Version__Genres_Operator>;
   version__kinopoiskId?: InputMaybe<VersionsContent_Version__KinopoiskId_Operator>;
   version__kodikId?: InputMaybe<VersionsContent_Version__KodikId_Operator>;
+  version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
+  version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
+  version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -10014,6 +10450,10 @@ export type VersionsContents = {
   totalDocs: Scalars['Int']['output'];
   totalPages: Scalars['Int']['output'];
 };
+
+
+
+
 
 
 
@@ -10136,7 +10576,7 @@ export type GetContentBySlugQueryVariables = Exact<{
 }>;
 
 
-export type GetContentBySlugQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, originalTitle: string | null, slug: string | null, description: unknown, releaseYear: number | null, kinopoiskId: string | null, franchiseId: string | null, duration: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, playerLink: string | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null }> } | null }> } | null }> } | null };
+export type GetContentBySlugQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, originalTitle: string | null, slug: string | null, description: unknown, releaseYear: number | null, kinopoiskId: string | null, franchiseId: string | null, duration: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, playerLink: string | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null, genres: Array<{ id: number, title: string, slug: string }> | null, meta: { title: string | null, description: string | null, image: { url: string | null } | null } | null }> } | null };
 
 export type GetContentQueryVariables = Exact<{
   limit?: number | null | undefined;
@@ -10207,7 +10647,7 @@ export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"O
 export const ResetPasswordUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResetPasswordUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resetPasswordUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"token"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<ResetPasswordUserMutation, ResetPasswordUserMutationVariables>;
 export const UpdateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}}]}}]} as unknown as DocumentNode<UpdateUserMutation, UpdateUserMutationVariables>;
 export const GetContentIdsByKinopoiskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentIdsByKinopoisk"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"kinopoiskId"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentIdsByKinopoiskQuery, GetContentIdsByKinopoiskQueryVariables>;
-export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"kinopoiskId"}},{"kind":"Field","name":{"kind":"Name","value":"franchiseId"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
+export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"kinopoiskId"}},{"kind":"Field","name":{"kind":"Name","value":"franchiseId"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"image"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
 export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalDocs"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
 export const GetGenresDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetGenres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Genres"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"title","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]} as unknown as DocumentNode<GetGenresQuery, GetGenresQueryVariables>;
 export const GetSimilarContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSimilarContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]} as unknown as DocumentNode<GetSimilarContentQuery, GetSimilarContentQueryVariables>;

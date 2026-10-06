@@ -77,6 +77,13 @@ export interface Season {
 /*                                Base Content                                */
 /* -------------------------------------------------------------------------- */
 
+/** Мета-данные страницы, заданные в CMS (content.meta). */
+export interface SeoMeta {
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+}
+
 export interface BaseContent {
   id: number | string;
 
@@ -112,6 +119,9 @@ export interface BaseContent {
 
   poster: Media;
   backdrop: Media;
+
+  /** SEO-поля из CMS (плагин SEO): заголовок, описание, картинка. Могут быть пустыми. */
+  seo?: SeoMeta;
 
 
   director?: string;

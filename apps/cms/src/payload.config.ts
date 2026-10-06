@@ -36,21 +36,22 @@ import type { GenerateTitle, GenerateDescription, GenerateURL } from '@payloadcm
 
 // SEO: заголовок/описание/URL для мета-тегов. Если мета-поля не заполнены,
 // фронтенд может использовать эти же правила как fallback.
-// ВНИМАНИЕ: путь страницы на фронтенде (`/movies/...`, `/series/...`) —
-// предположение, поправьте под реальные маршруты apps/web.
-const SITE_NAME = 'Otakuum'
 
 const generateTitle: GenerateTitle = ({ doc }) =>
-  doc?.titleRu ? `${doc.titleRu} — смотреть онлайн | ${SITE_NAME}` : SITE_NAME
+  // Суффикс « · otakuum» фронтенд добавляет сам (title.template в layout.tsx).
+  doc?.titleRu
+    ? `${doc.titleRu}${doc.releaseYear ? ` (${doc.releaseYear})` : ''} — смотреть онлайн`
+    : 'otakuum'
 
 const generateDescription: GenerateDescription = ({ doc }) => {
   const year = doc?.releaseYear ? ` (${doc.releaseYear})` : ''
-  return doc?.titleRu ? `${doc.titleRu}${year} — смотреть онлайн на ${SITE_NAME}.` : ''
+  return doc?.titleRu ? `${doc.titleRu}${year} — смотреть онлайн на otakuum.` : ''
 }
 
 const generateURL: GenerateURL = ({ doc }) => {
   const base = frontendURLs[0] ?? cmsURL
-  const section = doc?.type === 'movie' ? 'movies' : 'series'
+  // Маршруты фронтенда: /movie/[slug] и /series/[slug]
+  const section = doc?.type === 'movie' ? 'movie' : 'series'
   return `${base}/${section}/${doc?.slug ?? ''}`
 }
 
@@ -157,6 +158,8 @@ export default buildConfig({
     seoPlugin({
       collections: ['content'],
       uploadsCollection: 'media',
+      // Вкладка «SEO» рядом с остальными вкладками формы Content.
+      tabbedUI: true,
       generateTitle,
       generateDescription,
       generateURL,

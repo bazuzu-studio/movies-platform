@@ -28,12 +28,13 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_local_data:/data
+    # ИСПРАВЛЕНИЕ 1: Использование встроенного в SILO хелсчека
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      test: ["CMD", "silo", "healthcheck", "ready"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   minio-init:
     image: docker.io/pgsty/silo:latest
@@ -52,93 +53,14 @@ services:
         set -eu
         echo "Waiting for MinIO to be fully ready..."
         for i in $(seq 1 30); do
-          mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" && break
+          mcli alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" && break
           echo "MinIO not ready yet (attempt $$i/30), retrying in 2s..."
           sleep 2
         done
-        mc mb --ignore-existing "local/$$S3_BUCKET"
-        mc anonymous set download "local/$$S3_BUCKET"
-
-
-  cms:
-    build:
-      context: ./apps/cms
-      dockerfile: Dockerfile.dev
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio-init:
-        condition: service_completed_successfully
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-movhub}
-      PAYLOAD_SECRET: ${PAYLOAD_SECRET:-local-development-secret-change-me}
-      CMS_URL: http://localhost:4000
-      FRONTEND_URL: http://localhost:3000
-      PORT: 4000
-      COOKIE_DOMAIN: ""
-      S3_BUCKET: ${S3_BUCKET:-media}
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: ${S3_REGION:-us-east-1}
-      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
-      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-supersecretpassword}
-      S3_PUBLIC_URL: http://localhost:${MINIO_API_PORT:-9000}/${S3_BUCKET:-media}
-      GRAPHQL_INTROSPECTION: "true"
-      CONTENT_PUBLIC_DRAFTS: "false"
-      REVALIDATE_URL: http://web:3000
-      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-local-revalidate-secret}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_SECURE: ${SMTP_SECURE:-false}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-no-reply@localhost}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-MovHub Local}
-      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-}
-      TRUSTED_PROXY_HOPS: "0"
-      WATCHPACK_POLLING: "true"
-      CHOKIDAR_USEPOLLING: "true"
-    ports:
-      - "4000:4000"
-    volumes:
-      - ./apps/cms:/app
-      - cms_node_modules:/app/node_modules
-      - cms_next:/app/.next
-    command: pnpm dev
-    init: true
-
-  web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
-    restart: unless-stopped
-    depends_on:
-      - cms
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      NEXT_PUBLIC_GRAPHQL_API_URL: http://localhost:4000/api/graphql
-      GRAPHQL_API_URL: http://cms:4000/api/graphql
-      S3_PUBLIC_URL: http://localhost:${MINIO_API_PORT:-9000}/${S3_BUCKET:-media}
-      S3_INTERNAL_URL: http://minio:9000/${S3_BUCKET:-media}   # ← ДОБАВИТЬ
-      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-local-revalidate-secret}
-      WATCHPACK_POLLING: "true"
-      CHOKIDAR_USEPOLLING: "true"
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./apps/web:/app
-      - web_node_modules:/app/node_modules
-      - web_next:/app/.next
-    command: pnpm dev
-    init: true
+        mcli mb --ignore-existing "local/$$S3_BUCKET"
+        # ИСПРАВЛЕНО: Новый синтаксис для установки публичного доступа (Read-Only)
+        mcli policy set download "local/$$S3_BUCKET"
 
 volumes:
   postgres_local_data:
   minio_local_data:
-  cms_node_modules:
-  cms_next:
-  web_node_modules:
-  web_next:

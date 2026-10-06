@@ -1,5 +1,5 @@
-import { formatAge, isAgeGated } from "@/lib/age";
 import { contentJsonLd, jsonLdString } from "@/lib/jsonld";
+import { buildContentMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -40,22 +40,8 @@ export async function generateMetadata({
     return {};
   }
 
-  const gated = isAgeGated(series.ageRating);
-  const age = formatAge(series.ageRating);
-
-  return {
-    title: series.titleRu,
-    description: series.description,
-    other: age ? { rating: age } : undefined,
-    openGraph: {
-      title: `${series.titleRu} (${series.releaseYear})`,
-      description: series.description,
-      images: !gated && series.backdrop?.url
-        ? [{ url: series.backdrop.url }]
-        : [],
-      type: "video.tv_show",
-    },
-  };
+  // SEO-поля из CMS (content.meta) с fallback на данные тайтла.
+  return buildContentMetadata(series);
 }
 
 export default async function SeriesPage({

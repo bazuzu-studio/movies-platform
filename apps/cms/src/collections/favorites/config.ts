@@ -80,6 +80,7 @@ const preventDuplicateFavorite: CollectionConfig['hooks'] = {
 export const Favorites: CollectionConfig = {
   slug: 'favorites',
   admin: {
+    group: 'Пользователи',
     useAsTitle: 'id',
     defaultColumns: ['user', 'content', 'createdAt'],
   },

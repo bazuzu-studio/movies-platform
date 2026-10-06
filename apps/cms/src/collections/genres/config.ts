@@ -6,6 +6,7 @@ import type { CollectionConfig } from 'payload'
 export const Genres: CollectionConfig = {
   slug: 'genres',
   admin: {
+    group: 'Каталог',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug'],
   },

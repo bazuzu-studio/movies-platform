@@ -74,6 +74,9 @@ export default async function HomePage() {
     newArrivals[0] ??
     movies[0];
 
+    console.log(popular);
+    
+
   return (
     <HomeClient
       heroItem={heroItem}

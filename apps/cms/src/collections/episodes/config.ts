@@ -6,6 +6,7 @@ import { revalidateAfterChange, revalidateAfterDelete } from '@/hooks/revalidate
 export const Episodes: CollectionConfig = {
   slug: 'episodes',
   admin: {
+    group: 'Каталог',
     useAsTitle: 'title',
     defaultColumns: ['season', 'episodeNumber', 'title', 'airingAt'],
   },

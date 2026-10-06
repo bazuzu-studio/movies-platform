@@ -25,16 +25,10 @@ export const Content: CollectionConfig = {
   timestamps: true,
 
   admin: {
+    group: 'Каталог',
     useAsTitle: 'titleRu',
 
-    defaultColumns: [
-      'titleRu',
-      'titleEn',
-      'type',
-      'releaseYear',
-      'updatedAt',
-      'createdAt',
-    ],
+    defaultColumns: ['titleRu', 'titleEn', 'type', 'releaseYear', 'updatedAt', 'createdAt'],
   },
 
   access: {
@@ -61,51 +55,172 @@ export const Content: CollectionConfig = {
 
   fields: [
     {
-      name: 'type',
-      type: 'select',
-      required: true,
-      index: true,
-      options: [
-        { label: 'Фильм', value: 'movie' },
-        { label: 'Сериал', value: 'series' },
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Основное',
+          fields: [
+            {
+              name: 'type',
+              type: 'select',
+              required: true,
+              index: true,
+              options: [
+                { label: 'Фильм', value: 'movie' },
+                { label: 'Сериал', value: 'series' },
+              ],
+              admin: {
+                description: 'Определяет, какие поля/связи актуальны для записи',
+              },
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'titleRu',
+                  type: 'text',
+                  required: true,
+                  index: true,
+                  admin: {
+                    description:
+                      'Название на русском языке — отображается в интерфейсе по умолчанию',
+                  },
+                },
+                {
+                  name: 'titleEn',
+                  type: 'text',
+                  required: true,
+                  // Не unique: ремейки и одноимённые тайтлы («The Thing» 1982 и 2011)
+                  // иначе ломали импорт. Уникальность обеспечивает slug.
+                  index: true,
+                  admin: {
+                    description:
+                      'Название на английском языке — источник slug (может повторяться у разных тайтлов)',
+                  },
+                },
+              ],
+            },
+            {
+              name: 'originalTitle',
+              type: 'text',
+              admin: {
+                description: 'Оригинальное название, если отличается от titleEn',
+              },
+            },
+            {
+              name: 'description',
+              type: 'richText',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'releaseYear',
+                  type: 'number',
+                  required: true,
+                  index: true,
+                  admin: {
+                    description: 'Год выпуска (movie) или год начала выхода (series)',
+                  },
+                },
+                {
+                  name: 'rating',
+                  type: 'number',
+                  min: 0,
+                  max: 10,
+                  index: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Изображения',
+          description: 'Постер и фон тайтла',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'poster',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description: 'Постер (вертикальный)',
+                  },
+                },
+                {
+                  name: 'backdrop',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description: 'Фоновое изображение',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Воспроизведение',
+          description: 'Плеер фильма или сезоны сериала',
+          fields: [
+            {
+              name: 'duration',
+              type: 'number',
+              admin: {
+                description: 'Длительность в минутах (только для фильмов)',
+                condition: (data) => data?.type === 'movie',
+              },
+            },
+            {
+              name: 'playerLink',
+              type: 'text',
+              label: 'Ссылка на плеер',
+              admin: {
+                description: 'Прямая ссылка для встроенного плеера (только для фильмов)',
+                condition: (data) => data?.type === 'movie', // Показывать только если тип — фильм
+              },
+            },
+            {
+              name: 'seasons',
+              type: 'join',
+              collection: 'seasons',
+              on: 'content',
+              // По умолчанию join отдаёт только 10 документов — у длинных
+              // франшиз сезоны обрезались.
+              defaultLimit: 100,
+              defaultSort: 'seasonNumber',
+              admin: {
+                description: 'Связанные сезоны (обратная связь, только для сериалов)',
+                condition: (data) => data?.type === 'series',
+              },
+            },
+          ],
+        },
+        {
+          label: 'Служебное',
+          fields: [
+            {
+              name: 'status',
+              type: 'select',
+              required: true,
+              defaultValue: 'draft',
+              options: [
+                { label: 'Черновик', value: 'draft' },
+                { label: 'Опубликовано', value: 'published' },
+              ],
+              admin: {
+                description:
+                  'Устаревшее служебное поле. Видимость на сайте определяет _status (кнопки «Опубликовать» / «Черновик» в админке), а не это поле. Не путать со статусом релиза (releaseStatus)',
+              },
+            },
+          ],
+        },
       ],
-      admin: {
-        description: 'Определяет, какие поля/связи актуальны для записи',
-      },
     },
 
-    {
-      name: 'titleEn',
-      type: 'text',
-      required: true,
-      // Не unique: ремейки и одноимённые тайтлы («The Thing» 1982 и 2011)
-      // иначе ломали импорт. Уникальность обеспечивает slug.
-      index: true,
-      admin: {
-        description:
-          'Название на английском языке — источник slug (может повторяться у разных тайтлов)',
-      },
-    },
-
-    {
-      name: 'titleRu',
-      type: 'text',
-      required: true,
-      index: true,
-      admin: {
-        description:
-          'Название на русском языке — отображается в интерфейсе по умолчанию',
-      },
-    },
-
-    {
-      name: 'originalTitle',
-      type: 'text',
-      admin: {
-        description: 'Оригинальное название, если отличается от titleEn',
-      },
-    },
-
+    // Поля сайдбара — рядом с tabs (требование tabbedUI SEO-плагина).
     {
       name: 'slug',
       type: 'text',
@@ -122,9 +237,7 @@ export const Content: CollectionConfig = {
             if (value) return value
 
             const base =
-              slugify(data?.titleEn) ||
-              slugify(data?.titleRu) ||
-              slugify(data?.originalTitle)
+              slugify(data?.titleEn) || slugify(data?.titleRu) || slugify(data?.originalTitle)
 
             if (!base) return value
 
@@ -158,12 +271,6 @@ export const Content: CollectionConfig = {
         ],
       },
     },
-
-    {
-      name: 'description',
-      type: 'richText',
-    },
-
     {
       name: 'kinopoiskId',
       type: 'text',
@@ -173,7 +280,6 @@ export const Content: CollectionConfig = {
         description: 'Для дедупликации при импорте из Kodik',
       },
     },
-
     {
       name: 'shikimoriId',
       type: 'text',
@@ -183,7 +289,6 @@ export const Content: CollectionConfig = {
         description: 'Для дедупликации при импорте из Kodik',
       },
     },
-
     {
       name: 'kodikId',
       type: 'text',
@@ -193,7 +298,6 @@ export const Content: CollectionConfig = {
         description: 'ID материала в Kodik',
       },
     },
-
     {
       name: 'franchiseId',
       type: 'text',
@@ -204,27 +308,6 @@ export const Content: CollectionConfig = {
           'Идентификатор франшизы: записи (сезоны) с одинаковым значением показываются на сайте как сезоны одного сериала. Если пусто — используется kinopoiskId',
       },
     },
-
-    {
-      name: 'releaseYear',
-      type: 'number',
-      required: true,
-      index: true,
-      admin: {
-        description:
-          'Год выпуска (movie) или год начала выхода (series)',
-      },
-    },
-
-    {
-      name: 'duration',
-      type: 'number',
-      admin: {
-        description: 'Длительность в минутах (только для фильмов)',
-        condition: (data) => data?.type === 'movie',
-      },
-    },
-
     {
       name: 'genres',
       type: 'relationship',
@@ -234,27 +317,6 @@ export const Content: CollectionConfig = {
         position: 'sidebar',
       },
     },
-
-    {
-      name: 'rating',
-      type: 'number',
-      min: 0,
-      max: 10,
-      index: true,
-    },
-
-    // --- НОВОЕ ПОЛЕ: playerLink ---
-    {
-      name: 'playerLink',
-      type: 'text',
-      label: 'Ссылка на плеер',
-      admin: {
-        description: 'Прямая ссылка для встроенного плеера (только для фильмов)',
-        condition: (data) => data?.type === 'movie', // Показывать только если тип — фильм
-      },
-    },
-    // -----------------------------
-
     {
       name: 'ageRating',
       type: 'number',
@@ -265,18 +327,6 @@ export const Content: CollectionConfig = {
           'Возрастное ограничение (0, 6, 12, 16, 18). Источник: Kodik material_data.minimal_age',
       },
     },
-
-    /**
-     * Статус выхода: анонс / выходит / вышло.
-     *
-     * Источник — Kodik material_data.anime_status (аниме) или all_status
-     * (остальные сериалы). Значения совпадают со значениями Kodik, поэтому
-     * пайплайн (kodik-pipeline) пишет их в колонку release_status без
-     * преобразований. Команда `pipeline.py update-ongoing` использует поле,
-     * чтобы находить сериалы, у которых выходят новые серии.
-     *
-     * Не путать с `status` ниже — тот служебный (draft/published).
-     */
     {
       name: 'releaseStatus',
       type: 'select',
@@ -291,55 +341,6 @@ export const Content: CollectionConfig = {
         position: 'sidebar',
         description:
           'Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте',
-      },
-    },
-
-    {
-      name: 'poster',
-      type: 'upload',
-      relationTo: 'media',
-      admin: {
-        description: 'Постер (вертикальный)',
-      },
-    },
-
-    {
-      name: 'backdrop',
-      type: 'upload',
-      relationTo: 'media',
-      admin: {
-        description: 'Фоновое изображение',
-      },
-    },
-
-    {
-      name: 'seasons',
-      type: 'join',
-      collection: 'seasons',
-      on: 'content',
-      // По умолчанию join отдаёт только 10 документов — у длинных
-      // франшиз сезоны обрезались.
-      defaultLimit: 100,
-      defaultSort: 'seasonNumber',
-      admin: {
-        description:
-          'Связанные сезоны (обратная связь, только для сериалов)',
-        condition: (data) => data?.type === 'series',
-      },
-    },
-
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: [
-        { label: 'Черновик', value: 'draft' },
-        { label: 'Опубликовано', value: 'published' },
-      ],
-      admin: {
-        description:
-          'Устаревшее служебное поле. Видимость на сайте определяет _status (кнопки «Опубликовать» / «Черновик» в админке), а не это поле. Не путать со статусом релиза (releaseStatus)',
       },
     },
   ],

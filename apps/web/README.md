@@ -196,3 +196,10 @@ apps/web/
 2. Если файл `src/graphql/content/search-content.graphql` больше не нужен —
    удалите его и перегенерируйте типы (поиск его не использует).
 
+
+
+## SEO-метаданные из CMS
+
+Страницы `/movie/[slug]` и `/series/[slug]` берут `<title>`, description и OG/Twitter-картинку из SEO-полей CMS (`content.meta.title / description / image`, запрос `GetContentBySlug`), а если они пусты — из данных тайтла (`titleRu`, описание, `backdrop`/`poster`). Логика — `src/lib/seo.ts` (`buildContentMetadata`); также выставляются `canonical` и Twitter-карточка. Для 18+ картинка и ссылка на плеер в метаданные не попадают.
+
+После изменения GraphQL-запросов типы пересоздаются: `pnpm codegen` (нужна доступная CMS либо `CODEGEN_SCHEMA_URL`).

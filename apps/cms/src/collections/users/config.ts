@@ -27,6 +27,7 @@ const resetPasswordFrontendUrl = frontendURLs[0]
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
+    group: 'Пользователи',
     useAsTitle: 'email',
     defaultColumns: ['email', 'roles'], // что видно в списке в админ-панели
   },

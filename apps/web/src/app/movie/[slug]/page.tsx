@@ -6,8 +6,8 @@ import {
   getSimilarContent,
 } from "@/lib/api";
 import { MovieDetailClient } from "@/components/pages/MovieDetailClient";
-import { formatAge, isAgeGated } from "@/lib/age";
 import { contentJsonLd, jsonLdString } from "@/lib/jsonld";
+import { buildContentMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -40,39 +40,8 @@ export async function generateMetadata({
     return {};
   }
 
-  // Description приходит из richText-поля CMS
-  // и может быть пустым или слишком длинным.
-  const description = movie.description
-    ? movie.description.slice(0, 200)
-    : undefined;
-
-  const gated = isAgeGated(movie.ageRating);
-  const age = formatAge(movie.ageRating);
-
-  return {
-    title: movie.titleRu,
-    description,
-    // Возрастная маркировка в метаданных страницы.
-    other: age ? { rating: age } : undefined,
-
-    openGraph: {
-      title: `${movie.titleRu} (${movie.releaseYear})`,
-      description,
-
-      // Не передаём битую ссылку, если backdrop отсутствует.
-      // Для 18+ не отдаём превью и ссылку на плеер в соцсети/краулерам.
-      images: !gated && movie.backdrop.url
-        ? [{ url: movie.backdrop.url }]
-        : undefined,
-
-      // Ссылка на плеер (Kodik playerLink) — только для фильмов, где она есть.
-      videos: !gated && movie.playerLink
-        ? [{ url: movie.playerLink }]
-        : undefined,
-
-      type: "video.movie",
-    },
-  };
+  // SEO-поля из CMS (content.meta) с fallback на данные тайтла.
+  return buildContentMetadata(movie);
 }
 
 export default async function MoviePage({

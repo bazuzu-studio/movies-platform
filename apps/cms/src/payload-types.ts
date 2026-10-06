@@ -210,21 +210,17 @@ export interface Content {
    */
   type: 'movie' | 'series';
   /**
-   * Название на английском языке — источник slug (может повторяться у разных тайтлов)
-   */
-  titleEn: string;
-  /**
    * Название на русском языке — отображается в интерфейсе по умолчанию
    */
   titleRu: string;
   /**
+   * Название на английском языке — источник slug (может повторяться у разных тайтлов)
+   */
+  titleEn: string;
+  /**
    * Оригинальное название, если отличается от titleEn
    */
   originalTitle?: string | null;
-  /**
-   * Генерируется автоматически из названия (с транслитерацией), если оставить пустым
-   */
-  slug: string;
   description?: {
     root: {
       type: string;
@@ -241,43 +237,10 @@ export interface Content {
     [k: string]: unknown;
   } | null;
   /**
-   * Для дедупликации при импорте из Kodik
-   */
-  kinopoiskId?: string | null;
-  /**
-   * Для дедупликации при импорте из Kodik
-   */
-  shikimoriId?: string | null;
-  /**
-   * ID материала в Kodik
-   */
-  kodikId?: string | null;
-  /**
-   * Идентификатор франшизы: записи (сезоны) с одинаковым значением показываются на сайте как сезоны одного сериала. Если пусто — используется kinopoiskId
-   */
-  franchiseId?: string | null;
-  /**
    * Год выпуска (movie) или год начала выхода (series)
    */
   releaseYear: number;
-  /**
-   * Длительность в минутах (только для фильмов)
-   */
-  duration?: number | null;
-  genres?: (number | Genre)[] | null;
   rating?: number | null;
-  /**
-   * Прямая ссылка для встроенного плеера (только для фильмов)
-   */
-  playerLink?: string | null;
-  /**
-   * Возрастное ограничение (0, 6, 12, 16, 18). Источник: Kodik material_data.minimal_age
-   */
-  ageRating?: number | null;
-  /**
-   * Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте
-   */
-  releaseStatus?: ('anons' | 'ongoing' | 'released') | null;
   /**
    * Постер (вертикальный)
    */
@@ -286,6 +249,14 @@ export interface Content {
    * Фоновое изображение
    */
   backdrop?: (number | null) | Media;
+  /**
+   * Длительность в минутах (только для фильмов)
+   */
+  duration?: number | null;
+  /**
+   * Прямая ссылка для встроенного плеера (только для фильмов)
+   */
+  playerLink?: string | null;
   /**
    * Связанные сезоны (обратная связь, только для сериалов)
    */
@@ -306,6 +277,35 @@ export interface Content {
      */
     image?: (number | null) | Media;
   };
+  /**
+   * Генерируется автоматически из названия (с транслитерацией), если оставить пустым
+   */
+  slug: string;
+  /**
+   * Для дедупликации при импорте из Kodik
+   */
+  kinopoiskId?: string | null;
+  /**
+   * Для дедупликации при импорте из Kodik
+   */
+  shikimoriId?: string | null;
+  /**
+   * ID материала в Kodik
+   */
+  kodikId?: string | null;
+  /**
+   * Идентификатор франшизы: записи (сезоны) с одинаковым значением показываются на сайте как сезоны одного сериала. Если пусто — используется kinopoiskId
+   */
+  franchiseId?: string | null;
+  genres?: (number | Genre)[] | null;
+  /**
+   * Возрастное ограничение (0, 6, 12, 16, 18). Источник: Kodik material_data.minimal_age
+   */
+  ageRating?: number | null;
+  /**
+   * Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте
+   */
+  releaseStatus?: ('anons' | 'ongoing' | 'released') | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -572,24 +572,16 @@ export interface GenresSelect<T extends boolean = true> {
  */
 export interface ContentSelect<T extends boolean = true> {
   type?: T;
-  titleEn?: T;
   titleRu?: T;
+  titleEn?: T;
   originalTitle?: T;
-  slug?: T;
   description?: T;
-  kinopoiskId?: T;
-  shikimoriId?: T;
-  kodikId?: T;
-  franchiseId?: T;
   releaseYear?: T;
-  duration?: T;
-  genres?: T;
   rating?: T;
-  playerLink?: T;
-  ageRating?: T;
-  releaseStatus?: T;
   poster?: T;
   backdrop?: T;
+  duration?: T;
+  playerLink?: T;
   seasons?: T;
   status?: T;
   meta?:
@@ -599,6 +591,14 @@ export interface ContentSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  slug?: T;
+  kinopoiskId?: T;
+  shikimoriId?: T;
+  kodikId?: T;
+  franchiseId?: T;
+  genres?: T;
+  ageRating?: T;
+  releaseStatus?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -23,7 +23,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
           поэтому используем next/image с priority (без lazy-загрузки и с
           автоматическими WebP/AVIF + responsive sizes) вместо обычного <img>. */}
       <Image
-        src={item.backdrop?.url ?? "/default-backdrop.jpg"}
+        src={item.backdrop?.url || "/default-backdrop.jpg"}
         alt={item.titleRu}
         fill
         priority
@@ -46,7 +46,7 @@ export function HeroSection({ item }: { item: ContentItem }) {
             ))} */}
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.02] mb-2 [text-wrap:balance] drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)] line-clamp-3" title={item.titleRu}>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.02] mb-2 [text-wrap:balance] drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)]">
             {item.titleRu} 
           </h1>
           <p className="text-sm text-[#A1A1AA] font-medium mb-3">{item.titleEn}</p>

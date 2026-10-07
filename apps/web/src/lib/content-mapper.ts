@@ -158,21 +158,11 @@ function mapSeason(raw: RawSeason): Season {
   };
 }
 
-/**
+/** Порог рейтинга, начиная с которого контент считается популярным. */
+export const POPULAR_RATING_THRESHOLD = 7.5;
 
-* Порог рейтинга, начиная с которого контент считается
-* популярным на главной.
-  */
-const POPULAR_RATING_THRESHOLD = 7.5;
-
-/**
-
-* Сколько последних лет считаем новыми поступлениями.
-*
-* Например, при текущем 2026 году:
-* 2026 и 2025 считаются новыми.
-  */
-const NEW_ARRIVAL_YEARS_WINDOW = 1;
+/** Сколько последних лет считаем новинками (при 2026: 2026 и 2025). */
+export const NEW_ARRIVAL_YEARS_WINDOW = 1;
 
 function mapSeo(meta: RawContent["meta"]): SeoMeta | undefined {
   const title = meta?.title?.trim() || undefined;
@@ -213,76 +203,6 @@ function mapBaseFields(raw: RawContent) {
   };
 }
 
-/**
-
-* Форма документа из коллекции search-results
-* (@payloadcms/plugin-search) отличается от Content:
-*
-* * title вместо titleRu
-* * могут отсутствовать genres
-* * могут отсутствовать backdrop/status
-* * могут отсутствовать ageRating  и другие поля
-*
-/**
- * Поэтому SearchResult сначала приводится к безопасной
- * форме ContentItem.
- */
-export interface RawSearchResult {
-  id: number | string;
-
-  title?: string | null;
-  titleEn?: string | null;
-
-  slug?: string | null;
-  type?: string | null;
-
-  releaseYear?: number | null;
-  rating?: number | null;
-
-  // Поле, которое стало обязательным в типах Series — добавляем в сырой результат
-  playerLink?: string | null;
-
-  poster?: {
-    id: number | string;
-    url?: string | null;
-  } | null;
-}
-
-export function mapSearchResultToItem(raw: RawSearchResult): ContentItem {
-  const base = {
-    id: Number(raw.id),
-    titleRu: raw.title ?? "",
-    titleEn: raw.titleEn ?? "",
-    slug: raw.slug ?? "",
-    description: "",
-    releaseYear: raw.releaseYear ?? 0,
-    genres: [],
-    genreIds: [],
-    rating: raw.rating ?? 0,
-    ageRating: undefined,
-    poster: mapMedia(raw.poster),
-    backdrop: EMPTY_MEDIA,
-    // Добавляем обязательное поле playerLink (берём из raw, если есть, иначе пустая строка)
-    playerLink: raw.playerLink ?? "",
-  };
-
-  if (raw.type === "series") {
-    return {
-      ...base,
-      type: "series",
-      seasons: [],
-      // Теперь playerLink уже есть в base, можно не дублировать.
-      // Если логика требует переопределения — оставьте явное присваивание здесь.
-    };
-  }
-
-  return {
-    ...base,
-    type: "movie",
-    duration: 0,
-  };
-}
-
 export function mapContentToItem(raw: RawContent): ContentItem {
   const base = mapBaseFields(raw);
 
@@ -291,11 +211,7 @@ export function mapContentToItem(raw: RawContent): ContentItem {
       ...base,
       type: "movie",
       duration: raw.duration ?? 0,
-      // ВАЖНО: embedUrl берём из raw.embedUrl, а не из playerLink
       embedUrl: raw.playerLink ?? undefined,
-      // playerLink уже есть внутри base (там: playerLink: raw.playerLink ?? "")
-      // поэтому явно добавлять его сюда не нужно, но TypeScript будет доволен,
-      // так как поле обязательное и оно уже присутствует через spread-оператор.
     };
     return movie;
   }
@@ -305,7 +221,6 @@ export function mapContentToItem(raw: RawContent): ContentItem {
       ...base,
       type: "series",
       seasons: (raw.seasons?.docs ?? []).map(mapSeason),
-      // playerLink тоже уже есть в base
     };
     return series;
   }

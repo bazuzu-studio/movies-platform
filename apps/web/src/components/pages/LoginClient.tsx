@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
 import { useAuth } from "@/components/providers/AuthContext";
+import { safeNextPath } from "@/lib/safe-redirect";
 
 export function LoginClient() {
   const router = useRouter();
@@ -29,12 +30,12 @@ export function LoginClient() {
     try {
       // login() ходит в GraphQL (loginUser) и выставляет httpOnly cookie
       // на стороне Payload — см. AuthContext.tsx
-      await login(email, pass);
+      await login(email.trim(), pass);
       toast.success("Добро пожаловать!");
       // Возвращаем на страницу, с которой выбросило на вход (?next=…).
       // Принимаем только относительный путь на этом же сайте.
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : "/");
+      router.push(safeNextPath(next));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Неверный email или пароль");
     } finally {

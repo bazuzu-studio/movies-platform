@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import type { Endpoint, PayloadRequest } from 'payload'
 
 import { isEmailConfigured } from '../lib/email/nodemailer'
@@ -5,16 +6,15 @@ import { isEmailConfigured } from '../lib/email/nodemailer'
 /**
  * POST /api/contact-message
  *
- * Принимает форму обратной связи — браузер бьёт сюда напрямую из
- * ContactClient.tsx (apps/web/src/components/pages/ContactClient.tsx),
- * без прокси через сервер фронтенда, — и отправляет письмо через
+ * Принимает форму обратной связи от сервера сайта (POST /api/contact на
+ * otakuum.ru пересылает сюда проверенный запрос; браузер CMS не видит) и
+ * отправляет письмо через
  * email-адаптер, уже настроенный здесь в payload.config.ts
  * (email: nodemailerAdapter(...)). Так apps/web не держит собственных
  * SMTP-учётных данных — вся отправка почты идёт через CMS.
  *
- * Вся валидация и защита (rate-limit, honeypot) — здесь, а не на фронте:
- * этот endpoint публичный (без auth) и вызывается прямо из браузера, так что
- * дублировать проверки на сервере фронтенда уже не от чего защищать.
+ * Валидация и защита (rate-limit, honeypot) дублируются и здесь: endpoint
+ * публичный (без auth) и может быть вызван в обход сайта.
  */
 
 const NAME_MAX = 100
@@ -77,7 +77,22 @@ function json(body: unknown, status: number): Response {
 // берём адрес справа: 1 = только Traefik, 2 = Cloudflare → Traefik.
 const TRUSTED_PROXY_HOPS = Math.max(1, Number(process.env.TRUSTED_PROXY_HOPS) || 1)
 
+// Сервер сайта обращается к CMS по внутренней сети, поэтому CMS видит адрес
+// сайта, а не посетителя. Сайт передаёт настоящий IP в x-client-ip, а верим мы
+// ему только вместе с общим секретом REVALIDATE_SECRET (иначе любой мог бы
+// подставить произвольный IP и обойти лимит).
+function secretsMatch(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided)
+  const b = Buffer.from(expected)
+  return a.length === b.length && timingSafeEqual(a, b)
+}
+
 function getClientIp(req: PayloadRequest): string {
+  const secret = process.env.REVALIDATE_SECRET?.trim()
+  const provided = req.headers.get('x-internal-secret') ?? ''
+  const forwardedIp = req.headers.get('x-client-ip')?.trim()
+  if (secret && forwardedIp && secretsMatch(provided, secret)) return forwardedIp
+
   // req.headers — это Web Headers (см. тип PayloadRequest), а не Node IncomingHttpHeaders.
   const forwarded = req.headers.get('x-forwarded-for')
   if (forwarded) {

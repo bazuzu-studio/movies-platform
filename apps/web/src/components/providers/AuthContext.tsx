@@ -129,27 +129,29 @@ const login = useCallback(async (email: string, password: string) => {
 }, []);
 
   /**
-   * Регистрация всегда создаёт пользователя с ролью "user" —
-   * роль зашита в GraphQL-мутации (RegisterUserDocument), а не приходит
-   * из формы. Даже если кто-то попытается передать role напрямую
-   * через API в обход этой функции — сервер (Payload access control)
-   * должен это отклонять или игнорировать.
+   * Регистрация всегда создаёт пользователя с ролью "user" — роль не
+   * приходит из формы, а на сервере её выставляет protectRoles.
+   *
+   * Мутация createUser в Payload аккаунт создаёт, но сессию НЕ открывает
+   * (cookie не выставляется). Раньше интерфейс сразу считал пользователя
+   * вошедшим, хотя cookie не было: после обновления страницы он «разлогинивался»,
+   * а /profile и /favorites редиректили на вход. Поэтому после создания
+   * входим явной мутацией loginUser.
    */
   const register = useCallback(async (name: string, email: string, password: string) => {
     try {
-      const data = await gqlClient.request(RegisterUserDocument, {
-        name,
-        email,
-        password,
-      });
-      // После регистрации Payload обычно сразу логинит пользователя
-      // и ставит cookie — если это не так в вашей схеме, здесь нужно
-      // дополнительно вызвать login(email, password).
-      setUser(toAuthUser(data.createUser));
+      await gqlClient.request(RegisterUserDocument, { name, email, password });
     } catch (error) {
-      throw new Error(
-        extractGraphQLErrorMessage(error, "Не удалось создать аккаунт")
-      );
+      throw new Error(extractGraphQLErrorMessage(error, "Не удалось создать аккаунт"));
+    }
+
+    try {
+      const data = await gqlClient.request(LoginUserDocument, { email, password });
+      setUser(toAuthUser(data.loginUser?.user));
+    } catch {
+      // Аккаунт создан, но войти автоматически не вышло — не выдаём это за
+      // ошибку регистрации: пусть пользователь просто войдёт сам.
+      throw new Error("Аккаунт создан. Войдите, используя свой email и пароль.");
     }
   }, []);
 

@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     "Все фильмы и сериалы otakuum с фильтрами по жанру, году, возрасту и статусу выхода.",
 };
 
+// Не пререндерим при сборке: каталог зависит от CMS (данные кэшируются на 60 с).
+export const dynamic = "force-dynamic";
+
 interface Props {
   searchParams: Promise<{
     type?: string;

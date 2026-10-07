@@ -17,11 +17,9 @@ export async function generateStaticParams() {
   // Сборка не должна зависеть от доступности CMS: при ошибке страницы
   // просто рендерятся по запросу (dynamicParams по умолчанию включён).
   try {
-    const { items } = await getContentList(1, 100);
+    const { items } = await getContentList(1, 100, "movie");
 
-    return items
-      .filter((content) => content.type === "movie")
-      .map((content) => ({
+    return items.map((content) => ({
         slug: content.slug,
       }));
   } catch (error) {

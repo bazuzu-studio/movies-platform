@@ -1,0 +1,23 @@
+# Страница «Избранное»: карточки тайтлов сразу в ответе, а не фильтрация
+# первых 100 записей каталога на клиенте (избранное за их пределами терялось).
+query GetFavoriteItems($where: Favorite_where) {
+  Favorites(where: $where, limit: 500, sort: "-createdAt") {
+    docs {
+      id
+      content {
+        id
+        titleEn
+        titleRu
+        slug
+        type
+        releaseYear
+        rating
+        poster {
+          url
+        }
+        ageRating
+        releaseStatus
+      }
+    }
+  }
+}

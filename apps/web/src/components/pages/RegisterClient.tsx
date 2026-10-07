@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
 import { useAuth } from "@/components/providers/AuthContext";
+import { PASSWORD_HINT, validatePassword } from "@/lib/validation";
 
 export function RegisterClient() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export function RegisterClient() {
   const [confirm, setConfirm] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -29,23 +31,23 @@ const handleSubmit = async (e: React.FormEvent) => {
     setError("Пароли не совпадают");
     return;
   }
-  if (pass.length < 6) {
-    setError("Пароль должен содержать минимум 6 символов");
-    return;
-  }
-  if (!/[a-zA-Zа-яА-Я]/.test(pass) || !/\d/.test(pass)) {
-    setError("Пароль должен содержать буквы и цифры");
+  const passwordError = validatePassword(pass);
+  if (passwordError) {
+    setError(passwordError);
     return;
   }
 
+  setIsSubmitting(true);
   try {
     // Роль не передаётся отсюда — регистрация всегда создаёт "user",
     // это зашито в GraphQL-мутации RegisterUserDocument (см. AuthContext).
-    await register(name, email, pass);
+    await register(name.trim(), email.trim(), pass);
     toast.success("Аккаунт создан!");
     router.push("/");
   } catch (err) {
     setError(err instanceof Error ? err.message : "Не удалось создать аккаунт");
+  } finally {
+    setIsSubmitting(false);
   }
 };
 
@@ -85,7 +87,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 setPass(e.target.value);
                 setError("");
               }}
-              placeholder="Минимум 6 символов, буквы и цифры"
+              placeholder={PASSWORD_HINT}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 pr-11 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
             />
             <button
@@ -118,8 +120,8 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         )}
 
-        <Btn type="submit" size="lg" className="w-full justify-center mt-1">
-          Зарегистрироваться
+        <Btn type="submit" size="lg" className="w-full justify-center mt-1" disabled={isSubmitting}>
+          {isSubmitting ? "Создаём..." : "Зарегистрироваться"}
         </Btn>
 
         <div className="text-center text-sm text-[#8E8E98]">

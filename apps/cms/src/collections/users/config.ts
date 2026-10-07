@@ -69,11 +69,11 @@ export const Users: CollectionConfig = {
     ...(resetPasswordFrontendUrl
       ? {
           forgotPassword: {
-            generateEmailSubject: () => 'Восстановление пароля — MovHub',
+            generateEmailSubject: () => 'Восстановление пароля — otakuum',
             generateEmailHTML: ({ token } = {}) => {
               const resetUrl = `${resetPasswordFrontendUrl}/reset-password?token=${token ?? ''}`
               return `
-                <p>Вы запросили восстановление пароля на MovHub.</p>
+                <p>Вы запросили восстановление пароля на otakuum.</p>
                 <p><a href="${resetUrl}">Придумать новый пароль</a></p>
                 <p>Если ссылка не открывается, скопируйте её в браузер: ${resetUrl}</p>
                 <p>Если это были не вы — просто проигнорируйте это письмо, пароль останется прежним.</p>

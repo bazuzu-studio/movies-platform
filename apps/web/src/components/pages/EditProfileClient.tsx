@@ -6,6 +6,7 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Btn } from "@/components/ui/Btn";
 import { useAuth } from "@/components/providers/AuthContext";
+import { validatePassword } from "@/lib/validation";
 
 export function EditProfileClient() {
   const router = useRouter();
@@ -15,15 +16,23 @@ export function EditProfileClient() {
   const [showPass, setShowPass] = useState(false);
   const [password, setPassword] = useState("");
 
-  if (!user) return null;
-
   const [submitting, setSubmitting] = useState(false);
+
+  // Хуки выше return: иначе их число меняется между рендерами (Rules of Hooks).
+  if (!user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await updateProfile({ name, email, password: password || undefined });
+      if (password) {
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          toast.error(passwordError);
+          return;
+        }
+      }
+      await updateProfile({ name: name.trim(), email: email.trim(), password: password || undefined });
       toast.success("Профиль обновлён");
       router.push("/profile");
     } catch (error) {

@@ -1,0 +1,11 @@
+# Лёгкий список для sitemap.xml: только slug, тип и дата изменения.
+query GetSitemapEntries($limit: Int!, $page: Int!) {
+  Contents(limit: $limit, page: $page, sort: "-updatedAt") {
+    docs {
+      slug
+      type
+      updatedAt
+    }
+    hasNextPage
+  }
+}

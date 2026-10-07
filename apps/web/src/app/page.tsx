@@ -1,12 +1,17 @@
 
 import type { Metadata } from "next";
 
-import { getContentList, type ContentListResult } from "@/lib/api";
+import { getContentList, getHeroItem, type ContentListResult } from "@/lib/api";
 import { HomeClient } from "@/components/pages/HomeClient";
 
 export const metadata: Metadata = {
   title: "Главная",
 };
+
+// Страница зависит от CMS: не пререндерим её при `next build` (CMS в этот
+// момент может быть недоступна, например при первой выкладке). Данные всё
+// равно кэшируются на 60 с через fetch (см. serverClient в lib/api.ts).
+export const dynamic = "force-dynamic";
 
 const EMPTY_LIST: ContentListResult = {
   items: [],
@@ -21,6 +26,7 @@ export default async function HomePage() {
     moviesContent,
     seriesContent,
     ongoingContent,
+    heroItem,
   ] = await Promise.all([
     // Популярное
     getContentList(1, 12, {
@@ -56,6 +62,12 @@ export default async function HomePage() {
       console.error("HomePage: не удалось загрузить онгоинги", error);
       return EMPTY_LIST;
     }),
+
+    // Hero: тайтл с фоном и описанием (в списках их нет). Сбой не роняет главную.
+    getHeroItem().catch((error) => {
+      console.error("HomePage: не удалось загрузить hero", error);
+      return undefined;
+    }),
   ]);
 
   const popular = popularContent.items;
@@ -64,21 +76,9 @@ export default async function HomePage() {
   const series = seriesContent.items;
   const ongoing = ongoingContent.items;
 
-  // Для Hero-блока приоритетно берём сериал.
-  // Если сериалов нет — первый доступный элемент.
-  // TODO: заменить на отдельное поле "featured"/"isHero"
-  // в CMS, когда оно появится.
-  const heroItem =
-    series[0] ??
-    popular[0] ??
-    newArrivals[0] ??
-    movies[0];
-
-    
-
   return (
     <HomeClient
-      heroItem={heroItem}
+      heroItem={heroItem ?? series[0] ?? popular[0] ?? newArrivals[0] ?? movies[0]}
       popular={popular}
       movies={movies}
       series={series}

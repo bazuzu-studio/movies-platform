@@ -1,0 +1,49 @@
+# Все записи франшизы (каждый сезон — отдельный Content) вместе с сезонами и
+# сериями ОДНИМ запросом. Раньше: запрос id франшизы + запрос сезонов (2-3
+# обращения к CMS на каждую страницу сериала). Условие where собирается в
+# getContentBySlug: franchiseId / kinopoiskId / id.
+#
+# Помимо серий берём данные самой записи Content (название, год, рейтинг,
+# возраст, описание, фон): по ним страница показывает информацию о ПОСЛЕДНЕМ
+# вышедшем сезоне, а не о том, чей slug открыт (иначе у франшизы с 2013 года
+# в шапке был бы 2013-й). Сезоны сортируются по номеру, затем по году, чтобы
+# «Часть 1» и «Часть 2» одного сезона шли подряд в порядке выхода.
+query GetSeriesFranchise($where: Content_where!) {
+  Contents(where: $where, limit: 50, pagination: false) {
+    docs {
+      id
+      slug
+      titleRu
+      releaseYear
+      releaseStatus
+      rating
+      ageRating
+      description
+      poster {
+        url
+      }
+      backdrop {
+        url
+      }
+      seasons(sort: "seasonNumber,releaseYear", limit: 100) {
+        docs {
+          id
+          seasonNumber
+          title
+          releaseYear
+          episodes(sort: "episodeNumber", limit: 500) {
+            docs {
+              id
+              episodeNumber
+              title
+              playerLink
+              description
+              duration
+              airingAt
+            }
+          }
+        }
+      }
+    }
+  }
+}

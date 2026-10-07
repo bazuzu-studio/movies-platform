@@ -33,7 +33,7 @@ function MovieCardComponent({ item }: { item: ContentItem }) {
       {" "}
       <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-[#121214] ring-1 ring-white/[0.06] shadow-[var(--shadow-card)] transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:ring-[#EF4A4F]/40 group-hover:shadow-[var(--shadow-glow)]">
         <Image
-          src={item.poster?.url ?? "/default-poster.jpg"}
+          src={item.poster?.url || "/default-poster.jpg"}
           alt={item.titleRu}
           fill
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"

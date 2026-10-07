@@ -8,7 +8,7 @@ import { AppChrome } from "@/components/chrome/AppChrome";
 
 // next/font самостоятельно скачивает и самостоятельно хостит шрифт при сборке
 // (self-hosted, без раннего внешнего запроса к fonts.googleapis.com):
-// это устраняет layout shift/блокирующий запрос и помогает уложиться вnext/font
+// это устраняет layout shift/блокирующий запрос и помогает уложиться в
 // LCP ≤ 2.5s из ТЗ (п.4.1), а также убирает предупреждение сборщика о
 // порядке @import в globals.css.
 const inter = Inter({

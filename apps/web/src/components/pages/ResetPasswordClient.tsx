@@ -8,6 +8,7 @@ import { ClientError } from "graphql-request";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
 import { gqlClient } from "@/lib/graphql-client";
+import { PASSWORD_HINT, validatePassword } from "@/lib/validation";
 import { ResetPasswordUserDocument } from "@/generated/graphql";
 
 function extractGraphQLErrorMessage(error: unknown, fallback: string): string {
@@ -44,8 +45,9 @@ export function ResetPasswordClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
-      setError("Пароль должен быть не короче 8 символов");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
     setSubmitting(true);
@@ -83,7 +85,7 @@ export function ResetPasswordClient() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Минимум 8 символов"
+                placeholder={PASSWORD_HINT}
                 className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
               />
             </div>

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { contactMessageEndpointUrl } from "@/lib/cms";
+import { getClientIp } from "@/lib/client-ip";
+import { EMAIL_RE } from "@/lib/validation";
 
 /**
  * POST /api/contact
@@ -21,17 +23,23 @@ const EMAIL_MAX = 200;
 const MESSAGE_MIN = 10;
 const MESSAGE_MAX = 5000;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 // Простой in-memory rate-limit: не более 3 писем в час с одного IP.
 // Сбрасывается при рестарте процесса — этого достаточно, чтобы отсечь
 // случайного бота; CMS дополнительно применяет свой (более мягкий) лимит.
 const RATE_LIMIT = 3;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const hits = new Map<string, number[]>();
+const MAX_TRACKED_IPS = 5000;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+
+  // Карта раньше никогда не чистилась — убираем протухшие записи.
+  if (hits.size > MAX_TRACKED_IPS) {
+    for (const [key, list] of hits) {
+      if (list.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(key);
+    }
+  }
   const timestamps = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
 
   if (timestamps.length >= RATE_LIMIT) {
@@ -50,7 +58,8 @@ function isRateLimited(ip: string): boolean {
 const CMS_TIMEOUT_MS = 10_000;
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // Адрес берём справа (x-forwarded-for слева подделывается клиентом).
+  const ip = getClientIp(request);
 
   if (isRateLimited(ip)) {
     return NextResponse.json(
@@ -104,7 +113,15 @@ export async function POST(request: NextRequest) {
   try {
     cmsResponse = await fetch(contactMessageEndpointUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // CMS видит запрос с адреса этого сервера, поэтому передаём настоящий
+        // IP посетителя (для её rate-limit); CMS верит ему только вместе с
+        // общим секретом REVALIDATE_SECRET.
+        ...(process.env.REVALIDATE_SECRET
+          ? { "x-internal-secret": process.env.REVALIDATE_SECRET.trim(), "x-client-ip": ip }
+          : {}),
+      },
       body: JSON.stringify({ name: trimmedName, email: trimmedEmail, message: trimmedMessage }),
       signal: controller.signal,
     });
@@ -139,7 +156,7 @@ export async function POST(request: NextRequest) {
     // валидация строже — расхождение стоит явно увидеть в логах, см. выше),
     // а не что письмо технически не отправилось. Пробрасываем её сообщение
     // пользователю как есть — оно уже написано по-русски и без внутренних
-    // деталей (см. apps/cms/src/endpoints/contact-message.ts).
+    // деталей (см. cms/src/endpoints/contact-message.ts).
     // 5xx от CMS (SMTP недоступен и т.п.) — тоже отдаём как есть, статус
     // сохраняем, чтобы клиент мог отличить "неверные данные" от "попробуйте позже".
     return NextResponse.json(

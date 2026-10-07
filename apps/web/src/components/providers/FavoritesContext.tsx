@@ -75,6 +75,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["favorite-items"] });
     },
   });
 
@@ -83,6 +84,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       gqlClient.request(RemoveFavoriteDocument, { id: favoriteId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["favorite-items"] });
     },
   });
 
@@ -97,6 +99,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     }
 
     const existingFavoriteId = favoritesMap.get(contentId);
+
+    // Отрицательный id — запись ещё создаётся на сервере (оптимистичное
+    // обновление). Повторный клик в этот момент игнорируем: удалять пока нечего.
+    if (existingFavoriteId !== undefined && existingFavoriteId < 0) return;
 
     if (existingFavoriteId) {
       setFavoritesMap((prev) => {

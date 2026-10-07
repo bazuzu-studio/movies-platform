@@ -1,8 +1,9 @@
 # src/graphql/contents/GetContentBySlug.graphql
 # Сезоны и серии здесь НЕ запрашиваются: getContentBySlug (src/lib/api.ts)
-# берёт их отдельным запросом GetSeasonsByContentIds сразу по всей франшизе.
+# берёт их отдельным запросом GetSeriesFranchise сразу по всей франшизе.
+# pagination: false — без лишнего COUNT(*) для выборки одной записи.
 query GetContentBySlug($slug: String!) {
-  Contents(where: { slug: { equals: $slug } }, limit: 1) {
+  Contents(where: { slug: { equals: $slug } }, limit: 1, pagination: false) {
     docs {
       id
       type

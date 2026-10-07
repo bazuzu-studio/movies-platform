@@ -1,0 +1,24 @@
+# Герой главной: один тайтл с фоном, описанием и жанрами.
+query GetHeroContent($where: Content_where) {
+  Contents(where: $where, limit: 1, sort: "-updatedAt", pagination: false) {
+    docs {
+      id
+      type
+      titleEn
+      titleRu
+      slug
+      description
+      releaseYear
+      duration
+      rating
+      poster {
+        url
+      }
+      backdrop {
+        url
+      }
+      ageRating
+      releaseStatus
+    }
+  }
+}

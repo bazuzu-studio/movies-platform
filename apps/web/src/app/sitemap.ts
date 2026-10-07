@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getSitemapEntries } from "@/lib/api";
 
+// Список тайтлов берётся из CMS: не фиксируем его на этапе сборки.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 

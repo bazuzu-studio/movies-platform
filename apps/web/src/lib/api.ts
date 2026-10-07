@@ -1,29 +1,28 @@
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 
 import {
   GetContentDocument,
   GetContentBySlugDocument,
-  GetSimilarContentDocument,
   GetGenresDocument,
-  GetContentIdsByKinopoiskDocument,
-  GetSeasonsByContentIdsDocument,
+  GetHeroContentDocument,
+  GetSeriesFranchiseDocument,
+  GetSimilarContentDocument,
+  GetSitemapEntriesDocument,
+  type Content_Where,
 } from "@/generated/graphql";
 
 import {
   mapContentToItem,
+  NEW_ARRIVAL_YEARS_WINDOW,
+  POPULAR_RATING_THRESHOLD,
   type RawContent,
 } from "./content-mapper";
-
-import type {
-  ContentItem,
-  Genre,
-  Season,
-} from "./types";
-
+import type { ContentItem, Genre, Season } from "./types";
 import { parseReleaseStatus, type ReleaseStatus } from "./release-status";
 import { episodeReleaseDate, episodeTitle } from "./episode";
+import { normalizeImageUrl } from "./image-url";
 import { richTextToPlainText } from "./richtext";
-import { labelSeasons, pickLatestSeason } from "./seasons";
+import { dedupeSeasonsBySlug, labelSeasons, pickLatestSeason } from "./seasons";
 
 const endpoint =
   process.env.GRAPHQL_API_URL ??
@@ -31,95 +30,41 @@ const endpoint =
   "http://localhost:4000/api/graphql";
 
 /**
- * Отдельный клиент для server-side запросов публичного контента.
+ * Клиент для серверных запросов публичного контента. Ответы кэшируются в Next
+ * (revalidate 60 с) и сбрасываются по тегу "content" (POST /api/revalidate).
  */
-const serverClient = new GraphQLClient(
-  endpoint,
-  {
-    fetch: (url, init) =>
-      fetch(url, {
-        ...init,
-        next: {
-          revalidate: 60,
-          tags: ["content"],
-        },
-      }),
-  },
-);
+const serverClient = new GraphQLClient(endpoint, {
+  fetch: (url, init) =>
+    fetch(url, {
+      ...init,
+      next: { revalidate: 60, tags: ["content"] },
+    }),
+});
 
 /** Достаёт docs[] из ответа Payload/GraphQL. */
-function docsOf<
-  T extends
-    | { docs?: unknown[] | null }
-    | null
-    | undefined,
->(
-  field: T,
-): NonNullable<T>["docs"] extends
-  | (infer U)[]
-  | null
-  | undefined
-  ? U[]
-  : never {
-  return (field?.docs ?? []) as never;
+function docsOf<T>(field: { docs?: T[] | null } | null | undefined): T[] {
+  return field?.docs ?? [];
 }
 
-// --------------------------------------------------------------------------
-// НОВАЯ: нормализация URL картинок (подмена localhost → minio)
-// --------------------------------------------------------------------------
-
-function normalizeImageUrl(url: string | null | undefined): string {
-  if (!url) return "";
-  if (url.startsWith("/")) return url; // относительные пути не трогаем
-
-  const internal = process.env.S3_INTERNAL_URL; // http://minio:9000/media
-  const publicUrl = process.env.S3_PUBLIC_URL;  // http://localhost:9000/media
-
-  if (!internal) return url;
-
-  // Если есть публичный URL — заменяем его целиком на внутренний
-  if (publicUrl) {
-    const fromBase = publicUrl.replace(/\/+$/, "");
-    const toBase = internal.replace(/\/+$/, "");
-
-    if (url.startsWith(fromBase)) {
-      return toBase + url.slice(fromBase.length);
-    }
-  }
-
-  // Фолбэк: меняем хост/порт через URL, сохраняя путь
-  try {
-    const parsed = new URL(url);
-    const internalParsed = new URL(internal);
-
-    parsed.hostname = internalParsed.hostname;
-    parsed.port = internalParsed.port;
-
-    return parsed.toString();
-  } catch {
-    return url;
-  }
+/** Применяет подмену адреса картинки к вложенному media-объекту. */
+function withNormalizedUrl<T extends { url?: string | null } | null | undefined>(media: T): T {
+  if (media?.url) media.url = normalizeImageUrl(media.url);
+  return media;
 }
 
 /* -------------------------------------------------------------------------- */
 /*                                  Content                                   */
 /* -------------------------------------------------------------------------- */
 
-export type ContentSort =
-  | "popular"
-  | "newest"
-  | "alphabetical";
+export type ContentSort = "popular" | "newest" | "alphabetical";
+
+/** Фильтр по году: конкретный год ("2025") или "<год>-or-earlier". */
+export type YearFilter = string;
 
 export interface ContentListFilters {
   type?: "movie" | "series";
   genre?: string;
-  year?:
-    | "2026"
-    | "2025"
-    | "2024"
-    | "2023"
-    | "2022"
-    | "2021-or-earlier";
+  year?: YearFilter;
   age?: "0" | "6" | "12" | "16" | "18";
   status?: ReleaseStatus;
   search?: string;
@@ -132,107 +77,67 @@ export interface ContentListResult {
   hasNextPage: boolean;
 }
 
-function buildContentWhere(
-  filters: ContentListFilters = {},
-  genreId?: number,
-) {
+const SEARCH_MAX_LENGTH = 100;
+
+/**
+ * Поисковая строка для оператора `like`: убираем символы-шаблоны LIKE
+ * (% _ \), которые иначе превращают запрос в тяжёлый шаблон, схлопываем
+ * пробелы и ограничиваем длину.
+ */
+export function sanitizeSearch(raw: string | undefined): string {
+  return (raw ?? "")
+    .replace(/[%_\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, SEARCH_MAX_LENGTH);
+}
+
+const EARLIER_RE = /^(\d{4})-or-earlier$/;
+
+/** Допустимое значение ?year=: четыре цифры или "<год>-or-earlier". */
+export function isValidYearFilter(value: string): boolean {
+  const match = /^(\d{4})(?:-or-earlier)?$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  return year >= 1900 && year <= new Date().getFullYear() + 1;
+}
+
+function buildContentWhere(filters: ContentListFilters = {}, genreId?: number): Content_Where | undefined {
   const AND: Record<string, unknown>[] = [];
 
-  if (filters.sort === "popular") {
-    AND.push({ rating: { greater_than: 0 } });
+  if (filters.sort === "popular") AND.push({ rating: { greater_than: 0 } });
+
+  if (filters.type === "movie" || filters.type === "series") {
+    AND.push({ type: { equals: filters.type } });
   }
 
-  if (
-    filters.type === "movie" ||
-    filters.type === "series"
-  ) {
-    AND.push({
-      type: {
-        equals: filters.type,
-      },
-    });
-  }
-
-  if (genreId !== undefined) {
-    AND.push({
-      genres: {
-        in: [genreId],
-      },
-    });
-  }
+  if (genreId !== undefined) AND.push({ genres: { in: [genreId] } });
 
   if (filters.year) {
-    if (filters.year === "2021-or-earlier") {
-      AND.push({
-        releaseYear: {
-          less_than_equal: 2021,
-        },
-      });
-    } else {
-      AND.push({
-        releaseYear: {
-          equals: Number(filters.year),
-        },
-      });
-    }
+    const earlier = EARLIER_RE.exec(filters.year);
+    if (earlier) AND.push({ releaseYear: { less_than_equal: Number(earlier[1]) } });
+    else if (isValidYearFilter(filters.year)) AND.push({ releaseYear: { equals: Number(filters.year) } });
   }
 
-  if (filters.age) {
-    const minAge = Number(filters.age);
-    AND.push({
-      ageRating: {
-        greater_than_equal: minAge,
-      },
-    });
-  }
+  if (filters.age) AND.push({ ageRating: { greater_than_equal: Number(filters.age) } });
 
-  if (filters.status) {
-    AND.push({
-      releaseStatus: {
-        equals: filters.status,
-      },
-    });
-  }
+  if (filters.status) AND.push({ releaseStatus: { equals: filters.status } });
 
-  const search =
-    typeof filters.search === "string"
-      ? filters.search.trim()
-      : "";
-
+  const search = sanitizeSearch(filters.search);
   if (search) {
     AND.push({
       OR: [
-        {
-          titleRu: {
-            like: search,
-          },
-        },
-        {
-          titleEn: {
-            like: search,
-          },
-        },
-        {
-          originalTitle: {
-            like: search,
-          },
-        },
+        { titleRu: { like: search } },
+        { titleEn: { like: search } },
+        { originalTitle: { like: search } },
       ],
     });
   }
 
-  if (AND.length === 0) {
-    return undefined;
-  }
-
-  return {
-    AND,
-  };
+  return AND.length === 0 ? undefined : ({ AND } as Content_Where);
 }
 
-function getContentSort(
-  sort: ContentSort = "newest",
-): string {
+function getContentSort(sort: ContentSort = "newest"): string {
   switch (sort) {
     case "popular":
       return "-rating,-updatedAt";
@@ -244,81 +149,74 @@ function getContentSort(
   }
 }
 
-async function getGenreIdByTitle(
-  title: string,
-): Promise<number | undefined> {
-  const normalizedTitle = title.trim().toLowerCase();
+/**
+ * Поиск: названия, начинающиеся с запроса, — выше тех, где он просто
+ * встречается. Сортировка устойчивая, порядок внутри групп не меняется.
+ */
+function rankBySearch(items: ContentItem[], query: string): ContentItem[] {
+  const q = query.toLowerCase();
+  const score = (item: ContentItem): number => {
+    const titles = [item.titleRu, item.titleEn, item.originalTitle ?? ""].map((t) => t.toLowerCase());
+    if (titles.some((t) => t === q)) return 0;
+    if (titles.some((t) => t.startsWith(q))) return 1;
+    return 2;
+  };
+  return items
+    .map((item, index) => ({ item, index, rank: score(item) }))
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .map((entry) => entry.item);
+}
 
-  if (!normalizedTitle) {
-    return undefined;
-  }
+async function getGenreIdByTitle(title: string): Promise<number | undefined> {
+  const normalized = title.trim().toLowerCase();
+  if (!normalized) return undefined;
 
+  // Список жанров кэшируется Next (revalidate 60), лишнего запроса к CMS нет.
   const data = await serverClient.request(GetGenresDocument);
-  const genres = docsOf(data.Genres) as Array<Genre & { id: number | string }>;
-
-  const genre = genres.find(
+  const genre = docsOf(data.Genres).find(
     (item) =>
-      item.title.trim().toLowerCase() === normalizedTitle ||
-      item.slug.trim().toLowerCase() === normalizedTitle,
+      item.title.trim().toLowerCase() === normalized || item.slug.trim().toLowerCase() === normalized,
   );
 
   if (!genre) {
     console.warn(`Genre not found: "${title}"`);
     return undefined;
   }
-
-  const id = Number(genre.id);
-  if (!Number.isInteger(id)) {
-    console.warn(`Invalid genre ID for ${title}:`, genre.id);
-    return undefined;
-  }
-
-  return id;
+  return Number.isInteger(genre.id) ? genre.id : undefined;
 }
 
 export async function getContentList(
   page = 1,
   limit = 24,
-  filtersOrType?:
-    | ContentListFilters
-    | "movie"
-    | "series",
+  filtersOrType?: ContentListFilters | "movie" | "series",
 ): Promise<ContentListResult> {
   const filters: ContentListFilters =
-    typeof filtersOrType === "string"
-      ? {
-          type: filtersOrType,
-        }
-      : filtersOrType ?? {};
+    typeof filtersOrType === "string" ? { type: filtersOrType } : (filtersOrType ?? {});
 
   try {
-    let genreId: number | undefined;
+    const genreId = filters.genre?.trim() ? await getGenreIdByTitle(filters.genre) : undefined;
 
-    if (typeof filters.genre === "string" && filters.genre.trim()) {
-      genreId = await getGenreIdByTitle(filters.genre);
+    // Жанр запрошен, но не найден: пустой результат, а не весь каталог.
+    if (filters.genre?.trim() && genreId === undefined) {
+      return { items: [], totalDocs: 0, hasNextPage: false };
     }
 
-    const data = await serverClient.request(
-      GetContentDocument,
-      {
-        limit,
-        page,
-        sort: getContentSort(filters.sort),
-        where: buildContentWhere(filters, genreId),
-      },
-    );
+    const data = await serverClient.request(GetContentDocument, {
+      limit,
+      page,
+      sort: getContentSort(filters.sort),
+      where: buildContentWhere(filters, genreId),
+    });
 
     const content = data.Contents;
-
-    // --- НОВАЯ: нормализуем картинки ДО маппинга ---
-    const docs = docsOf(content);
-    const items = docs.map((doc) => {
-      const raw = doc as RawContent;
-      if (raw.poster?.url) {
-        raw.poster.url = normalizeImageUrl(raw.poster.url);
-      }
+    let items = docsOf(content).map((doc) => {
+      const raw = doc as unknown as RawContent;
+      withNormalizedUrl(raw.poster);
       return mapContentToItem(raw);
     });
+
+    const search = sanitizeSearch(filters.search);
+    if (search) items = rankBySearch(items, search);
 
     return {
       items,
@@ -331,194 +229,130 @@ export async function getContentList(
   }
 }
 
+/**
+ * Тайтл для hero-блока главной: свежий, с рейтингом и обязательно с фоном
+ * (с заглушкой вместо backdrop hero выглядит пустым). Если таких нет —
+ * любой сериал/фильм с фоном.
+ */
+export async function getHeroItem(): Promise<ContentItem | undefined> {
+  const currentYear = new Date().getFullYear();
+
+  const attempts: Content_Where[] = [
+    {
+      AND: [
+        { type: { equals: "series" } },
+        { backdrop: { exists: true } },
+        { rating: { greater_than_equal: 7 } },
+        { releaseYear: { greater_than_equal: currentYear - 1 } },
+      ],
+    } as Content_Where,
+    { backdrop: { exists: true } } as Content_Where,
+  ];
+
+  for (const where of attempts) {
+    const data = await serverClient.request(GetHeroContentDocument, { where });
+    const doc = docsOf(data.Contents)[0];
+    if (doc) {
+      const raw = doc as unknown as RawContent;
+      withNormalizedUrl(raw.poster);
+      withNormalizedUrl(raw.backdrop);
+      return mapContentToItem(raw);
+    }
+  }
+  return undefined;
+}
+
 /* -------------------------------------------------------------------------- */
 /*                              Content by slug                               */
 /* -------------------------------------------------------------------------- */
 
-interface RawEpisode {
-  id: string | number;
-  episodeNumber: number | null;
-  title?: string | null;
-  description?: string | null;
-  releaseDate?: string | null;
-  duration?: number | null;
-  playerLink?: string | null;
-  airingAt?: number | null;
+type RawContentWithFranchise = RawContent & { franchiseId?: string | null };
+
+/** Какие записи Content считаются сезонами одного сериала. */
+function franchiseWhere(raw: RawContentWithFranchise): Content_Where {
+  if (raw.franchiseId) return { franchiseId: { equals: raw.franchiseId } };
+  if (raw.kinopoiskId) return { kinopoiskId: { equals: raw.kinopoiskId } };
+  return { id: { equals: raw.id } };
 }
 
-interface RawSeason {
-  id: string | number;
-  seasonNumber: number | null;
-  title?: string | null;
-  releaseYear?: number | null;
-  content?: {
-    id: string | number;
-    slug: string;
-    titleRu?: string | null;
-    releaseYear?: number | null;
-    releaseStatus?: string | null;
-    rating?: number | null;
-    ageRating?: number | null;
-    description?: unknown;
-    poster?: {
-      id?: string | number;
-      url?: string | null;
-    } | null;
-    backdrop?: {
-      id?: string | number;
-      url?: string | null;
-    } | null;
-  } | null;
-  poster?: {
-    id: string | number;
-    url: string;
-  } | null;
-  episodes?: {
-    docs?: RawEpisode[];
-  } | null;
-}
+/** Сезоны и серии всей франшизы — одним запросом (см. get-series-franchise.graphql). */
+async function getFranchiseSeasons(raw: RawContentWithFranchise): Promise<Season[]> {
+  const data = await serverClient.request(GetSeriesFranchiseDocument, {
+    where: franchiseWhere(raw),
+  });
 
-interface RawContentId {
-  id: string | number;
-}
+  const seasons: Season[] = [];
 
-type RawContentWithPlayerLink = RawContent & {
-  playerLink?: string | null;
-  franchiseId?: string | null;
-};
+  for (const content of docsOf(data.Contents)) {
+    const poster = withNormalizedUrl(content.poster);
+    const backdrop = withNormalizedUrl(content.backdrop);
+    const description = richTextToPlainText(content.description ?? "") || undefined;
 
-const GetContentIdsByFranchiseQuery = gql`
-  query GetContentIdsByFranchise($franchiseId: String!) {
-    Contents(where: { franchiseId: { equals: $franchiseId } }, limit: 50) {
-      docs {
-        id
-      }
+    for (const season of docsOf(content.seasons)) {
+      if (typeof season.seasonNumber !== "number" || Number.isNaN(season.seasonNumber)) continue;
+
+      seasons.push({
+        id: season.id,
+        seasonNumber: season.seasonNumber,
+        title: season.title ?? `Сезон ${season.seasonNumber}`,
+        contentTitle: content.titleRu ?? undefined,
+        // Год сезона: у строки сезона, а если пусто — у его Content.
+        releaseYear: season.releaseYear ?? content.releaseYear ?? 0,
+        slug: content.slug ?? "",
+        releaseStatus: parseReleaseStatus(content.releaseStatus),
+        poster: poster?.url ? { id: content.id, url: poster.url } : undefined,
+        backdrop: backdrop?.url ? { id: content.id, url: backdrop.url } : undefined,
+        description,
+        rating: content.rating ?? undefined,
+        ageRating: content.ageRating ?? undefined,
+        episodes: docsOf(season.episodes)
+          .map((episode) => ({
+            id: episode.id,
+            episodeNumber: episode.episodeNumber ?? 0,
+            title: episodeTitle(episode.title, episode.episodeNumber ?? 0),
+            // description в CMS — richText (Lexical JSON), а не строка.
+            description: richTextToPlainText(episode.description),
+            releaseDate: episodeReleaseDate(episode.airingAt),
+            duration: episode.duration ?? 0,
+            embedUrl: episode.playerLink ?? undefined,
+          }))
+          .sort((a, b) => a.episodeNumber - b.episodeNumber),
+      });
     }
   }
-`;
 
-interface ContentIdsResponse {
-  Contents?: { docs?: RawContentId[] | null } | null;
+  // Номер сезона, затем год: «Часть 1» и «Часть 2» одного сезона идут подряд
+  // в порядке выхода. Затем убираем дубли строк одного тайтла (остаются в БД
+  // после перенумерации франшизы старой версией пайплайна) и считаем части.
+  seasons.sort(
+    (a, b) =>
+      a.seasonNumber - b.seasonNumber ||
+      a.releaseYear - b.releaseYear ||
+      String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+  );
+
+  return labelSeasons(dedupeSeasonsBySlug(seasons));
 }
 
-export async function getContentBySlug(
-  slug: string,
-): Promise<ContentItem | undefined> {
+export async function getContentBySlug(slug: string): Promise<ContentItem | undefined> {
   try {
-    const data = await serverClient.request(
-      GetContentBySlugDocument,
-      { slug },
-    );
+    const data = await serverClient.request(GetContentBySlugDocument, { slug });
+    const raw = docsOf(data.Contents)[0] as unknown as RawContentWithFranchise | undefined;
+    if (!raw) return undefined;
 
-    const raw = docsOf(data.Contents)[0] as RawContentWithPlayerLink | undefined;
-
-    if (!raw) {
-      return undefined;
-    }
-
-    // --- НОВАЯ: нормализуем постер основного контента ---
-    if (raw.poster?.url) {
-      raw.poster.url = normalizeImageUrl(raw.poster.url);
-    }
-
-    if (raw.meta?.image?.url) {
-      raw.meta.image.url = normalizeImageUrl(raw.meta.image.url);
-    }
+    // Для внешних потребителей (OG) картинка из SEO-полей остаётся публичной —
+    // подменяем только то, что рендерит сам сайт через next/image.
+    withNormalizedUrl(raw.poster);
+    withNormalizedUrl(raw.backdrop);
 
     const item = mapContentToItem(raw);
 
-    if (item?.type === "series") {
+    if (item.type === "series") {
       try {
-        let contentIds: (string | number)[] = [];
-
-        if (raw.franchiseId) {
-          const franchiseData = await serverClient.request<ContentIdsResponse>(
-            GetContentIdsByFranchiseQuery,
-            { franchiseId: raw.franchiseId },
-          );
-          contentIds = (franchiseData.Contents?.docs ?? []).map((doc) => doc.id);
-        } else if (raw.kinopoiskId) {
-          const kinopoiskData = await serverClient.request(
-            GetContentIdsByKinopoiskDocument,
-            { kinopoiskId: raw.kinopoiskId },
-          );
-          const kinopoiskDocs = (kinopoiskData.Contents?.docs ?? []) as RawContentId[];
-          contentIds = kinopoiskDocs.map((doc) => doc.id);
-        }
-
-        if (contentIds.length === 0 && raw.id) {
-          contentIds = [raw.id];
-        }
-
-        const seasonsData = await serverClient.request(
-          GetSeasonsByContentIdsDocument,
-          { contentIds },
-        );
-
-        const seasonDocs = (seasonsData.Seasons?.docs ?? []) as RawSeason[];
-
-        const mapped = seasonDocs
-          .filter(
-            (season) =>
-              typeof season.seasonNumber === "number" &&
-              !Number.isNaN(season.seasonNumber),
-          )
-          .map((season) => {
-            const content = season.content;
-
-            // Нормализуем картинки сезона (localhost → minio)
-            if (content?.poster?.url) {
-              content.poster.url = normalizeImageUrl(content.poster.url);
-            }
-            if (content?.backdrop?.url) {
-              content.backdrop.url = normalizeImageUrl(content.backdrop.url);
-            }
-
-            return {
-              id: season.id,
-              seasonNumber: season.seasonNumber as number,
-              title: season.title ?? undefined,
-              // Год сезона: у записи сезона, а если пусто — у его Content.
-              releaseYear: season.releaseYear ?? content?.releaseYear ?? 0,
-              slug: content?.slug ?? "",
-              releaseStatus: parseReleaseStatus(content?.releaseStatus),
-              poster: content?.poster?.url
-                ? { id: content.poster.id ?? 0, url: content.poster.url }
-                : undefined,
-              backdrop: content?.backdrop?.url
-                ? { id: content.backdrop.id ?? 0, url: content.backdrop.url }
-                : undefined,
-              description: richTextToPlainText(content?.description ?? "") || undefined,
-              rating: content?.rating ?? undefined,
-              ageRating: content?.ageRating ?? undefined,
-              episodes: (
-                (season.episodes?.docs ?? []) as RawEpisode[]
-              )
-                .map((episode) => ({
-                  id: episode.id,
-                  episodeNumber: episode.episodeNumber ?? 0,
-                  title: episodeTitle(episode.title, episode.episodeNumber ?? 0),
-                  description: episode.description ?? "",
-                  releaseDate: episodeReleaseDate(episode.airingAt, episode.releaseDate),
-                  duration: episode.duration ?? 0,
-                  embedUrl: episode.playerLink ?? undefined,
-                }))
-                .sort((a, b) => a.episodeNumber - b.episodeNumber),
-            };
-          })
-          // Сначала номер сезона, затем год выхода: «Часть 1» и «Часть 2»
-          // одного сезона идут подряд в порядке выхода.
-          .sort(
-            (a, b) =>
-              a.seasonNumber - b.seasonNumber ||
-              a.releaseYear - b.releaseYear ||
-              a.id.toString().localeCompare(b.id.toString(), undefined, { numeric: true }),
-          );
-
-        item.seasons = labelSeasons(mapped as Season[]);
+        item.seasons = await getFranchiseSeasons(raw);
 
         // Шапка страницы и SEO описывают ПОСЛЕДНИЙ вышедший сезон, а не тот,
-        // чей slug открыт (иначе у франшизы с 2013 года показывался бы 2013-й).
+        // чей slug открыт (иначе у франшизы с 2013 года был бы 2013-й).
         const latest = pickLatestSeason(item.seasons);
         if (latest) {
           if (latest.releaseYear) item.releaseYear = latest.releaseYear;
@@ -529,19 +363,14 @@ export async function getContentBySlug(
           if (latest.poster?.url) item.poster = latest.poster;
           if (latest.backdrop?.url) item.backdrop = latest.backdrop;
           if (latest.releaseYear) {
-            item.isNew = new Date().getFullYear() - latest.releaseYear <= 1;
+            item.isNew = new Date().getFullYear() - latest.releaseYear <= NEW_ARRIVAL_YEARS_WINDOW;
           }
-          if (latest.rating) item.isPopular = latest.rating >= 7.5;
+          if (latest.rating) item.isPopular = latest.rating >= POPULAR_RATING_THRESHOLD;
         }
-      } catch (seasonsError) {
-        console.error(
-          `getContentBySlug: не удалось получить сезоны (kinopoiskId=${raw.kinopoiskId})`,
-          seasonsError,
-        );
+      } catch (error) {
+        console.error(`getContentBySlug: не удалось получить сезоны (slug=${slug})`, error);
         item.seasons = [];
       }
-    } else if (item?.type === "movie") {
-      item.playerLink = raw.playerLink ?? "";
     }
 
     return item;
@@ -570,17 +399,11 @@ export async function getGenres(): Promise<Genre[]> {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Похожий контент: тот же тип (сериал → сериалы), общий жанр, без самого
- * тайтла и без других сезонов той же франшизы (они и так показаны в
- * переключателе сезонов).
+ * Похожий контент: тот же тип, общий жанр, без самого тайтла и без других
+ * сезонов той же франшизы (они уже есть в переключателе сезонов).
  */
-export async function getSimilarContent(
-  item: ContentItem,
-  limit = 12,
-): Promise<ContentItem[]> {
-  if (!item.genreIds?.length) {
-    return [];
-  }
+export async function getSimilarContent(item: ContentItem, limit = 12): Promise<ContentItem[]> {
+  if (!item.genreIds?.length) return [];
 
   const baseAnd: Record<string, unknown>[] = [
     { genres: { in: item.genreIds } },
@@ -588,90 +411,45 @@ export async function getSimilarContent(
     { type: { equals: item.type } },
   ];
 
-  // Другие сезоны той же франшизы уже показаны в переключателе сезонов.
-  if (item.franchiseId) {
-    baseAnd.push({ franchiseId: { not_equals: item.franchiseId } });
-  }
+  if (item.franchiseId) baseAnd.push({ franchiseId: { not_equals: item.franchiseId } });
+  if (item.kinopoiskId) baseAnd.push({ kinopoiskId: { not_equals: item.kinopoiskId } });
 
-  if (item.kinopoiskId) {
-    baseAnd.push({ kinopoiskId: { not_equals: item.kinopoiskId } });
-  }
-
-  const fetchSimilar = async (
-    and: Record<string, unknown>[],
-    count: number,
-  ): Promise<ContentItem[]> => {
-    const data = await serverClient.request(
-      GetSimilarContentDocument,
-      {
-        where: { AND: and },
-        limit: count,
-        sort: "-rating",
-      },
-    );
+  const fetchSimilar = async (and: Record<string, unknown>[], count: number): Promise<ContentItem[]> => {
+    const data = await serverClient.request(GetSimilarContentDocument, {
+      where: { AND: and } as Content_Where,
+      limit: count,
+      sort: "-rating",
+    });
 
     return docsOf(data.Contents).map((doc) => {
-      const raw = doc as RawContent;
-      if (raw.poster?.url) {
-        raw.poster.url = normalizeImageUrl(raw.poster.url);
-      }
+      const raw = doc as unknown as RawContent;
+      withNormalizedUrl(raw.poster);
       return mapContentToItem(raw);
     });
   };
 
   try {
-    // Сначала тайтлы с рейтингом
-    const rated = await fetchSimilar(
-      [...baseAnd, { rating: { greater_than: 0 } }],
-      limit,
+    // Сначала с рейтингом: в Postgres NULL при сортировке по убыванию идёт
+    // первым, поэтому без фильтра тайтлы без рейтинга вытеснили бы остальные.
+    const rated = await fetchSimilar([...baseAnd, { rating: { greater_than: 0 } }], limit);
+    if (rated.length >= limit) return rated;
+
+    const ratedIds = rated.map((entry) => Number(entry.id));
+    const rest = await fetchSimilar(
+      [...baseAnd, ...(ratedIds.length > 0 ? [{ id: { not_in: ratedIds } }] : [])],
+      limit - rated.length,
     );
 
-    if (rated.length >= limit) {
-      return rated;
-    }
-
-    // Добираем без рейтинга — БЕЗ not_in в запросе
-    const rest = await fetchSimilar(baseAnd, limit - rated.length);
-
-    // Фильтруем уже полученные результаты, чтобы не дублировать те, что были в rated
-    const ratedIdsSet = new Set(rated.map((entry) => Number(entry.id)));
-    const filteredRest = rest.filter((entry) => !ratedIdsSet.has(Number(entry.id)));
-
-    return [...rated, ...filteredRest].slice(0, limit);
+    return [...rated, ...rest];
   } catch (error) {
     console.error(`getSimilarContent(${item.id}) failed`, error);
     throw error;
   }
 }
 
-
 /* -------------------------------------------------------------------------- */
 /*                                  Sitemap                                   */
 /* -------------------------------------------------------------------------- */
-
-const GetSitemapEntriesQuery = gql`
-  query GetSitemapEntries($limit: Int!, $page: Int!) {
-    Contents(limit: $limit, page: $page, sort: "-updatedAt") {
-      docs {
-        slug
-        type
-        updatedAt
-      }
-      hasNextPage
-    }
-  }
-`;
-
-interface SitemapEntriesResponse {
-  Contents?: {
-    docs?: Array<{
-      slug?: string | null;
-      type?: "movie" | "series" | null;
-      updatedAt?: string | null;
-    }> | null;
-    hasNextPage?: boolean | null;
-  } | null;
-}
 
 export interface SitemapEntry {
   slug: string;
@@ -680,26 +458,21 @@ export interface SitemapEntry {
 }
 
 /**
- * Лёгкий список для sitemap.xml: только slug, тип и дата изменения —
- * без постеров, жанров и описаний, которые тянул getContentList.
+ * Лёгкий список для sitemap.xml: только slug, тип и дата изменения.
  * Забирает страницами по 1000, максимум 20 страниц.
  */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const entries: SitemapEntry[] = [];
 
   for (let page = 1; page <= 20; page += 1) {
-    const data =
-      await serverClient.request<SitemapEntriesResponse>(
-        GetSitemapEntriesQuery,
-        { limit: 1000, page },
-      );
+    const data = await serverClient.request(GetSitemapEntriesDocument, { limit: 1000, page });
 
-    for (const doc of data.Contents?.docs ?? []) {
+    for (const doc of docsOf(data.Contents)) {
       if (doc.slug && (doc.type === "movie" || doc.type === "series")) {
         entries.push({
           slug: doc.slug,
           type: doc.type,
-          updatedAt: doc.updatedAt ?? undefined,
+          updatedAt: typeof doc.updatedAt === "string" ? doc.updatedAt : undefined,
         });
       }
     }

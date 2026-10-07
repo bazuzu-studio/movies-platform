@@ -16,17 +16,27 @@ export const SORT_OPTIONS = [
 
 export type SortOption = (typeof SORT_OPTIONS)[number];
 
-export const YEAR_OPTIONS = [
-  "Все",
-  "2026",
-  "2025",
-  "2024",
-  "2023",
-  "2022",
-  "2021 и раньше",
-] as const;
+const CURRENT_YEAR = new Date().getFullYear();
 
-export type YearOption = (typeof YEAR_OPTIONS)[number];
+// Пять последних лет + «<год> и раньше». Список строится от текущего года,
+// чтобы не устаревать с наступлением нового.
+const RECENT_YEARS = Array.from({ length: 5 }, (_, i) => String(CURRENT_YEAR - i));
+const EARLIER_SUFFIX = " и раньше";
+
+export const YEAR_OPTIONS: readonly string[] = [
+  "Все",
+  ...RECENT_YEARS,
+  `${CURRENT_YEAR - 5}${EARLIER_SUFFIX}`,
+];
+
+export type YearOption = string;
+
+/** Подпись фильтра года -> значение ?year= для API (undefined = без фильтра). */
+export function yearOptionToApi(option: YearOption): string | undefined {
+  if (option === "Все") return undefined;
+  if (option.endsWith(EARLIER_SUFFIX)) return `${option.slice(0, -EARLIER_SUFFIX.length)}-or-earlier`;
+  return option;
+}
 
 export const AGE_OPTIONS = [
   "Все",

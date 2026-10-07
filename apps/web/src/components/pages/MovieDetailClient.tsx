@@ -44,7 +44,7 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
         <div className="absolute inset-0 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#08080A]/80 to-transparent" />
         <button
-          onClick={() => router.back()}
+          onClick={() => (window.history.length > 1 ? router.back() : router.push("/catalog"))}
           className="absolute top-20 left-4 sm:left-8 flex items-center gap-2 text-sm text-white/80 hover:text-white bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Назад
@@ -56,7 +56,7 @@ export function MovieDetailClient({ movie, similar }: { movie: Movie; similar: C
           <div className="shrink-0 w-36 sm:w-56 lg:w-64 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-[#121214] relative">
               <Image
-                src={movie.poster?.url ?? "/default-poster.jpg"}
+                src={movie.poster?.url || "/default-poster.jpg"}
                 alt={movie.titleRu}
                 fill
                 sizes="(max-width: 640px) 192px, (max-width: 1024px) 224px, 256px"

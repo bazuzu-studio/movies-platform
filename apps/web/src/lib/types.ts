@@ -70,6 +70,9 @@ export interface Season {
   /** Статус релиза связанного Content (у каждого сезона своя запись в CMS). */
   releaseStatus?: ReleaseStatus;
 
+  /** Русское название Content сезона — по нему определяется «Часть N». */
+  contentTitle?: string;
+
   /** Номер части внутри сезона («Часть 1», «Часть 2»), если сезон разбит. */
   part?: number;
 

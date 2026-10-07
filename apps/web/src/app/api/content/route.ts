@@ -6,21 +6,13 @@ import {
   type ContentSort,
 } from "@/lib/api";
 import { RELEASE_STATUSES } from "@/lib/release-status";
+import { isValidYearFilter } from "@/lib/api";
 
 const SORT_VALUES: ContentSort[] = [
   "popular",
   "newest",
   "alphabetical",
 ];
-
-const YEAR_VALUES = [
-  "2026",
-  "2025",
-  "2024",
-  "2023",
-  "2022",
-  "2021-or-earlier",
-] as const;
 
 // Возраст передаётся как число без плюса: 0, 6, 12, 16, 18
 const AGE_VALUES = ["0", "6", "12", "16", "18"] as const;
@@ -93,10 +85,10 @@ export async function GET(request: NextRequest) {
       searchParams.get("search"),
     );
 
-    const year = getOptionalValue(
-      searchParams.get("year"),
-      YEAR_VALUES,
-    );
+    // "2025" или "2021-or-earlier"; всё остальное игнорируется.
+    const yearParam = getOptionalString(searchParams.get("year"));
+    const year =
+      yearParam && isValidYearFilter(yearParam) ? yearParam : undefined;
 
     // Возраст приходит как строка "12" (без плюса), валидируем по списку
     const age = getOptionalValue(

@@ -1,13 +1,21 @@
 // lib/graphql-client.ts
-import { GraphQLClient } from 'graphql-request'
-
-const endpoint = process.env.NEXT_PUBLIC_GRAPHQL_API_URL ?? 'http://localhost:4000/api/graphql'
+import { GraphQLClient } from "graphql-request";
 
 /**
- * credentials: 'include' — обязательно для авторизации через Payload CMS:
- * httpOnly cookie с JWT ставится сервером в ответ на loginUser/createUser
- * и должна отправляться браузером на каждый следующий запрос (в том числе meUser).
+ * Браузерные запросы (вход, регистрация, профиль, избранное) идут на тот же
+ * origin — /api/graphql (см. src/app/api/graphql/route.ts), а оттуда
+ * проксируются в CMS. Поэтому:
+ *  - адрес CMS не светится в браузере и не нужен в клиентском бандле;
+ *  - cookie сессии выставляется для самого сайта (otakuum.ru), без CORS и
+ *    зависимости от COOKIE_DOMAIN.
+ *
+ * Абсолютный URL нужен graphql-request, если клиент вдруг вызовут на сервере.
  */
+const endpoint =
+  typeof window === "undefined"
+    ? `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/graphql`
+    : `${window.location.origin}/api/graphql`;
+
 export const gqlClient = new GraphQLClient(endpoint, {
-  credentials: 'include',
-})
+  credentials: "same-origin",
+});

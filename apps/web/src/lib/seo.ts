@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { formatAge, isAgeGated } from "@/lib/age";
+import { toPublicImageUrl } from "@/lib/image-url";
 import type { ContentItem } from "@/lib/types";
 
 const DESCRIPTION_MAX = 200;
@@ -18,7 +19,8 @@ export function buildContentMetadata(item: ContentItem): Metadata {
   const title = item.seo?.title || item.titleRu;
   const description =
     item.seo?.description || (item.description ? item.description.slice(0, DESCRIPTION_MAX) : undefined);
-  const imageUrl = item.seo?.imageUrl || item.backdrop?.url || item.poster?.url || undefined;
+  // OG-картинка должна быть публичной: внутренний адрес MinIO краулеры не откроют.
+  const imageUrl = toPublicImageUrl(item.seo?.imageUrl || item.backdrop?.url || item.poster?.url || undefined);
   const images = !gated && imageUrl ? [{ url: imageUrl }] : undefined;
   const ogTitle = item.seo?.title || `${item.titleRu} (${item.releaseYear})`;
 

@@ -1,7 +1,7 @@
 # Похожие: условия (жанры, тип, исключение самого тайтла и его франшизы)
-# собираются в getSimilarContent (src/lib/api.ts).
+# собираются в getSimilarContent (src/lib/api.ts). Жанры карточке не нужны.
 query GetSimilarContent($where: Content_where, $limit: Int!, $sort: String) {
-  Contents(where: $where, limit: $limit, sort: $sort) {
+  Contents(where: $where, limit: $limit, sort: $sort, pagination: false) {
     docs {
       id
       type
@@ -12,11 +12,6 @@ query GetSimilarContent($where: Content_where, $limit: Int!, $sort: String) {
       rating
       poster {
         url
-      }
-      genres {
-        id
-        title
-        slug
       }
       ageRating
       releaseStatus

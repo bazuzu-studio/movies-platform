@@ -45,7 +45,7 @@ const smtpSecure = process.env.SMTP_SECURE?.trim() === 'true' || smtpPort === 46
 // eager-вычисление тут было бы багом.
 export const getNodemailerOptions = (): NodemailerAdapterArgs => ({
   defaultFromAddress: requireEnv('EMAIL_FROM_ADDRESS'),
-  defaultFromName: process.env.EMAIL_FROM_NAME?.trim() || 'MovHub',
+  defaultFromName: process.env.EMAIL_FROM_NAME?.trim() || 'otakuum',
 
   transportOptions: {
     host: requireEnv('SMTP_HOST'),

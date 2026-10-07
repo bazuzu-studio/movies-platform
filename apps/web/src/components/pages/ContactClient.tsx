@@ -6,7 +6,6 @@ import { User, Mail, MessageSquare, Check } from "lucide-react";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
-import { contactMessageEndpointUrl } from "@/lib/cms";
 
 const MESSAGE_MIN = 10;
 
@@ -37,12 +36,9 @@ export function ContactClient() {
 
     setSubmitting(true);
     try {
-      // Шлём напрямую в CMS (см. apps/cms/src/endpoints/contact-message.ts),
-      // без прокси через сервер фронтенда — как и остальные формы через
-      // gqlClient. Адрес CMS и так публичный (NEXT_PUBLIC_GRAPHQL_API_URL),
-      // а всю валидацию, rate-limit и honeypot endpoint проверяет сам,
-      // ровно потому что он публичный и может быть вызван и в обход этой формы.
-      const res = await fetch(contactMessageEndpointUrl, {
+      // Форма идёт через сервер сайта (/api/contact), а он уже пересылает
+      // сообщение в CMS, где настроена почта. Адрес CMS браузеру не нужен.
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message, website }),

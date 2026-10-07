@@ -7,11 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Inbox,
   Search as SearchIcon,
@@ -39,6 +35,7 @@ import {
   type YearOption,
   statusUrlValue,
   useCatalogFilters,
+  yearOptionToApi,
 } from "@/hooks/useCatalogFilters";
 import { useCountUp } from "@/hooks/useCountUp";
 
@@ -55,16 +52,6 @@ const SORT_MAP: Record<SortOption, string> = {
   Популярные: "popular",
   Новинки: "newest",
   "По алфавиту": "alphabetical",
-};
-
-const YEAR_MAP: Record<YearOption, string | undefined> = {
-  Все: undefined,
-  "2026": "2026",
-  "2025": "2025",
-  "2024": "2024",
-  "2023": "2023",
-  "2022": "2022",
-  "2021 и раньше": "2021-or-earlier",
 };
 
 interface CatalogClientProps {
@@ -101,7 +88,7 @@ function buildContentParams(page: number, query: CatalogQuery): URLSearchParams 
     params.set("genre", query.genre);
   }
 
-  const apiYear = YEAR_MAP[query.year];
+  const apiYear = yearOptionToApi(query.year);
   if (apiYear) {
     params.set("year", apiYear);
   }
@@ -142,7 +129,6 @@ export function CatalogClient({
   type: initialType,
   status: initialStatus,
 }: CatalogClientProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -291,10 +277,20 @@ export function CatalogClient({
   }, [typeFilter, genre, year, age, status, sort, searchVal]);
 
   /*
-   * Синхронизация первоначальных props при смене type через URL.
+   * Синхронизация первоначальных props при переходе по ссылке (?type=… из
+   * шапки). Применяем их, только если остальные фильтры по умолчанию: иначе
+   * серверный список (без жанра/года/поиска) затёр бы уже загруженный
+   * клиентом отфильтрованный результат.
    */
   const previousInitialTypeRef = useRef(initialType);
   const previousInitialStatusRef = useRef(initialStatus);
+  const extrasAreDefaultRef = useRef(true);
+  extrasAreDefaultRef.current =
+    genre === "Все" &&
+    year === DEFAULT_YEAR &&
+    age === DEFAULT_AGE &&
+    sort === DEFAULT_SORT &&
+    !searchVal;
 
   useEffect(() => {
     if (
@@ -306,6 +302,8 @@ export function CatalogClient({
 
     previousInitialTypeRef.current = initialType;
     previousInitialStatusRef.current = initialStatus;
+
+    if (!extrasAreDefaultRef.current) return;
 
     setItems(initialItems);
     setCurrentPage(1);
@@ -372,6 +370,18 @@ export function CatalogClient({
     age,
   ]);
 
+  // history.replaceState вместо router.push: Next синхронизирует его с
+  // useSearchParams, но не делает RSC-запрос — раньше каждое нажатие на «Фильмы»
+  // или «Выходит» заново грузило с сервера 50 тайтлов, которые тут же
+  // перезаписывались результатом клиентского fetch.
+  const replaceUrl = useCallback(
+    (params: URLSearchParams) => {
+      const query = params.toString();
+      window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
+    },
+    [pathname],
+  );
+
   const updateTypeInUrl = useCallback(
     (value: TypeFilter) => {
       setType(value);
@@ -385,11 +395,9 @@ export function CatalogClient({
         params.set("type", value);
       }
 
-      const query = params.toString();
-
-      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      replaceUrl(params);
     },
-    [pathname, router, searchParams, setType],
+    [replaceUrl, searchParams, setType],
   );
 
   const updateStatusInUrl = useCallback(
@@ -406,11 +414,9 @@ export function CatalogClient({
         params.delete("status");
       }
 
-      const nextQuery = params.toString();
-
-      router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+      replaceUrl(params);
     },
-    [pathname, router, searchParams, setStatus],
+    [replaceUrl, searchParams, setStatus],
   );
 
   const handleReset = useCallback(() => {
@@ -418,8 +424,8 @@ export function CatalogClient({
     setType("all");
     setCurrentPage(1);
 
-    router.push(pathname, { scroll: false });
-  }, [pathname, resetFilters, router, setType]);
+    replaceUrl(new URLSearchParams());
+  }, [replaceUrl, resetFilters, setType]);
 
   const visibleItems = items;
   const hasMore = hasNextPage && !loading;

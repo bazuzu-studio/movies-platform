@@ -1,4 +1,5 @@
-
+# Карточки каталога/главной. Только то, что рисует MovieCard: без backdrop и
+# жанров (это лишние JOIN'ы на каждую из 50 записей страницы).
 query GetContent($limit: Int, $page: Int, $sort: String, $where: Content_where) {
   Contents(limit: $limit, page: $page, sort: $sort, where: $where) {
     docs {
@@ -12,13 +13,6 @@ query GetContent($limit: Int, $page: Int, $sort: String, $where: Content_where) 
       poster {
         url
       }
-      backdrop {
-        url
-      }
-      genres {
-        id
-        title
-      }
       ageRating
       releaseStatus
     }
@@ -26,4 +20,3 @@ query GetContent($limit: Int, $page: Int, $sort: String, $where: Content_where) 
     hasNextPage
   }
 }
-

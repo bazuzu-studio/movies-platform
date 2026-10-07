@@ -66,10 +66,9 @@ export function SeasonSwitcher({ seasons, activeKey, onSelect }: SeasonSwitcherP
           const isActive = key === activeKey;
           const episodeCount = season.episodes?.length ?? 0;
           const href = season.slug ? `/series/${season.slug}` : "#";
-          // «Сезон 2 · Часть 1» — подпись считается в api.ts (labelSeasons).
+          // «Сезон 2 · Часть 1» — подпись считается в seasons.ts (labelSeasons).
           const label = season.label ?? `Сезон ${number}`;
           const hasCustomTitle = Boolean(season.title && season.title !== label);
-          
 
           return (
             <li

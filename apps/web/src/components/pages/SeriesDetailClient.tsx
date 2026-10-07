@@ -36,11 +36,17 @@ export function SeriesDetailClient({
 
   
 
+  // «Назад»: если страницу открыли по прямой ссылке, истории нет — ведём в каталог.
+  const goBack = useCallback(() => {
+    if (window.history.length > 1) router.back();
+    else router.push("/catalog");
+  }, [router]);
+
   const playerRef = useRef<HTMLDivElement>(null);
 
   // Какой сезон открыть: явно выбранный (?season=slug), иначе ПОСЛЕДНИЙ
   // вышедший. Раньше открывался сезон по slug страницы — для франшизы,
-  // начавшейся в 2013, это давало 2013 год вместо актуального сезона.
+  // начавшейся в 2013 году, это давало 2013-й вместо актуального сезона.
   const seasonFromUrl = searchParams.get("season");
   const defaultKey = useMemo(() => {
     const fromUrl = seasonFromUrl
@@ -247,7 +253,7 @@ export function SeriesDetailClient({
         <div className="absolute inset-0 bg-gradient-to-r from-[#08080A]/80 to-transparent" />
 
         <button
-          onClick={() => router.back()}
+          onClick={goBack}
           className="absolute top-20 left-4 sm:left-8 flex items-center gap-2 text-sm text-white/80 hover:text-white bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Назад

@@ -20,7 +20,7 @@ export const ALLOWED_EMBED_HOSTS: readonly string[] = [
  * Поддерживает:
  * - protocol-relative: //kodikplayer.com/seria/...
  * - без схемы: kodikplayer.com/seria/...
- * - с любой схемой (http, https)
+ * - со схемой http/https (http поднимается до https); остальные схемы отклоняются
  */
 export function getSafeEmbedUrl(rawUrl: string | undefined | null): string | null {
   if (!rawUrl) return null;
@@ -39,6 +39,13 @@ export function getSafeEmbedUrl(rawUrl: string | undefined | null): string | nul
     }
 
     const url = new URL(urlString);
+
+    // Только http(s). Без этой проверки `javascript://kodikplayer.com/%0aalert(1)`
+    // проходил по hostname и попадал в src iframe (sandbox с allow-same-origin
+    // исполнил бы код в контексте сайта). http принудительно поднимаем до https:
+    // иначе плеер блокируется как mixed content.
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    url.protocol = 'https:';
 
     // Точное совпадение hostname
     if (!ALLOWED_EMBED_HOSTS.includes(url.hostname)) return null;

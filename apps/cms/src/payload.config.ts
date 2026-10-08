@@ -35,6 +35,7 @@ import { healthEndpoint } from './endpoints/health'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import type { GenerateTitle, GenerateDescription, GenerateURL } from '@payloadcms/plugin-seo/types'
+import { migrations } from './migrations'
 
 // SEO: заголовок/описание/URL для мета-тегов. Если мета-поля не заполнены,
 // фронтенд может использовать эти же правила как fallback.
@@ -115,7 +116,7 @@ export default buildConfig({
     // применяет ещё не выполненные миграции автоматически при старте
     // контейнера — отдельный шаг `payload migrate` в Dokploy не нужен.
     // В dev-режиме по-прежнему работает push.
-  
+   prodMigrations: migrations,
   }),
 
   // Приведение типа намеренное: между версиями `sharp` (0.34.x/0.35.x) и

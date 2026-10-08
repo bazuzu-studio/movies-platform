@@ -1,0 +1,15 @@
+# Ближайшая невышедшая серия каждого сезона франшизы (поля content.nextEpisodeNumber /
+# nextEpisodeAt заполняет `python pipeline.py sync-schedule`, время — Unix-секунды,
+# ЭФИР в Японии). Отдельный запрос, а не часть GetSeriesFranchise: пока CMS не
+# получила миграцию с этими полями, запрос падает, и сайт просто не показывает
+# расписание (getNextEpisodes перехватывает ошибку), а не теряет страницу сериала.
+query GetNextEpisodes($where: Content_where!) {
+  Contents(where: $where, limit: 50, pagination: false) {
+    docs {
+      id
+      slug
+      nextEpisodeNumber
+      nextEpisodeAt
+    }
+  }
+}

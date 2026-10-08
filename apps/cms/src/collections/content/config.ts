@@ -5,6 +5,7 @@ import { admin } from '@/access/admin'
 import { publishedOrEditor } from '@/access/publishedOrEditor'
 import { revalidateAfterChange, revalidateAfterDelete } from '@/hooks/revalidate'
 import { slugify } from '@/lib/slugify'
+import { scheduleFields } from '../ContentScheduleFields'
 
 /**
  * Единая коллекция для фильмов и сериалов.
@@ -343,5 +344,6 @@ export const Content: CollectionConfig = {
           'Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте',
       },
     },
+    ...scheduleFields
   ],
 }

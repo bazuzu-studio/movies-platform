@@ -1,0 +1,11 @@
+# Серии одного сезона (только id и номер): по ним get-episode-sources.graphql
+# отбирает ссылки на плеер других озвучек. Берётся серверным маршрутом
+# /api/episode-sources (getSeasonSources в src/lib/api.ts).
+query GetSeasonEpisodeIds($where: Episode_where) {
+  Episodes(where: $where, limit: 1000, pagination: false) {
+    docs {
+      id
+      episodeNumber
+    }
+  }
+}

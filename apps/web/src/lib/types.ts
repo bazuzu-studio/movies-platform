@@ -6,6 +6,7 @@
 /* -------------------------------------------------------------------------- */
 
 import type { ReleaseStatus } from "./release-status";
+import type { NextEpisode } from "./next-episode";
 
 export type ContentType = "movie" | "series";
 
@@ -69,6 +70,9 @@ export interface Season {
 
   /** Статус релиза связанного Content (у каждого сезона своя запись в CMS). */
   releaseStatus?: ReleaseStatus;
+
+  /** Ближайшая невышедшая серия (расписание эфира из AniList), если известна. */
+  nextEpisode?: NextEpisode;
 
   /** Русское название Content сезона — по нему определяется «Часть N». */
   contentTitle?: string;

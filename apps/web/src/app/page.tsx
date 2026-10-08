@@ -1,7 +1,7 @@
 
 import type { Metadata } from "next";
 
-import { getContentList, getHeroItem, type ContentListResult } from "@/lib/api";
+import { getContentList, getHeroItem, getSchedule, type ContentListResult } from "@/lib/api";
 import { HomeClient } from "@/components/pages/HomeClient";
 
 export const metadata: Metadata = {
@@ -27,6 +27,7 @@ export default async function HomePage() {
     seriesContent,
     ongoingContent,
     heroItem,
+    schedule,
   ] = await Promise.all([
     // Популярное
     getContentList(1, 12, {
@@ -68,6 +69,13 @@ export default async function HomePage() {
       console.error("HomePage: не удалось загрузить hero", error);
       return undefined;
     }),
+
+    // Расписание эфира. Сбой (например, в CMS ещё нет полей nextEpisode*)
+    // не роняет главную — блок просто не показывается.
+    getSchedule(40).catch((error) => {
+      console.error("HomePage: не удалось загрузить расписание", error);
+      return [];
+    }),
   ]);
 
   const popular = popularContent.items;
@@ -84,6 +92,8 @@ export default async function HomePage() {
       series={series}
       ongoing={ongoing}
       newArrivals={newArrivals}
+      schedule={schedule}
+      serverNow={Date.now()}
     />
   );
 }

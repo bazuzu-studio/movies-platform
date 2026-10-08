@@ -1,0 +1,29 @@
+# Серии, вышедшие в эфир за заданный промежуток (episodes.airingAt, Unix-секунды):
+# нужны расписанию, чтобы сегодняшние уже вышедшие серии оставались в списке, пока
+# content.nextEpisode* перескочил на следующую. Фильтр по времени — в getSchedule.
+query GetAiredEpisodes($where: Episode_where!, $limit: Int) {
+  Episodes(where: $where, limit: $limit, sort: "airingAt", pagination: false) {
+    docs {
+      id
+      episodeNumber
+      airingAt
+      season {
+        id
+        content {
+          id
+          type
+          titleEn
+          titleRu
+          slug
+          releaseYear
+          rating
+          ageRating
+          releaseStatus
+          poster {
+            url
+          }
+        }
+      }
+    }
+  }
+}

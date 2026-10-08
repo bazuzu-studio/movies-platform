@@ -2,10 +2,12 @@
 "use client";
 
 import type { ContentItem } from "@/lib/types";
+import type { ScheduleEntry } from "@/lib/api";
 
 import { HeroSection } from "@/components/content/HeroSection";
 import { ContentRow } from "@/components/content/ContentRow";
 import { ContinueWatching } from "@/components/content/ContinueWatching";
+import { ScheduleRow } from "@/components/content/ScheduleRow";
 
 interface HomeClientProps {
   heroItem?: ContentItem;
@@ -15,6 +17,10 @@ interface HomeClientProps {
   /** Сериалы со статусом «выходит». */
   ongoing?: ContentItem[];
   newArrivals: ContentItem[];
+  /** Ближайшие эфиры (блок «Расписание эфира»). */
+  schedule?: ScheduleEntry[];
+  /** Время рендера на сервере, мс. */
+  serverNow?: number;
 }
 
 export function HomeClient({
@@ -24,6 +30,8 @@ export function HomeClient({
   series,
   ongoing = [],
   newArrivals,
+  schedule = [],
+  serverNow = 0,
 }: HomeClientProps) {
   if (
     !heroItem &&
@@ -43,6 +51,8 @@ export function HomeClient({
 
       <div className="mt-10 space-y-2">
         <ContinueWatching />
+
+        {schedule.length > 0 && <ScheduleRow entries={schedule} serverNow={serverNow} />}
 
         {ongoing.length > 0 && (
           <ContentRow

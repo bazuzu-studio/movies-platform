@@ -74,6 +74,8 @@ export interface Config {
     episodes: Episode;
     favorites: Favorite;
     seasons: Season;
+    voiceovers: Voiceover;
+    'episode-sources': EpisodeSource;
     'search-results': SearchResult;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -96,6 +98,8 @@ export interface Config {
     episodes: EpisodesSelect<false> | EpisodesSelect<true>;
     favorites: FavoritesSelect<false> | FavoritesSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
+    voiceovers: VoiceoversSelect<false> | VoiceoversSelect<true>;
+    'episode-sources': EpisodeSourcesSelect<false> | EpisodeSourcesSelect<true>;
     'search-results': SearchResultsSelect<false> | SearchResultsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -306,6 +310,11 @@ export interface Content {
    * Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте
    */
   releaseStatus?: ('anons' | 'ongoing' | 'released') | null;
+  nextEpisodeNumber?: number | null;
+  /**
+   * Заполняется пайплайном (sync-schedule) по расписанию AniList.
+   */
+  nextEpisodeAt?: number | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -391,6 +400,36 @@ export interface Favorite {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voiceovers".
+ */
+export interface Voiceover {
+  id: number;
+  title: string;
+  /**
+   * Стабильный идентификатор студии, например anilibria, shiza-project
+   */
+  slug: string;
+  /**
+   * translation.id из Kodik API; по нему пайплайн сопоставляет озвучки (python pipeline.py match-voiceovers).
+   */
+  kodikTranslationId?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "episode-sources".
+ */
+export interface EpisodeSource {
+  id: number;
+  episode: number | Episode;
+  voiceover: number | Voiceover;
+  playerLink: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -464,6 +503,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'seasons';
         value: number | Season;
+      } | null)
+    | ({
+        relationTo: 'voiceovers';
+        value: number | Voiceover;
+      } | null)
+    | ({
+        relationTo: 'episode-sources';
+        value: number | EpisodeSource;
       } | null)
     | ({
         relationTo: 'search-results';
@@ -599,6 +646,8 @@ export interface ContentSelect<T extends boolean = true> {
   genres?: T;
   ageRating?: T;
   releaseStatus?: T;
+  nextEpisodeNumber?: T;
+  nextEpisodeAt?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -638,6 +687,28 @@ export interface SeasonsSelect<T extends boolean = true> {
   title?: T;
   releaseYear?: T;
   episodes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "voiceovers_select".
+ */
+export interface VoiceoversSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  kodikTranslationId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "episode-sources_select".
+ */
+export interface EpisodeSourcesSelect<T extends boolean = true> {
+  episode?: T;
+  voiceover?: T;
+  playerLink?: T;
   updatedAt?: T;
   createdAt?: T;
 }

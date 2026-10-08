@@ -1,0 +1,21 @@
+# Ссылки на плеер по озвучкам (коллекция episode-sources в CMS, наполняет
+# `python pipeline.py sync-dubs`) для заданных серий. Основная озвучка серии
+# по-прежнему лежит в episodes.playerLink — этот запрос нужен только для выбора
+# другой озвучки. Если коллекции в CMS ещё нет, запрос падает, а сайт показывает
+# серию без выбора озвучки (см. getSeasonSources / SeriesDetailClient).
+query GetEpisodeSources($where: EpisodeSource_where) {
+  EpisodeSources(where: $where, limit: 20000, pagination: false) {
+    docs {
+      id
+      playerLink
+      episode {
+        id
+      }
+      voiceover {
+        id
+        title
+        slug
+      }
+    }
+  }
+}

@@ -3,12 +3,19 @@ import { GraphQLClient } from "graphql-request";
 import {
   GetContentDocument,
   GetContentBySlugDocument,
+  GetEpisodeSourcesDocument,
   GetGenresDocument,
   GetHeroContentDocument,
+  GetAiredEpisodesDocument,
+  GetNextEpisodesDocument,
+  GetScheduleDocument,
+  GetSeasonEpisodeIdsDocument,
   GetSeriesFranchiseDocument,
   GetSimilarContentDocument,
   GetSitemapEntriesDocument,
   type Content_Where,
+  type Episode_Where,
+  type EpisodeSource_Where,
 } from "@/generated/graphql";
 
 import {
@@ -23,6 +30,8 @@ import { episodeReleaseDate, episodeTitle } from "./episode";
 import { normalizeImageUrl } from "./image-url";
 import { richTextToPlainText } from "./richtext";
 import { dedupeSeasonsBySlug, labelSeasons, pickLatestSeason } from "./seasons";
+import { mskDayStartSec, parseNextEpisode, type NextEpisode } from "./next-episode";
+import { groupSources, type SeasonSources, type SourceRow } from "./voiceovers";
 
 const endpoint =
   process.env.GRAPHQL_API_URL ??
@@ -334,6 +343,95 @@ async function getFranchiseSeasons(raw: RawContentWithFranchise): Promise<Season
   return labelSeasons(dedupeSeasonsBySlug(seasons));
 }
 
+/* -------------------------------------------------------------------------- */
+/*                         Расписание эфира (/schedule)                       */
+/* -------------------------------------------------------------------------- */
+
+export interface ScheduleEntry {
+  /** Карточка сериала (как в каталоге). */
+  item: ContentItem;
+  next: NextEpisode;
+}
+
+/**
+ * Расписание на сегодня и дальше (по Москве): будущие серии из
+ * content.nextEpisode*, плюс уже вышедшие СЕГОДНЯ серии из episodes.airingAt
+ * (в content.nextEpisode* после выхода серии стоит уже следующая, поэтому без
+ * них сегодняшний вечер пропадал бы из списка). Дубли (тайтл + номер серии)
+ * схлопываются; по времени эфира.
+ *
+ * Бросает ошибку, если в CMS нет полей nextEpisode* — вызывающий код решает,
+ * что показывать (страница — сообщение, главная — нет блока). Запрос вышедших
+ * серий необязателен: при сбое остаётся только будущее расписание.
+ */
+export async function getSchedule(limit = 200): Promise<ScheduleEntry[]> {
+  const nowMs = Date.now();
+  const startSec = mskDayStartSec(nowMs);
+
+  const where = {
+    AND: [{ type: { equals: "series" } }, { nextEpisodeAt: { greater_than_equal: startSec } }],
+  } as unknown as Content_Where;
+
+  const [upcoming, aired] = await Promise.all([
+    serverClient.request(GetScheduleDocument, { where, limit }),
+    serverClient
+      .request(GetAiredEpisodesDocument, {
+        where: {
+          AND: [
+            { airingAt: { greater_than_equal: startSec } },
+            { airingAt: { less_than_equal: Math.floor(nowMs / 1000) } },
+          ],
+        } as unknown as Episode_Where,
+        limit,
+      })
+      .catch((error) => {
+        console.warn("getSchedule: вышедшие серии недоступны", error);
+        return undefined;
+      }),
+  ]);
+
+  const entries = new Map<string, ScheduleEntry>();
+  const add = (doc: unknown, next: NextEpisode | undefined) => {
+    const raw = doc as RawContent | null | undefined;
+    if (!raw || !next || raw.type !== "series" || !raw.slug) return;
+    const key = `${raw.id}:${next.number}`;
+    if (entries.has(key)) return;
+    withNormalizedUrl(raw.poster);
+    entries.set(key, { item: mapContentToItem(raw), next });
+  };
+
+  for (const doc of docsOf(upcoming.Contents)) {
+    add(doc, parseNextEpisode(doc.nextEpisodeNumber, doc.nextEpisodeAt));
+  }
+  for (const episode of docsOf(aired?.Episodes)) {
+    add(episode.season?.content, parseNextEpisode(episode.episodeNumber, episode.airingAt));
+  }
+
+  return [...entries.values()].sort((a, b) => a.next.airingAt - b.next.airingAt);
+}
+
+/**
+ * Расписание: дописывает сезонам ближайшую невышедшую серию (по slug записи
+ * Content). Отдельный запрос с перехватом ошибки: пока CMS не получила поля
+ * nextEpisode*, сайт работает как раньше, просто без расписания.
+ */
+async function attachNextEpisodes(seasons: Season[], where: Content_Where): Promise<void> {
+  try {
+    const data = await serverClient.request(GetNextEpisodesDocument, { where });
+    const bySlug = new Map<string, NonNullable<ReturnType<typeof parseNextEpisode>>>();
+    for (const doc of docsOf(data.Contents)) {
+      const next = parseNextEpisode(doc.nextEpisodeNumber, doc.nextEpisodeAt);
+      if (next && doc.slug) bySlug.set(doc.slug, next);
+    }
+    for (const season of seasons) {
+      const next = bySlug.get(season.slug);
+      if (next) season.nextEpisode = next;
+    }
+  } catch (error) {
+    console.warn("attachNextEpisodes: расписание недоступно (нет полей в CMS?)", error);
+  }
+}
+
 export async function getContentBySlug(slug: string): Promise<ContentItem | undefined> {
   try {
     const data = await serverClient.request(GetContentBySlugDocument, { slug });
@@ -350,6 +448,7 @@ export async function getContentBySlug(slug: string): Promise<ContentItem | unde
     if (item.type === "series") {
       try {
         item.seasons = await getFranchiseSeasons(raw);
+        await attachNextEpisodes(item.seasons, franchiseWhere(raw));
 
         // Шапка страницы и SEO описывают ПОСЛЕДНИЙ вышедший сезон, а не тот,
         // чей slug открыт (иначе у франшизы с 2013 года был бы 2013-й).
@@ -378,6 +477,47 @@ export async function getContentBySlug(slug: string): Promise<ContentItem | unde
     console.error(`getContentBySlug(${slug}) failed`, error);
     throw error;
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Озвучки серий (episode-sources)                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Ссылки на плеер всех озвучек для серий одного сезона, по номеру серии.
+ *
+ * Основная озвучка серии берётся из episodes.playerLink (см. getFranchiseSeasons),
+ * остальные — из коллекции CMS episode-sources. Два запроса: id серий сезона,
+ * затем источники этих серий (фильтр по связи `episode` с вложенным полем
+ * сезона в GraphQL Payload недоступен). Оба кэшируются Next (revalidate 60).
+ * Если коллекции в CMS ещё нет, запрос выбросит ошибку — вызывающий код
+ * показывает серию без выбора озвучки.
+ */
+export async function getSeasonSources(seasonId: number): Promise<SeasonSources> {
+  const episodes = await serverClient.request(GetSeasonEpisodeIdsDocument, {
+    where: { season: { equals: seasonId } } as Episode_Where,
+  });
+
+  const numberById = new Map<number, number>();
+  for (const episode of docsOf(episodes.Episodes)) numberById.set(episode.id, episode.episodeNumber);
+  if (numberById.size === 0) return {};
+
+  const data = await serverClient.request(GetEpisodeSourcesDocument, {
+    where: { episode: { in: [...numberById.keys()] } } as EpisodeSource_Where,
+  });
+
+  const rows: SourceRow[] = [];
+  for (const source of docsOf(data.EpisodeSources)) {
+    const episodeNumber = source.episode ? numberById.get(source.episode.id) : undefined;
+    if (episodeNumber === undefined || !source.voiceover?.slug || !source.playerLink) continue;
+    rows.push({
+      episodeNumber,
+      slug: source.voiceover.slug,
+      title: source.voiceover.title,
+      url: source.playerLink,
+    });
+  }
+  return groupSources(rows);
 }
 
 /* -------------------------------------------------------------------------- */

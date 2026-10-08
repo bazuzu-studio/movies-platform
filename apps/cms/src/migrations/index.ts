@@ -2,6 +2,7 @@ import * as migration_20260924_075556_initial from './20260924_075556_initial';
 import * as migration_20260928_193844_add_release_status from './20260928_193844_add_release_status';
 import * as migration_20261003_120000_hardening_and_franchise from './20261003_120000_hardening_and_franchise';
 import * as migration_20261006_120000_add_seo_meta from './20261006_120000_add_seo_meta';
+import * as migration_20261007_140000_add_voiceovers_and_episode_sources from './20261007_140000_add_voiceovers_and_episode_sources';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20261006_120000_add_seo_meta.up,
     down: migration_20261006_120000_add_seo_meta.down,
     name: '20261006_120000_add_seo_meta'
+  },
+  {
+    up: migration_20261007_140000_add_voiceovers_and_episode_sources.up,
+    down: migration_20261007_140000_add_voiceovers_and_episode_sources.down,
+    name: '20261007_140000_add_voiceovers_and_episode_sources'
   },
 ];

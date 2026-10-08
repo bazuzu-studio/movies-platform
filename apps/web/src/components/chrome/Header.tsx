@@ -12,6 +12,7 @@ const navItems = [
   { label: "Каталог", href: "/catalog" },
   { label: "Фильмы", href: "/catalog?type=movie" },
   { label: "Сериалы", href: "/catalog?type=series" },
+  { label: "Расписание", href: "/schedule" },
   { label: "Избранное", href: "/favorites" },
 ] as const;
 

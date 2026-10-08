@@ -3,6 +3,7 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { parse } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 /** All built-in and custom scalars, mapped to their actual values */
@@ -52,6 +53,8 @@ export type Content = {
   kinopoiskId?: Maybe<Scalars['String']['output']>;
   kodikId?: Maybe<Scalars['String']['output']>;
   meta?: Maybe<Content_Meta>;
+  nextEpisodeAt?: Maybe<Scalars['Float']['output']>;
+  nextEpisodeNumber?: Maybe<Scalars['Float']['output']>;
   originalTitle?: Maybe<Scalars['String']['output']>;
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
@@ -10675,3 +10678,168 @@ export const GetHeroContentDocument = {"kind":"Document","definitions":[{"kind":
 export const GetSeriesFranchiseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeriesFranchise"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber,releaseYear","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeriesFranchiseQuery, GetSeriesFranchiseQueryVariables>;
 export const GetSitemapEntriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSitemapEntries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-updatedAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetSitemapEntriesQuery, GetSitemapEntriesQueryVariables>;
 export const GetFavoriteItemsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavoriteItems"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-createdAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoriteItemsQuery, GetFavoriteItemsQueryVariables>;
+
+/* -------------------------------------------------------------------------- */
+/* ВРУЧНУЮ добавлено: озвучки серий (коллекция CMS episode-sources).           */
+/* Исходники — src/graphql/content/get-season-episode-ids.graphql и           */
+/* get-episode-sources.graphql. Перед коммитом выполните `pnpm codegen`:      */
+/* он заменит этот блок настоящим выводом (и уберёт import { parse } выше).   */
+/* -------------------------------------------------------------------------- */
+
+export type EpisodeSource_Episode_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  equals?: InputMaybe<Scalars['JSON']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  not_equals?: InputMaybe<Scalars['JSON']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+};
+
+export type EpisodeSource_Voiceover_Operator = EpisodeSource_Episode_Operator;
+
+export type EpisodeSource_Where = {
+  episode?: InputMaybe<EpisodeSource_Episode_Operator>;
+  voiceover?: InputMaybe<EpisodeSource_Voiceover_Operator>;
+};
+
+export type GetSeasonEpisodeIdsQueryVariables = Exact<{
+  where?: InputMaybe<Episode_Where>;
+}>;
+
+
+export type GetSeasonEpisodeIdsQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number }> } | null };
+
+export type GetEpisodeSourcesQueryVariables = Exact<{
+  where?: InputMaybe<EpisodeSource_Where>;
+}>;
+
+
+export type GetEpisodeSourcesQuery = { EpisodeSources: { docs: Array<{ id: number, playerLink: string, episode: { id: number } | null, voiceover: { id: number, title: string, slug: string } | null }> } | null };
+
+export const GetSeasonEpisodeIdsDocument = parse(`
+  query GetSeasonEpisodeIds($where: Episode_where) {
+    Episodes(where: $where, limit: 1000, pagination: false) {
+      docs {
+        id
+        episodeNumber
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetSeasonEpisodeIdsQuery, GetSeasonEpisodeIdsQueryVariables>;
+export const GetEpisodeSourcesDocument = parse(`
+  query GetEpisodeSources($where: EpisodeSource_where) {
+    EpisodeSources(where: $where, limit: 20000, pagination: false) {
+      docs {
+        id
+        playerLink
+        episode {
+          id
+        }
+        voiceover {
+          id
+          title
+          slug
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetEpisodeSourcesQuery, GetEpisodeSourcesQueryVariables>;
+
+/* -------------------------------------------------------------------------- */
+/* ВРУЧНУЮ добавлено: расписание серий (content.nextEpisodeNumber/At).         */
+/* Исходник — src/graphql/content/get-next-episodes.graphql. Перед коммитом   */
+/* выполните `pnpm codegen`: он заменит этот блок настоящим выводом.          */
+/* -------------------------------------------------------------------------- */
+
+export type GetNextEpisodesQueryVariables = Exact<{
+  where: Content_Where;
+}>;
+
+
+export type GetNextEpisodesQuery = { Contents: { docs: Array<{ id: number, slug: string | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null }> } | null };
+
+export const GetNextEpisodesDocument = parse(`
+  query GetNextEpisodes($where: Content_where!) {
+    Contents(where: $where, limit: 50, pagination: false) {
+      docs {
+        id
+        slug
+        nextEpisodeNumber
+        nextEpisodeAt
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetNextEpisodesQuery, GetNextEpisodesQueryVariables>;
+
+/* ВРУЧНУЮ добавлено: страница расписания (src/graphql/content/get-schedule.graphql). */
+/* Перед коммитом выполните `pnpm codegen`.                                          */
+
+export type GetScheduleQueryVariables = Exact<{
+  where: Content_Where;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetScheduleQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null, poster: { url: string | null } | null }> } | null };
+
+export const GetScheduleDocument = parse(`
+  query GetSchedule($where: Content_where!, $limit: Int) {
+    Contents(where: $where, limit: $limit, sort: "nextEpisodeAt", pagination: false) {
+      docs {
+        id
+        type
+        titleEn
+        titleRu
+        slug
+        releaseYear
+        rating
+        ageRating
+        releaseStatus
+        nextEpisodeNumber
+        nextEpisodeAt
+        poster {
+          url
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetScheduleQuery, GetScheduleQueryVariables>;
+
+/* ВРУЧНУЮ добавлено: вышедшие серии для расписания (src/graphql/content/get-aired-episodes.graphql). */
+/* Перед коммитом выполните `pnpm codegen`.                                                         */
+
+export type GetAiredEpisodesQueryVariables = Exact<{
+  where: Episode_Where;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetAiredEpisodesQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number, airingAt: number | null, season: { id: number, content: { id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null } | null } | null }> } | null };
+
+export const GetAiredEpisodesDocument = parse(`
+  query GetAiredEpisodes($where: Episode_where!, $limit: Int) {
+    Episodes(where: $where, limit: $limit, sort: "airingAt", pagination: false) {
+      docs {
+        id
+        episodeNumber
+        airingAt
+        season {
+          id
+          content {
+            id
+            type
+            titleEn
+            titleRu
+            slug
+            releaseYear
+            rating
+            ageRating
+            releaseStatus
+            poster {
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetAiredEpisodesQuery, GetAiredEpisodesQueryVariables>;

@@ -29,3 +29,55 @@ export function episodeReleaseDate(
   }
   return legacyReleaseDate ?? "";
 }
+
+/* -------------------------------------------------------------------------- */
+/*                         Отображение даты эфира серии                       */
+/* -------------------------------------------------------------------------- */
+
+const TIME_ZONE = "Europe/Moscow";
+
+const shortFmt = new Intl.DateTimeFormat("ru-RU", {
+  timeZone: TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+});
+const shortYearFmt = new Intl.DateTimeFormat("ru-RU", {
+  timeZone: TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+});
+const longFmt = new Intl.DateTimeFormat("ru-RU", {
+  timeZone: TIME_ZONE,
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+const timeFmt = new Intl.DateTimeFormat("ru-RU", {
+  timeZone: TIME_ZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+const yearFmt = new Intl.DateTimeFormat("en", { timeZone: TIME_ZONE, year: "numeric" });
+
+function parseIso(iso: string | null | undefined): Date | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** «12.10» (для текущего года) или «12.10.25»; пусто, если даты нет. По Москве. */
+export function formatEpisodeDateShort(iso: string | null | undefined, nowMs: number = Date.now()): string {
+  const date = parseIso(iso);
+  if (!date) return "";
+  const sameYear = yearFmt.format(date) === yearFmt.format(nowMs);
+  return (sameYear ? shortFmt : shortYearFmt).format(date).replace(/\//g, ".");
+}
+
+/** «12 октября 2026, 18:26 МСК»; пусто, если даты нет. Это время ЭФИРА в Японии. */
+export function formatEpisodeDateLong(iso: string | null | undefined): string {
+  const date = parseIso(iso);
+  if (!date) return "";
+  return `${longFmt.format(date).replace(" г.", "")}, ${timeFmt.format(date)} МСК`;
+}

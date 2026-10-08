@@ -1,0 +1,24 @@
+# Расписание эфира: сериалы с известной ближайшей серией (content.nextEpisodeAt,
+# Unix-секунды; заполняет `python pipeline.py sync-schedule`). Фильтр по времени и
+# сортировка собираются в getSchedule (src/lib/api.ts). Если полей в CMS ещё нет,
+# запрос падает, а сайт не показывает расписание (ошибка перехватывается).
+query GetSchedule($where: Content_where!, $limit: Int) {
+  Contents(where: $where, limit: $limit, sort: "nextEpisodeAt", pagination: false) {
+    docs {
+      id
+      type
+      titleEn
+      titleRu
+      slug
+      releaseYear
+      rating
+      ageRating
+      releaseStatus
+      nextEpisodeNumber
+      nextEpisodeAt
+      poster {
+        url
+      }
+    }
+  }
+}

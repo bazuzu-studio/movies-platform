@@ -39,7 +39,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-no-reply@otakuum.ru}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-MovHub}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-otakuum}
       CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-}
       # Мгновенный сброс кэша фронтенда после правок (см. src/lib/revalidate.ts).
       # REVALIDATE_URL — адрес фронтенда из контейнера CMS (alias сервиса web в

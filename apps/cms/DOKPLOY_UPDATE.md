@@ -8,6 +8,25 @@
 grep -rn "\[Dokploy\]" src next.config.ts pnpm-workspace.yaml Dockerfile docker-compose*.yml
 ```
 
+## Ревизия 10 — озвучки и источники серий (2026-10-07)
+
+- Две новые коллекции (группа «Каталог»): **`voiceovers`** (справочник озвучек: `title`, `slug`, `kodikTranslationId`, все уникальны) и **`episode-sources`** (ссылка на плеер `playerLink` для пары «серия ↔ озвучка»; пара `episode` + `voiceover` уникальна). Нужны kodik-pipeline: `sync-voiceovers`, `match-voiceovers`, `sync-dubs`. Серии (`episodes`) не менялись: основная озвучка по-прежнему в `episodes.playerLink`, остальные — в `episode-sources`.
+- GraphQL-имена заданы явно (`Voiceover(s)`, `EpisodeSource(s)`): русские `labels` без этого попали бы в имена типов, а кириллица в GraphQL недопустима. Запросы сайта: `Voiceovers`, `EpisodeSources`.
+- Права: чтение публичное (как у `episodes`), создание/изменение — `editor`/`admin`, удаление — `admin`; изменения сбрасывают кэш сайта.
+- Новая миграция **`20261007_140000_add_voiceovers_and_episode_sources`**: таблицы `voiceovers` и `episode_sources`, индексы, внешние ключи и колонки `voiceovers_id` / `episode_sources_id` в `payload_locked_documents_rels` (без них админка падает при блокировке документов). Идемпотентна, применяется автоматически (`prodMigrations`). Внешние ключи `episode_sources` — `ON DELETE cascade`: при `set null` (дефолт Payload) удаление серии или озвучки упиралось бы в NOT NULL, в том числе `fix-seasons` пайплайна.
+- Обновлены `payload.config.ts`, `migrations/index.ts`, `payload-types.ts` (вручную по образцу соседних коллекций), README. Снимок `.json` для миграции не создавался (как в ревизии 7).
+- Порядок выкладки: 1) задеплоить CMS (миграция применится сама); 2) в пайплайне `sync-voiceovers`, `match-voiceovers --write`, ещё раз `sync-voiceovers`; 3) `sync-dubs --dry-run`, затем `sync-dubs`. Файлы `cms/Voiceovers.ts` и `cms/EpisodeSources.ts` из репозитория пайплайна больше не нужны — коллекции уже здесь.
+- Сайт пока не читает `episode-sources`: чтобы показать выбор озвучки, нужен запрос к `EpisodeSources` на фронтенде (после деплоя выполнить `pnpm codegen`).
+- Не проверено: сборка, применение миграции на реальной БД и имя составного индекса, которое сгенерирует Payload (`tsc` и `pnpm migrate` в среде проверки недоступны).
+
+## Ревизия 9 — форма обратной связи через сайт, правки сборки (2026-10-07)
+
+- **`/api/contact-message` вызывает сервер сайта**, а не браузер (форма на otakuum.ru → `POST /api/contact` → CMS). Сайт передаёт настоящий IP посетителя в `x-client-ip` вместе с `x-internal-secret` (= `REVALIDATE_SECRET`); без совпадающего секрета заголовок игнорируется и работает прежний разбор `x-forwarded-for` (`TRUSTED_PROXY_HOPS`). Раньше при вызове через сайт CMS видела один адрес для всех и режет всех после 5 писем в час.
+- `next.config.ts`: `turbopack.root` снова указывает на каталог CMS (в ревизии 3 его убрали из описания, но в файле остался `../../`, в контейнере это `/`).
+- Бренд в письмах и отправителе: `otakuum` вместо `MovHub` (`EMAIL_FROM_NAME` по умолчанию тоже).
+- Схема БД не менялась, миграций нет. Не проверено: сборка и запуск (в среде проверки нет зависимостей).
+- Известное ограничение: `seasons` и `episodes` читаются без проверки публикации родительского `content`, поэтому ссылки плеера у черновиков доступны по прямому запросу к API.
+
 ## Ревизия 8 — структура и оформление админки
 
 - **Группы в сайдбаре** (`admin.group`): «Каталог» (Content, Seasons, Episodes, Genres), «Медиа» (Media), «Пользователи» (Users, Favorites).

@@ -102,6 +102,8 @@ CMS и Admin Panel будут доступны на [http://localhost:4000/admin
 | `genres` | Жанры | все | Уникальные `title`/`slug` |
 | `seasons` | Сезоны сериалов | все | `relationship` на `content` (только записи с `type = series`) |
 | `episodes` | Эпизоды | все | `relationship` на `seasons` |
+| `voiceovers` | Справочник озвучек (студии дубляжа) | все | Уникальные `title`/`slug`/`kodikTranslationId`; наполняет kodik-pipeline (`sync-voiceovers`) |
+| `episode-sources` | Ссылка на плеер для пары «серия ↔ озвучка» | все | `relationship` на `episodes` и `voiceovers`, пара уникальна; наполняет kodik-pipeline (`sync-dubs`) |
 | `favorites` | Избранное пользователей | владелец | Хук `beforeChange` принудительно проставляет текущего пользователя владельцем; хук `beforeValidate` не даёт добавить один и тот же контент дважды |
 | `media` | Загруженные файлы (постеры, скриншоты и т.п.) | все | Хранится в S3/MinIO через `@payloadcms/storage-s3` (`disablePayloadAccessControl: true`) |
 
@@ -150,12 +152,14 @@ apps/cms/
 │   ├── access/            # Функции доступа (admin, editor, anyone, user, ...)
 │   ├── collections/         # Конфигурации коллекций Payload
 │   │   ├── content/
+│   │   ├── episode-sources/
 │   │   ├── episodes/
 │   │   ├── favorites/
 │   │   ├── genres/
 │   │   ├── media/
 │   │   ├── seasons/
-│   │   └── users/
+│   │   ├── users/
+│   │   └── voiceovers/
 │   ├── endpoints/
 │   │   └── contact-message.ts # POST /api/contact-message (форма обратной связи)
 │   ├── lib/

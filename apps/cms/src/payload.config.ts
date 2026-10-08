@@ -24,7 +24,7 @@ import { Voiceovers } from './collections/voiceovers/config'
 import { EpisodeSources } from './collections/episode-sources/config'
 // [Dokploy] Миграции БД (генерируются `pnpm migrate:create`) — в production
 // схема разворачивается ими, а не Drizzle push.
-import { migrations } from './migrations'
+
 // [Dokploy] URL CMS/frontend и список CORS/CSRF-origin'ов теперь читаются из
 // runtime-переменных CMS_URL / FRONTEND_URL (см. src/lib/urls.ts). Раньше эти
 // значения были захардкожены на localhost и NEXT_PUBLIC_APP_URL.

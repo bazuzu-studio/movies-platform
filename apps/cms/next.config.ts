@@ -5,6 +5,11 @@ import path from 'path'
 const nextConfig: NextConfig = {
   output: 'standalone',
 
+  // SKIP_TYPECHECK=true (build arg в Dockerfile) — не проверять типы при `next build`.
+  typescript: {
+    ignoreBuildErrors: process.env.SKIP_TYPECHECK === 'true',
+  },
+
   turbopack: {
     // Корень проекта = каталог CMS. Прежний '../../' (остаток монорепозитория)
     // в контейнере указывал на `/` и заставлял Turbopack сканировать всю ФС.
@@ -31,6 +36,14 @@ const nextConfig: NextConfig = {
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        // HSTS только в production (на http://localhost он бессмыслен);
+        // includeSubDomains не ставим — поддомены настраиваются отдельно.
+        ...(process.env.NODE_ENV === 'production'
+          ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000' }]
+          : []),
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        // CMS не должна попадать в выдачу (то же, что robots в layout, но и для API/админки).
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
       ],
     },
   ],

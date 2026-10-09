@@ -8,6 +8,25 @@
 grep -rn "\[Dokploy\]" src next.config.ts pnpm-workspace.yaml Dockerfile docker-compose*.yml
 ```
 
+## Ревизия 12 — поля расписания серий (2026-10-09)
+
+Ошибка на сайте: `Cannot query field "nextEpisodeNumber" on type "Content"` / `Field "nextEpisodeAt" is not defined by type "Content_where_and"` — в CMS не было полей, которые читают страницы `/schedule`, главная и страница сериала.
+
+- В коллекцию `content` добавлены поля **`nextEpisodeNumber`** и **`nextEpisodeAt`** (number, Unix-секунды, сайдбар; по `nextEpisodeAt` есть индекс). Их заполняет `python pipeline.py sync-schedule` после `sync-dubs`. `episodes.airingAt` уже существовал.
+- Новая миграция **`20261009_120000_add_next_episode`**: колонки `next_episode_number`, `next_episode_at` в `content` и `version_*` в `_content_v` (включены черновики), два индекса. Идемпотентна, применяется автоматически при старте (`prodMigrations`). Обновлены `migrations/index.ts`, `payload-types.ts` (вручную).
+- Порядок: 1) задеплоить CMS (миграция применится сама); 2) перезапуск не нужен сайту, ошибка пропадёт после деплоя CMS; 3) `sync-dubs`, затем `sync-schedule` — до этого расписание будет пустым, но без ошибок. 4) `pnpm codegen` во фронтенде против обновлённой CMS (по желанию: типы в `generated/graphql.ts` дополнены вручную).
+- Не проверено: сборка и применение миграции на реальной БД (в среде нет зависимостей и БД).
+
+## Ревизия 11 — шум в логах входа, заголовки, бренд (2026-10-09)
+
+- **Неверный пароль больше не пишется как ERROR со стеком.** В логе CMS каждая неудачная попытка `loginUser` («The email or password provided is incorrect») давала длинный стек уровня ERROR. Это штатная ситуация (опечатка, перебор паролей ботами), а не сбой. В `payload.config.ts` добавлен `loggingLevels` (`AuthenticationError`, `LockedAuth` → `info`), настоящие ошибки остаются ERROR. Блокировка после 5 неверных попыток на 10 минут уже была в `users/config.ts`, ссылка восстановления пароля уже ведёт на `/reset-password?token=…` сайта — это проверено и не менялось.
+- **Заголовки** (`next.config.ts`): `Strict-Transport-Security` (только production, без includeSubDomains), `Permissions-Policy`, `X-Robots-Tag: noindex, nofollow`. Новый `src/app/robots.ts` закрывает CMS от индексации целиком.
+- **Бренд:** заголовок вкладки админки «… — otakuum CMS» (`admin.meta.titleSuffix`), в `(frontend)/layout.tsx` «MovHub CMS» → «otakuum CMS».
+- **Долгая сборка образа:** в Dockerfile добавлены build-аргументы `NEXT_BUNDLER` (`turbopack` по умолчанию, можно `webpack`) и `SKIP_TYPECHECK` (`false` по умолчанию), а в конце сборки в лог пишется «build took Ns». Поведение по умолчанию не изменилось. Причина медлительности не установлена: нужен полный лог `next build` и объём RAM сервера (если 4 ГБ heap не помещаются в память, сборка уходит в swap).
+- Схема БД не менялась, миграций нет.
+- Не проверено: сборка и запуск. Прогнан только синтаксис изменённых файлов. Особенно проверьте `loggingLevels`: имена ошибок и допустимые значения зависят от версии Payload (стоит 3.90.2); если `tsc` ругнётся на ключи, уберите блок, на работу входа он не влияет.
+- Известное ограничение: регистрация (`createUser`) открыта гостям без ограничения частоты. Если появится поток фейковых аккаунтов, нужен rate-limit на уровне Traefik или CAPTCHA.
+
 ## Ревизия 10 — озвучки и источники серий (2026-10-07)
 
 - Две новые коллекции (группа «Каталог»): **`voiceovers`** (справочник озвучек: `title`, `slug`, `kodikTranslationId`, все уникальны) и **`episode-sources`** (ссылка на плеер `playerLink` для пары «серия ↔ озвучка»; пара `episode` + `voiceover` уникальна). Нужны kodik-pipeline: `sync-voiceovers`, `match-voiceovers`, `sync-dubs`. Серии (`episodes`) не менялись: основная озвучка по-прежнему в `episodes.playerLink`, остальные — в `episode-sources`.

@@ -43,9 +43,20 @@ RUN mkdir -p public
 # Лимит heap для сборки. 8192 в package.json рассчитан на сервер с 8+ ГБ RAM;
 # на меньшем сборка уходит в swap и «зависает» — уменьшите (например, 3072).
 ARG BUILD_MEMORY_MB=4096
+# Сборщик: turbopack (по умолчанию, как раньше) или webpack. Если сборка идёт
+# слишком долго, соберите один раз с NEXT_BUNDLER=webpack (Dokploy → Environment →
+# Build Args) и сравните время в логе («build took Ns»).
+ARG NEXT_BUNDLER=turbopack
+# SKIP_TYPECHECK=true пропускает проверку типов в `next build` (быстрее на
+# десятки секунд). Тогда гоняйте `pnpm exec tsc --noEmit` локально/в CI.
+ARG SKIP_TYPECHECK=false
+ENV SKIP_TYPECHECK=${SKIP_TYPECHECK}
 # Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
 RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
-  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build
+  sh -c 'start=$(date +%s); \
+    flag=""; [ "$NEXT_BUNDLER" = "webpack" ] && flag="--webpack"; \
+    pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build $flag \
+    && echo "build took $(( $(date +%s) - start ))s (bundler: $NEXT_BUNDLER)"'
 
 # ─────────────────────────────────────────────
 # runner: минимальный образ для запуска

@@ -3,6 +3,7 @@ import { LoginClient } from "@/components/pages/LoginClient";
 
 export const metadata: Metadata = {
   title: "Вход",
+  description: "Вход в аккаунт otakuum: избранное и профиль.",
   robots: { index: false },
 };
 

@@ -3,6 +3,7 @@ import { RegisterClient } from "@/components/pages/RegisterClient";
 
 export const metadata: Metadata = {
   title: "Регистрация",
+  description: "Создайте аккаунт otakuum, чтобы сохранять избранное.",
   robots: { index: false },
 };
 

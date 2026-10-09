@@ -145,7 +145,7 @@ export function ScheduleClient({ entries, serverNow, unavailable = false }: Sche
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_120%_at_15%_0%,rgba(56,189,248,0.16),transparent),radial-gradient(50%_100%_at_90%_0%,rgba(239,74,79,0.14),transparent)]"
         />
-        <div className="relative mx-auto max-w-[900px] px-4 pb-6 pt-24 sm:px-6 sm:pb-8 sm:pt-20 lg:px-8">
+        <div className="relative mx-auto max-w-[900px] px-4 pb-6 pt-8 sm:px-6 sm:pb-8 sm:pt-12 lg:px-8">
           <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-white sm:text-5xl">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500/15 ring-1 ring-sky-400/30 sm:h-14 sm:w-14">
               <CalendarClock aria-hidden className="h-6 w-6 text-sky-300 sm:h-8 sm:w-8" />

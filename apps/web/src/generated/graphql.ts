@@ -3,6 +3,7 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { parse } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 /** All built-in and custom scalars, mapped to their actual values */
@@ -12,9 +13,13 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: { input: unknown; output: unknown; }
+  /** A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address. */
   EmailAddress: { input: unknown; output: unknown; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: unknown; output: unknown; }
+  /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: { input: unknown; output: unknown; }
 };
 
@@ -22,7 +27,6 @@ export type Access = {
   __typename?: 'Access';
   canAccessAdmin: Scalars['Boolean']['output'];
   content?: Maybe<ContentAccess>;
-  episode_sources?: Maybe<Episode_SourcesAccess>;
   episodes?: Maybe<EpisodesAccess>;
   favorites?: Maybe<FavoritesAccess>;
   genres?: Maybe<GenresAccess>;
@@ -33,7 +37,6 @@ export type Access = {
   search_results?: Maybe<Search_ResultsAccess>;
   seasons?: Maybe<SeasonsAccess>;
   users?: Maybe<UsersAccess>;
-  voiceovers?: Maybe<VoiceoversAccess>;
 };
 
 export type Content = {
@@ -119,8 +122,6 @@ export type ContentDocAccessFields = {
   kinopoiskId?: Maybe<ContentDocAccessFields_KinopoiskId>;
   kodikId?: Maybe<ContentDocAccessFields_KodikId>;
   meta?: Maybe<ContentDocAccessFields_Meta>;
-  nextEpisodeAt?: Maybe<ContentDocAccessFields_NextEpisodeAt>;
-  nextEpisodeNumber?: Maybe<ContentDocAccessFields_NextEpisodeNumber>;
   originalTitle?: Maybe<ContentDocAccessFields_OriginalTitle>;
   playerLink?: Maybe<ContentDocAccessFields_PlayerLink>;
   poster?: Maybe<ContentDocAccessFields_Poster>;
@@ -537,62 +538,6 @@ export type ContentDocAccessFields_Meta_Title_Update = {
   permission: Scalars['Boolean']['output'];
 };
 
-export type ContentDocAccessFields_NextEpisodeAt = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeAt';
-  create?: Maybe<ContentDocAccessFields_NextEpisodeAt_Create>;
-  delete?: Maybe<ContentDocAccessFields_NextEpisodeAt_Delete>;
-  read?: Maybe<ContentDocAccessFields_NextEpisodeAt_Read>;
-  update?: Maybe<ContentDocAccessFields_NextEpisodeAt_Update>;
-};
-
-export type ContentDocAccessFields_NextEpisodeAt_Create = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeAt_Delete = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeAt_Read = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeAt_Update = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeNumber = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeNumber';
-  create?: Maybe<ContentDocAccessFields_NextEpisodeNumber_Create>;
-  delete?: Maybe<ContentDocAccessFields_NextEpisodeNumber_Delete>;
-  read?: Maybe<ContentDocAccessFields_NextEpisodeNumber_Read>;
-  update?: Maybe<ContentDocAccessFields_NextEpisodeNumber_Update>;
-};
-
-export type ContentDocAccessFields_NextEpisodeNumber_Create = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeNumber_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeNumber_Delete = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeNumber_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeNumber_Read = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeNumber_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentDocAccessFields_NextEpisodeNumber_Update = {
-  __typename?: 'ContentDocAccessFields_nextEpisodeNumber_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
 export type ContentDocAccessFields_OriginalTitle = {
   __typename?: 'ContentDocAccessFields_originalTitle';
   create?: Maybe<ContentDocAccessFields_OriginalTitle_Create>;
@@ -998,8 +943,6 @@ export type ContentFields = {
   kinopoiskId?: Maybe<ContentFields_KinopoiskId>;
   kodikId?: Maybe<ContentFields_KodikId>;
   meta?: Maybe<ContentFields_Meta>;
-  nextEpisodeAt?: Maybe<ContentFields_NextEpisodeAt>;
-  nextEpisodeNumber?: Maybe<ContentFields_NextEpisodeNumber>;
   originalTitle?: Maybe<ContentFields_OriginalTitle>;
   playerLink?: Maybe<ContentFields_PlayerLink>;
   poster?: Maybe<ContentFields_Poster>;
@@ -1413,62 +1356,6 @@ export type ContentFields_Meta_Title_Read = {
 
 export type ContentFields_Meta_Title_Update = {
   __typename?: 'ContentFields_meta_title_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeAt = {
-  __typename?: 'ContentFields_nextEpisodeAt';
-  create?: Maybe<ContentFields_NextEpisodeAt_Create>;
-  delete?: Maybe<ContentFields_NextEpisodeAt_Delete>;
-  read?: Maybe<ContentFields_NextEpisodeAt_Read>;
-  update?: Maybe<ContentFields_NextEpisodeAt_Update>;
-};
-
-export type ContentFields_NextEpisodeAt_Create = {
-  __typename?: 'ContentFields_nextEpisodeAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeAt_Delete = {
-  __typename?: 'ContentFields_nextEpisodeAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeAt_Read = {
-  __typename?: 'ContentFields_nextEpisodeAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeAt_Update = {
-  __typename?: 'ContentFields_nextEpisodeAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeNumber = {
-  __typename?: 'ContentFields_nextEpisodeNumber';
-  create?: Maybe<ContentFields_NextEpisodeNumber_Create>;
-  delete?: Maybe<ContentFields_NextEpisodeNumber_Delete>;
-  read?: Maybe<ContentFields_NextEpisodeNumber_Read>;
-  update?: Maybe<ContentFields_NextEpisodeNumber_Update>;
-};
-
-export type ContentFields_NextEpisodeNumber_Create = {
-  __typename?: 'ContentFields_nextEpisodeNumber_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeNumber_Delete = {
-  __typename?: 'ContentFields_nextEpisodeNumber_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeNumber_Read = {
-  __typename?: 'ContentFields_nextEpisodeNumber_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type ContentFields_NextEpisodeNumber_Update = {
-  __typename?: 'ContentFields_nextEpisodeNumber_Update';
   permission: Scalars['Boolean']['output'];
 };
 
@@ -1945,8 +1832,6 @@ export type ContentVersion_Version = {
   kinopoiskId?: Maybe<Scalars['String']['output']>;
   kodikId?: Maybe<Scalars['String']['output']>;
   meta?: Maybe<ContentVersion_Version_Meta>;
-  nextEpisodeAt?: Maybe<Scalars['Float']['output']>;
-  nextEpisodeNumber?: Maybe<Scalars['Float']['output']>;
   originalTitle?: Maybe<Scalars['String']['output']>;
   playerLink?: Maybe<Scalars['String']['output']>;
   poster?: Maybe<Media>;
@@ -2171,26 +2056,6 @@ export type Content_Meta__Title_Operator = {
   not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-export type Content_NextEpisodeAt_Operator = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Float']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  less_than?: InputMaybe<Scalars['Float']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  not_equals?: InputMaybe<Scalars['Float']['input']>;
-};
-
-export type Content_NextEpisodeNumber_Operator = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Float']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  less_than?: InputMaybe<Scalars['Float']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  not_equals?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type Content_OriginalTitle_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contains?: InputMaybe<Scalars['String']['input']>;
@@ -2374,8 +2239,6 @@ export type Content_Where = {
   meta__description?: InputMaybe<Content_Meta__Description_Operator>;
   meta__image?: InputMaybe<Content_Meta__Image_Operator>;
   meta__title?: InputMaybe<Content_Meta__Title_Operator>;
-  nextEpisodeAt?: InputMaybe<Content_NextEpisodeAt_Operator>;
-  nextEpisodeNumber?: InputMaybe<Content_NextEpisodeNumber_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -2408,8 +2271,6 @@ export type Content_Where_And = {
   meta__description?: InputMaybe<Content_Meta__Description_Operator>;
   meta__image?: InputMaybe<Content_Meta__Image_Operator>;
   meta__title?: InputMaybe<Content_Meta__Title_Operator>;
-  nextEpisodeAt?: InputMaybe<Content_NextEpisodeAt_Operator>;
-  nextEpisodeNumber?: InputMaybe<Content_NextEpisodeNumber_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -2442,8 +2303,6 @@ export type Content_Where_Or = {
   meta__description?: InputMaybe<Content_Meta__Description_Operator>;
   meta__image?: InputMaybe<Content_Meta__Image_Operator>;
   meta__title?: InputMaybe<Content_Meta__Title_Operator>;
-  nextEpisodeAt?: InputMaybe<Content_NextEpisodeAt_Operator>;
-  nextEpisodeNumber?: InputMaybe<Content_NextEpisodeNumber_Operator>;
   originalTitle?: InputMaybe<Content_OriginalTitle_Operator>;
   playerLink?: InputMaybe<Content_PlayerLink_Operator>;
   poster?: InputMaybe<Content_Poster_Operator>;
@@ -2491,468 +2350,6 @@ export type Episode = {
 
 export type EpisodeDescriptionArgs = {
   depth?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type EpisodeSource = {
-  __typename?: 'EpisodeSource';
-  createdAt?: Maybe<Scalars['DateTime']['output']>;
-  episode?: Maybe<Episode>;
-  id: Scalars['Int']['output'];
-  playerLink: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  voiceover?: Maybe<Voiceover>;
-};
-
-export type EpisodeSource_CreatedAt_Operator = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  like?: InputMaybe<Scalars['DateTime']['input']>;
-  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type EpisodeSource_Episode_Operator = {
-  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-  equals?: InputMaybe<Scalars['JSON']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-  not_equals?: InputMaybe<Scalars['JSON']['input']>;
-  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-};
-
-export type EpisodeSource_Id_Operator = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Int']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Int']['input']>;
-  less_than?: InputMaybe<Scalars['Int']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Int']['input']>;
-  not_equals?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type EpisodeSource_PlayerLink_Operator = {
-  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  like?: InputMaybe<Scalars['String']['input']>;
-  not_equals?: InputMaybe<Scalars['String']['input']>;
-  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
-export type EpisodeSource_UpdatedAt_Operator = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  like?: InputMaybe<Scalars['DateTime']['input']>;
-  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type EpisodeSource_Voiceover_Operator = {
-  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-  equals?: InputMaybe<Scalars['JSON']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-  not_equals?: InputMaybe<Scalars['JSON']['input']>;
-  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
-};
-
-export type EpisodeSource_Where = {
-  AND?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_Or>>>;
-  createdAt?: InputMaybe<EpisodeSource_CreatedAt_Operator>;
-  episode?: InputMaybe<EpisodeSource_Episode_Operator>;
-  id?: InputMaybe<EpisodeSource_Id_Operator>;
-  playerLink?: InputMaybe<EpisodeSource_PlayerLink_Operator>;
-  updatedAt?: InputMaybe<EpisodeSource_UpdatedAt_Operator>;
-  voiceover?: InputMaybe<EpisodeSource_Voiceover_Operator>;
-};
-
-export type EpisodeSource_Where_And = {
-  AND?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_Or>>>;
-  createdAt?: InputMaybe<EpisodeSource_CreatedAt_Operator>;
-  episode?: InputMaybe<EpisodeSource_Episode_Operator>;
-  id?: InputMaybe<EpisodeSource_Id_Operator>;
-  playerLink?: InputMaybe<EpisodeSource_PlayerLink_Operator>;
-  updatedAt?: InputMaybe<EpisodeSource_UpdatedAt_Operator>;
-  voiceover?: InputMaybe<EpisodeSource_Voiceover_Operator>;
-};
-
-export type EpisodeSource_Where_Or = {
-  AND?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<EpisodeSource_Where_Or>>>;
-  createdAt?: InputMaybe<EpisodeSource_CreatedAt_Operator>;
-  episode?: InputMaybe<EpisodeSource_Episode_Operator>;
-  id?: InputMaybe<EpisodeSource_Id_Operator>;
-  playerLink?: InputMaybe<EpisodeSource_PlayerLink_Operator>;
-  updatedAt?: InputMaybe<EpisodeSource_UpdatedAt_Operator>;
-  voiceover?: InputMaybe<EpisodeSource_Voiceover_Operator>;
-};
-
-export type EpisodeSources = {
-  __typename?: 'EpisodeSources';
-  docs: Array<EpisodeSource>;
-  hasNextPage: Scalars['Boolean']['output'];
-  hasPrevPage: Scalars['Boolean']['output'];
-  limit: Scalars['Int']['output'];
-  nextPage?: Maybe<Scalars['Int']['output']>;
-  offset?: Maybe<Scalars['Int']['output']>;
-  page: Scalars['Int']['output'];
-  pagingCounter: Scalars['Int']['output'];
-  prevPage?: Maybe<Scalars['Int']['output']>;
-  totalDocs: Scalars['Int']['output'];
-  totalPages: Scalars['Int']['output'];
-};
-
-export type EpisodeSourcesCreateAccess = {
-  __typename?: 'EpisodeSourcesCreateAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesCreateDocAccess = {
-  __typename?: 'EpisodeSourcesCreateDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesDeleteAccess = {
-  __typename?: 'EpisodeSourcesDeleteAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesDeleteDocAccess = {
-  __typename?: 'EpisodeSourcesDeleteDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesDocAccessFields = {
-  __typename?: 'EpisodeSourcesDocAccessFields';
-  createdAt?: Maybe<EpisodeSourcesDocAccessFields_CreatedAt>;
-  episode?: Maybe<EpisodeSourcesDocAccessFields_Episode>;
-  playerLink?: Maybe<EpisodeSourcesDocAccessFields_PlayerLink>;
-  updatedAt?: Maybe<EpisodeSourcesDocAccessFields_UpdatedAt>;
-  voiceover?: Maybe<EpisodeSourcesDocAccessFields_Voiceover>;
-};
-
-export type EpisodeSourcesDocAccessFields_CreatedAt = {
-  __typename?: 'EpisodeSourcesDocAccessFields_createdAt';
-  create?: Maybe<EpisodeSourcesDocAccessFields_CreatedAt_Create>;
-  delete?: Maybe<EpisodeSourcesDocAccessFields_CreatedAt_Delete>;
-  read?: Maybe<EpisodeSourcesDocAccessFields_CreatedAt_Read>;
-  update?: Maybe<EpisodeSourcesDocAccessFields_CreatedAt_Update>;
-};
-
-export type EpisodeSourcesDocAccessFields_CreatedAt_Create = {
-  __typename?: 'EpisodeSourcesDocAccessFields_createdAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_CreatedAt_Delete = {
-  __typename?: 'EpisodeSourcesDocAccessFields_createdAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_CreatedAt_Read = {
-  __typename?: 'EpisodeSourcesDocAccessFields_createdAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_CreatedAt_Update = {
-  __typename?: 'EpisodeSourcesDocAccessFields_createdAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Episode = {
-  __typename?: 'EpisodeSourcesDocAccessFields_episode';
-  create?: Maybe<EpisodeSourcesDocAccessFields_Episode_Create>;
-  delete?: Maybe<EpisodeSourcesDocAccessFields_Episode_Delete>;
-  read?: Maybe<EpisodeSourcesDocAccessFields_Episode_Read>;
-  update?: Maybe<EpisodeSourcesDocAccessFields_Episode_Update>;
-};
-
-export type EpisodeSourcesDocAccessFields_Episode_Create = {
-  __typename?: 'EpisodeSourcesDocAccessFields_episode_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Episode_Delete = {
-  __typename?: 'EpisodeSourcesDocAccessFields_episode_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Episode_Read = {
-  __typename?: 'EpisodeSourcesDocAccessFields_episode_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Episode_Update = {
-  __typename?: 'EpisodeSourcesDocAccessFields_episode_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_PlayerLink = {
-  __typename?: 'EpisodeSourcesDocAccessFields_playerLink';
-  create?: Maybe<EpisodeSourcesDocAccessFields_PlayerLink_Create>;
-  delete?: Maybe<EpisodeSourcesDocAccessFields_PlayerLink_Delete>;
-  read?: Maybe<EpisodeSourcesDocAccessFields_PlayerLink_Read>;
-  update?: Maybe<EpisodeSourcesDocAccessFields_PlayerLink_Update>;
-};
-
-export type EpisodeSourcesDocAccessFields_PlayerLink_Create = {
-  __typename?: 'EpisodeSourcesDocAccessFields_playerLink_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_PlayerLink_Delete = {
-  __typename?: 'EpisodeSourcesDocAccessFields_playerLink_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_PlayerLink_Read = {
-  __typename?: 'EpisodeSourcesDocAccessFields_playerLink_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_PlayerLink_Update = {
-  __typename?: 'EpisodeSourcesDocAccessFields_playerLink_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_UpdatedAt = {
-  __typename?: 'EpisodeSourcesDocAccessFields_updatedAt';
-  create?: Maybe<EpisodeSourcesDocAccessFields_UpdatedAt_Create>;
-  delete?: Maybe<EpisodeSourcesDocAccessFields_UpdatedAt_Delete>;
-  read?: Maybe<EpisodeSourcesDocAccessFields_UpdatedAt_Read>;
-  update?: Maybe<EpisodeSourcesDocAccessFields_UpdatedAt_Update>;
-};
-
-export type EpisodeSourcesDocAccessFields_UpdatedAt_Create = {
-  __typename?: 'EpisodeSourcesDocAccessFields_updatedAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_UpdatedAt_Delete = {
-  __typename?: 'EpisodeSourcesDocAccessFields_updatedAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_UpdatedAt_Read = {
-  __typename?: 'EpisodeSourcesDocAccessFields_updatedAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_UpdatedAt_Update = {
-  __typename?: 'EpisodeSourcesDocAccessFields_updatedAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Voiceover = {
-  __typename?: 'EpisodeSourcesDocAccessFields_voiceover';
-  create?: Maybe<EpisodeSourcesDocAccessFields_Voiceover_Create>;
-  delete?: Maybe<EpisodeSourcesDocAccessFields_Voiceover_Delete>;
-  read?: Maybe<EpisodeSourcesDocAccessFields_Voiceover_Read>;
-  update?: Maybe<EpisodeSourcesDocAccessFields_Voiceover_Update>;
-};
-
-export type EpisodeSourcesDocAccessFields_Voiceover_Create = {
-  __typename?: 'EpisodeSourcesDocAccessFields_voiceover_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Voiceover_Delete = {
-  __typename?: 'EpisodeSourcesDocAccessFields_voiceover_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Voiceover_Read = {
-  __typename?: 'EpisodeSourcesDocAccessFields_voiceover_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesDocAccessFields_Voiceover_Update = {
-  __typename?: 'EpisodeSourcesDocAccessFields_voiceover_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields = {
-  __typename?: 'EpisodeSourcesFields';
-  createdAt?: Maybe<EpisodeSourcesFields_CreatedAt>;
-  episode?: Maybe<EpisodeSourcesFields_Episode>;
-  playerLink?: Maybe<EpisodeSourcesFields_PlayerLink>;
-  updatedAt?: Maybe<EpisodeSourcesFields_UpdatedAt>;
-  voiceover?: Maybe<EpisodeSourcesFields_Voiceover>;
-};
-
-export type EpisodeSourcesFields_CreatedAt = {
-  __typename?: 'EpisodeSourcesFields_createdAt';
-  create?: Maybe<EpisodeSourcesFields_CreatedAt_Create>;
-  delete?: Maybe<EpisodeSourcesFields_CreatedAt_Delete>;
-  read?: Maybe<EpisodeSourcesFields_CreatedAt_Read>;
-  update?: Maybe<EpisodeSourcesFields_CreatedAt_Update>;
-};
-
-export type EpisodeSourcesFields_CreatedAt_Create = {
-  __typename?: 'EpisodeSourcesFields_createdAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_CreatedAt_Delete = {
-  __typename?: 'EpisodeSourcesFields_createdAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_CreatedAt_Read = {
-  __typename?: 'EpisodeSourcesFields_createdAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_CreatedAt_Update = {
-  __typename?: 'EpisodeSourcesFields_createdAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Episode = {
-  __typename?: 'EpisodeSourcesFields_episode';
-  create?: Maybe<EpisodeSourcesFields_Episode_Create>;
-  delete?: Maybe<EpisodeSourcesFields_Episode_Delete>;
-  read?: Maybe<EpisodeSourcesFields_Episode_Read>;
-  update?: Maybe<EpisodeSourcesFields_Episode_Update>;
-};
-
-export type EpisodeSourcesFields_Episode_Create = {
-  __typename?: 'EpisodeSourcesFields_episode_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Episode_Delete = {
-  __typename?: 'EpisodeSourcesFields_episode_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Episode_Read = {
-  __typename?: 'EpisodeSourcesFields_episode_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Episode_Update = {
-  __typename?: 'EpisodeSourcesFields_episode_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_PlayerLink = {
-  __typename?: 'EpisodeSourcesFields_playerLink';
-  create?: Maybe<EpisodeSourcesFields_PlayerLink_Create>;
-  delete?: Maybe<EpisodeSourcesFields_PlayerLink_Delete>;
-  read?: Maybe<EpisodeSourcesFields_PlayerLink_Read>;
-  update?: Maybe<EpisodeSourcesFields_PlayerLink_Update>;
-};
-
-export type EpisodeSourcesFields_PlayerLink_Create = {
-  __typename?: 'EpisodeSourcesFields_playerLink_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_PlayerLink_Delete = {
-  __typename?: 'EpisodeSourcesFields_playerLink_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_PlayerLink_Read = {
-  __typename?: 'EpisodeSourcesFields_playerLink_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_PlayerLink_Update = {
-  __typename?: 'EpisodeSourcesFields_playerLink_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_UpdatedAt = {
-  __typename?: 'EpisodeSourcesFields_updatedAt';
-  create?: Maybe<EpisodeSourcesFields_UpdatedAt_Create>;
-  delete?: Maybe<EpisodeSourcesFields_UpdatedAt_Delete>;
-  read?: Maybe<EpisodeSourcesFields_UpdatedAt_Read>;
-  update?: Maybe<EpisodeSourcesFields_UpdatedAt_Update>;
-};
-
-export type EpisodeSourcesFields_UpdatedAt_Create = {
-  __typename?: 'EpisodeSourcesFields_updatedAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_UpdatedAt_Delete = {
-  __typename?: 'EpisodeSourcesFields_updatedAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_UpdatedAt_Read = {
-  __typename?: 'EpisodeSourcesFields_updatedAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_UpdatedAt_Update = {
-  __typename?: 'EpisodeSourcesFields_updatedAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Voiceover = {
-  __typename?: 'EpisodeSourcesFields_voiceover';
-  create?: Maybe<EpisodeSourcesFields_Voiceover_Create>;
-  delete?: Maybe<EpisodeSourcesFields_Voiceover_Delete>;
-  read?: Maybe<EpisodeSourcesFields_Voiceover_Read>;
-  update?: Maybe<EpisodeSourcesFields_Voiceover_Update>;
-};
-
-export type EpisodeSourcesFields_Voiceover_Create = {
-  __typename?: 'EpisodeSourcesFields_voiceover_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Voiceover_Delete = {
-  __typename?: 'EpisodeSourcesFields_voiceover_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Voiceover_Read = {
-  __typename?: 'EpisodeSourcesFields_voiceover_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesFields_Voiceover_Update = {
-  __typename?: 'EpisodeSourcesFields_voiceover_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type EpisodeSourcesReadAccess = {
-  __typename?: 'EpisodeSourcesReadAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesReadDocAccess = {
-  __typename?: 'EpisodeSourcesReadDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesUpdateAccess = {
-  __typename?: 'EpisodeSourcesUpdateAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type EpisodeSourcesUpdateDocAccess = {
-  __typename?: 'EpisodeSourcesUpdateDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
 };
 
 export type Episode_AiringAt_Operator = {
@@ -5516,7 +4913,6 @@ export type Mutation = {
   __typename?: 'Mutation';
   createContent?: Maybe<Content>;
   createEpisode?: Maybe<Episode>;
-  createEpisodeSource?: Maybe<EpisodeSource>;
   createFavorite?: Maybe<Favorite>;
   createGenre?: Maybe<Genre>;
   createMedia?: Maybe<Media>;
@@ -5526,10 +4922,8 @@ export type Mutation = {
   createSearchResult?: Maybe<SearchResult>;
   createSeason?: Maybe<Season>;
   createUser?: Maybe<User>;
-  createVoiceover?: Maybe<Voiceover>;
   deleteContent?: Maybe<Content>;
   deleteEpisode?: Maybe<Episode>;
-  deleteEpisodeSource?: Maybe<EpisodeSource>;
   deleteFavorite?: Maybe<Favorite>;
   deleteGenre?: Maybe<Genre>;
   deleteMedia?: Maybe<Media>;
@@ -5539,10 +4933,8 @@ export type Mutation = {
   deleteSearchResult?: Maybe<SearchResult>;
   deleteSeason?: Maybe<Season>;
   deleteUser?: Maybe<User>;
-  deleteVoiceover?: Maybe<Voiceover>;
   duplicateContent?: Maybe<Content>;
   duplicateEpisode?: Maybe<Episode>;
-  duplicateEpisodeSource?: Maybe<EpisodeSource>;
   duplicateFavorite?: Maybe<Favorite>;
   duplicateGenre?: Maybe<Genre>;
   duplicateMedia?: Maybe<Media>;
@@ -5551,7 +4943,6 @@ export type Mutation = {
   duplicatePayloadPreference?: Maybe<PayloadPreference>;
   duplicateSearchResult?: Maybe<SearchResult>;
   duplicateSeason?: Maybe<Season>;
-  duplicateVoiceover?: Maybe<Voiceover>;
   forgotPasswordUser: Scalars['Boolean']['output'];
   loginUser?: Maybe<UsersLoginResult>;
   logoutUser?: Maybe<Scalars['String']['output']>;
@@ -5561,7 +4952,6 @@ export type Mutation = {
   unlockUser: Scalars['Boolean']['output'];
   updateContent?: Maybe<Content>;
   updateEpisode?: Maybe<Episode>;
-  updateEpisodeSource?: Maybe<EpisodeSource>;
   updateFavorite?: Maybe<Favorite>;
   updateGenre?: Maybe<Genre>;
   updateMedia?: Maybe<Media>;
@@ -5571,7 +4961,6 @@ export type Mutation = {
   updateSearchResult?: Maybe<SearchResult>;
   updateSeason?: Maybe<Season>;
   updateUser?: Maybe<User>;
-  updateVoiceover?: Maybe<Voiceover>;
   verifyEmailUser?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -5584,12 +4973,6 @@ export type MutationCreateContentArgs = {
 
 export type MutationCreateEpisodeArgs = {
   data: MutationEpisodeInput;
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type MutationCreateEpisodeSourceArgs = {
-  data: MutationEpisodeSourceInput;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -5648,12 +5031,6 @@ export type MutationCreateUserArgs = {
 };
 
 
-export type MutationCreateVoiceoverArgs = {
-  data: MutationVoiceoverInput;
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
 export type MutationDeleteContentArgs = {
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -5661,12 +5038,6 @@ export type MutationDeleteContentArgs = {
 
 
 export type MutationDeleteEpisodeArgs = {
-  id: Scalars['Int']['input'];
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type MutationDeleteEpisodeSourceArgs = {
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
 };
@@ -5726,12 +5097,6 @@ export type MutationDeleteUserArgs = {
 };
 
 
-export type MutationDeleteVoiceoverArgs = {
-  id: Scalars['Int']['input'];
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
 export type MutationDuplicateContentArgs = {
   data: MutationContentInput;
   id: Scalars['Int']['input'];
@@ -5740,12 +5105,6 @@ export type MutationDuplicateContentArgs = {
 
 export type MutationDuplicateEpisodeArgs = {
   data: MutationEpisodeInput;
-  id: Scalars['Int']['input'];
-};
-
-
-export type MutationDuplicateEpisodeSourceArgs = {
-  data: MutationEpisodeSourceInput;
   id: Scalars['Int']['input'];
 };
 
@@ -5798,12 +5157,6 @@ export type MutationDuplicateSeasonArgs = {
 };
 
 
-export type MutationDuplicateVoiceoverArgs = {
-  data: MutationVoiceoverInput;
-  id: Scalars['Int']['input'];
-};
-
-
 export type MutationForgotPasswordUserArgs = {
   email: Scalars['String']['input'];
 };
@@ -5849,15 +5202,6 @@ export type MutationUpdateContentArgs = {
 export type MutationUpdateEpisodeArgs = {
   autosave?: InputMaybe<Scalars['Boolean']['input']>;
   data: MutationEpisodeUpdateInput;
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  id: Scalars['Int']['input'];
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type MutationUpdateEpisodeSourceArgs = {
-  autosave?: InputMaybe<Scalars['Boolean']['input']>;
-  data: MutationEpisodeSourceUpdateInput;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -5939,15 +5283,6 @@ export type MutationUpdateSeasonArgs = {
 export type MutationUpdateUserArgs = {
   autosave?: InputMaybe<Scalars['Boolean']['input']>;
   data: MutationUserUpdateInput;
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  id: Scalars['Int']['input'];
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type MutationUpdateVoiceoverArgs = {
-  autosave?: InputMaybe<Scalars['Boolean']['input']>;
-  data: MutationVoiceoverUpdateInput;
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['Int']['input'];
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -6227,15 +5562,13 @@ export type PayloadLockedDocumentUpdate_DocumentRelationshipInput = {
 
 export type PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo =
   | 'content'
-  | 'episode_sources'
   | 'episodes'
   | 'favorites'
   | 'genres'
   | 'media'
   | 'search_results'
   | 'seasons'
-  | 'users'
-  | 'voiceovers';
+  | 'users';
 
 export type PayloadLockedDocumentUpdate_UserRelationshipInput = {
   relationTo?: InputMaybe<PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo>;
@@ -6245,7 +5578,7 @@ export type PayloadLockedDocumentUpdate_UserRelationshipInput = {
 export type PayloadLockedDocumentUpdate_UserRelationshipInputRelationTo =
   | 'users';
 
-export type PayloadLockedDocument_Document = Content | Episode | EpisodeSource | Favorite | Genre | Media | SearchResult | Season | User | Voiceover;
+export type PayloadLockedDocument_Document = Content | Episode | Favorite | Genre | Media | SearchResult | Season | User;
 
 export type PayloadLockedDocument_DocumentRelationshipInput = {
   relationTo?: InputMaybe<PayloadLockedDocument_DocumentRelationshipInputRelationTo>;
@@ -6254,27 +5587,23 @@ export type PayloadLockedDocument_DocumentRelationshipInput = {
 
 export type PayloadLockedDocument_DocumentRelationshipInputRelationTo =
   | 'content'
-  | 'episode_sources'
   | 'episodes'
   | 'favorites'
   | 'genres'
   | 'media'
   | 'search_results'
   | 'seasons'
-  | 'users'
-  | 'voiceovers';
+  | 'users';
 
 export type PayloadLockedDocument_Document_RelationTo =
   | 'content'
-  | 'episode_sources'
   | 'episodes'
   | 'favorites'
   | 'genres'
   | 'media'
   | 'search_results'
   | 'seasons'
-  | 'users'
-  | 'voiceovers';
+  | 'users';
 
 export type PayloadLockedDocument_Document_Relationship = {
   __typename?: 'PayloadLockedDocument_Document_Relationship';
@@ -6319,15 +5648,13 @@ export type PayloadLockedDocument_Document_Relation = {
 
 export type PayloadLockedDocument_Document_Relation_RelationTo =
   | 'content'
-  | 'episode_sources'
   | 'episodes'
   | 'favorites'
   | 'genres'
   | 'media'
   | 'search_results'
   | 'seasons'
-  | 'users'
-  | 'voiceovers';
+  | 'users';
 
 export type PayloadLockedDocument_GlobalSlug_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -7261,8 +6588,6 @@ export type Query = {
   Content?: Maybe<Content>;
   Contents?: Maybe<Contents>;
   Episode?: Maybe<Episode>;
-  EpisodeSource?: Maybe<EpisodeSource>;
-  EpisodeSources?: Maybe<EpisodeSources>;
   Episodes?: Maybe<Episodes>;
   Favorite?: Maybe<Favorite>;
   Favorites?: Maybe<Favorites>;
@@ -7281,11 +6606,8 @@ export type Query = {
   Seasons?: Maybe<Seasons>;
   User?: Maybe<User>;
   Users?: Maybe<Users>;
-  Voiceover?: Maybe<Voiceover>;
-  Voiceovers?: Maybe<Voiceovers>;
   allMedia?: Maybe<AllMedia>;
   countContents?: Maybe<CountContents>;
-  countEpisodeSources?: Maybe<CountEpisodeSources>;
   countEpisodes?: Maybe<CountEpisodes>;
   countFavorites?: Maybe<CountFavorites>;
   countGenres?: Maybe<CountGenres>;
@@ -7295,11 +6617,9 @@ export type Query = {
   countSearchResults?: Maybe<CountSearchResults>;
   countSeasons?: Maybe<CountSeasons>;
   countUsers?: Maybe<CountUsers>;
-  countVoiceovers?: Maybe<CountVoiceovers>;
   countallMedia?: Maybe<CountallMedia>;
   docAccessContent?: Maybe<ContentDocAccess>;
   docAccessEpisode?: Maybe<EpisodesDocAccess>;
-  docAccessEpisodeSource?: Maybe<Episode_SourcesDocAccess>;
   docAccessFavorite?: Maybe<FavoritesDocAccess>;
   docAccessGenre?: Maybe<GenresDocAccess>;
   docAccessMedia?: Maybe<MediaDocAccess>;
@@ -7309,7 +6629,6 @@ export type Query = {
   docAccessSearchResult?: Maybe<Search_ResultsDocAccess>;
   docAccessSeason?: Maybe<SeasonsDocAccess>;
   docAccessUser?: Maybe<UsersDocAccess>;
-  docAccessVoiceover?: Maybe<VoiceoversDocAccess>;
   initializedUser?: Maybe<Scalars['Boolean']['output']>;
   meUser?: Maybe<UsersMe>;
   versionContent?: Maybe<ContentVersion>;
@@ -7342,26 +6661,6 @@ export type QueryEpisodeArgs = {
   id: Scalars['Int']['input'];
   select?: InputMaybe<Scalars['Boolean']['input']>;
   trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type QueryEpisodeSourceArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  id: Scalars['Int']['input'];
-  select?: InputMaybe<Scalars['Boolean']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type QueryEpisodeSourcesArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  pagination?: InputMaybe<Scalars['Boolean']['input']>;
-  select?: InputMaybe<Scalars['Boolean']['input']>;
-  sort?: InputMaybe<Scalars['String']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-  where?: InputMaybe<EpisodeSource_Where>;
 };
 
 
@@ -7545,26 +6844,6 @@ export type QueryUsersArgs = {
 };
 
 
-export type QueryVoiceoverArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  id: Scalars['Int']['input'];
-  select?: InputMaybe<Scalars['Boolean']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type QueryVoiceoversArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  pagination?: InputMaybe<Scalars['Boolean']['input']>;
-  select?: InputMaybe<Scalars['Boolean']['input']>;
-  sort?: InputMaybe<Scalars['String']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-  where?: InputMaybe<Voiceover_Where>;
-};
-
-
 export type QueryAllMediaArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7581,13 +6860,6 @@ export type QueryCountContentsArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   trash?: InputMaybe<Scalars['Boolean']['input']>;
   where?: InputMaybe<Content_Where>;
-};
-
-
-export type QueryCountEpisodeSourcesArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-  where?: InputMaybe<EpisodeSource_Where>;
 };
 
 
@@ -7654,13 +6926,6 @@ export type QueryCountUsersArgs = {
 };
 
 
-export type QueryCountVoiceoversArgs = {
-  draft?: InputMaybe<Scalars['Boolean']['input']>;
-  trash?: InputMaybe<Scalars['Boolean']['input']>;
-  where?: InputMaybe<Voiceover_Where>;
-};
-
-
 export type QueryCountallMediaArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   trash?: InputMaybe<Scalars['Boolean']['input']>;
@@ -7674,11 +6939,6 @@ export type QueryDocAccessContentArgs = {
 
 
 export type QueryDocAccessEpisodeArgs = {
-  id: Scalars['Int']['input'];
-};
-
-
-export type QueryDocAccessEpisodeSourceArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -7724,11 +6984,6 @@ export type QueryDocAccessSeasonArgs = {
 
 
 export type QueryDocAccessUserArgs = {
-  id: Scalars['Int']['input'];
-};
-
-
-export type QueryDocAccessVoiceoverArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -10162,472 +9417,6 @@ export type UsersUpdateDocAccess = {
   where?: Maybe<Scalars['JSONObject']['output']>;
 };
 
-export type Voiceover = {
-  __typename?: 'Voiceover';
-  createdAt?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['Int']['output'];
-  kodikTranslationId?: Maybe<Scalars['Float']['output']>;
-  slug: Scalars['String']['output'];
-  title: Scalars['String']['output'];
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
-
-export type Voiceover_CreatedAt_Operator = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  like?: InputMaybe<Scalars['DateTime']['input']>;
-  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type Voiceover_Id_Operator = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Int']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Int']['input']>;
-  less_than?: InputMaybe<Scalars['Int']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Int']['input']>;
-  not_equals?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type Voiceover_KodikTranslationId_Operator = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Float']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  less_than?: InputMaybe<Scalars['Float']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  not_equals?: InputMaybe<Scalars['Float']['input']>;
-};
-
-export type Voiceover_Slug_Operator = {
-  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  like?: InputMaybe<Scalars['String']['input']>;
-  not_equals?: InputMaybe<Scalars['String']['input']>;
-  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
-export type Voiceover_Title_Operator = {
-  all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  like?: InputMaybe<Scalars['String']['input']>;
-  not_equals?: InputMaybe<Scalars['String']['input']>;
-  not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
-export type Voiceover_UpdatedAt_Operator = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['DateTime']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than?: InputMaybe<Scalars['DateTime']['input']>;
-  less_than_equal?: InputMaybe<Scalars['DateTime']['input']>;
-  like?: InputMaybe<Scalars['DateTime']['input']>;
-  not_equals?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type Voiceover_Where = {
-  AND?: InputMaybe<Array<InputMaybe<Voiceover_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<Voiceover_Where_Or>>>;
-  createdAt?: InputMaybe<Voiceover_CreatedAt_Operator>;
-  id?: InputMaybe<Voiceover_Id_Operator>;
-  kodikTranslationId?: InputMaybe<Voiceover_KodikTranslationId_Operator>;
-  slug?: InputMaybe<Voiceover_Slug_Operator>;
-  title?: InputMaybe<Voiceover_Title_Operator>;
-  updatedAt?: InputMaybe<Voiceover_UpdatedAt_Operator>;
-};
-
-export type Voiceover_Where_And = {
-  AND?: InputMaybe<Array<InputMaybe<Voiceover_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<Voiceover_Where_Or>>>;
-  createdAt?: InputMaybe<Voiceover_CreatedAt_Operator>;
-  id?: InputMaybe<Voiceover_Id_Operator>;
-  kodikTranslationId?: InputMaybe<Voiceover_KodikTranslationId_Operator>;
-  slug?: InputMaybe<Voiceover_Slug_Operator>;
-  title?: InputMaybe<Voiceover_Title_Operator>;
-  updatedAt?: InputMaybe<Voiceover_UpdatedAt_Operator>;
-};
-
-export type Voiceover_Where_Or = {
-  AND?: InputMaybe<Array<InputMaybe<Voiceover_Where_And>>>;
-  OR?: InputMaybe<Array<InputMaybe<Voiceover_Where_Or>>>;
-  createdAt?: InputMaybe<Voiceover_CreatedAt_Operator>;
-  id?: InputMaybe<Voiceover_Id_Operator>;
-  kodikTranslationId?: InputMaybe<Voiceover_KodikTranslationId_Operator>;
-  slug?: InputMaybe<Voiceover_Slug_Operator>;
-  title?: InputMaybe<Voiceover_Title_Operator>;
-  updatedAt?: InputMaybe<Voiceover_UpdatedAt_Operator>;
-};
-
-export type Voiceovers = {
-  __typename?: 'Voiceovers';
-  docs: Array<Voiceover>;
-  hasNextPage: Scalars['Boolean']['output'];
-  hasPrevPage: Scalars['Boolean']['output'];
-  limit: Scalars['Int']['output'];
-  nextPage?: Maybe<Scalars['Int']['output']>;
-  offset?: Maybe<Scalars['Int']['output']>;
-  page: Scalars['Int']['output'];
-  pagingCounter: Scalars['Int']['output'];
-  prevPage?: Maybe<Scalars['Int']['output']>;
-  totalDocs: Scalars['Int']['output'];
-  totalPages: Scalars['Int']['output'];
-};
-
-export type VoiceoversCreateAccess = {
-  __typename?: 'VoiceoversCreateAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversCreateDocAccess = {
-  __typename?: 'VoiceoversCreateDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversDeleteAccess = {
-  __typename?: 'VoiceoversDeleteAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversDeleteDocAccess = {
-  __typename?: 'VoiceoversDeleteDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversDocAccessFields = {
-  __typename?: 'VoiceoversDocAccessFields';
-  createdAt?: Maybe<VoiceoversDocAccessFields_CreatedAt>;
-  kodikTranslationId?: Maybe<VoiceoversDocAccessFields_KodikTranslationId>;
-  slug?: Maybe<VoiceoversDocAccessFields_Slug>;
-  title?: Maybe<VoiceoversDocAccessFields_Title>;
-  updatedAt?: Maybe<VoiceoversDocAccessFields_UpdatedAt>;
-};
-
-export type VoiceoversDocAccessFields_CreatedAt = {
-  __typename?: 'VoiceoversDocAccessFields_createdAt';
-  create?: Maybe<VoiceoversDocAccessFields_CreatedAt_Create>;
-  delete?: Maybe<VoiceoversDocAccessFields_CreatedAt_Delete>;
-  read?: Maybe<VoiceoversDocAccessFields_CreatedAt_Read>;
-  update?: Maybe<VoiceoversDocAccessFields_CreatedAt_Update>;
-};
-
-export type VoiceoversDocAccessFields_CreatedAt_Create = {
-  __typename?: 'VoiceoversDocAccessFields_createdAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_CreatedAt_Delete = {
-  __typename?: 'VoiceoversDocAccessFields_createdAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_CreatedAt_Read = {
-  __typename?: 'VoiceoversDocAccessFields_createdAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_CreatedAt_Update = {
-  __typename?: 'VoiceoversDocAccessFields_createdAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_KodikTranslationId = {
-  __typename?: 'VoiceoversDocAccessFields_kodikTranslationId';
-  create?: Maybe<VoiceoversDocAccessFields_KodikTranslationId_Create>;
-  delete?: Maybe<VoiceoversDocAccessFields_KodikTranslationId_Delete>;
-  read?: Maybe<VoiceoversDocAccessFields_KodikTranslationId_Read>;
-  update?: Maybe<VoiceoversDocAccessFields_KodikTranslationId_Update>;
-};
-
-export type VoiceoversDocAccessFields_KodikTranslationId_Create = {
-  __typename?: 'VoiceoversDocAccessFields_kodikTranslationId_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_KodikTranslationId_Delete = {
-  __typename?: 'VoiceoversDocAccessFields_kodikTranslationId_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_KodikTranslationId_Read = {
-  __typename?: 'VoiceoversDocAccessFields_kodikTranslationId_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_KodikTranslationId_Update = {
-  __typename?: 'VoiceoversDocAccessFields_kodikTranslationId_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Slug = {
-  __typename?: 'VoiceoversDocAccessFields_slug';
-  create?: Maybe<VoiceoversDocAccessFields_Slug_Create>;
-  delete?: Maybe<VoiceoversDocAccessFields_Slug_Delete>;
-  read?: Maybe<VoiceoversDocAccessFields_Slug_Read>;
-  update?: Maybe<VoiceoversDocAccessFields_Slug_Update>;
-};
-
-export type VoiceoversDocAccessFields_Slug_Create = {
-  __typename?: 'VoiceoversDocAccessFields_slug_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Slug_Delete = {
-  __typename?: 'VoiceoversDocAccessFields_slug_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Slug_Read = {
-  __typename?: 'VoiceoversDocAccessFields_slug_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Slug_Update = {
-  __typename?: 'VoiceoversDocAccessFields_slug_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Title = {
-  __typename?: 'VoiceoversDocAccessFields_title';
-  create?: Maybe<VoiceoversDocAccessFields_Title_Create>;
-  delete?: Maybe<VoiceoversDocAccessFields_Title_Delete>;
-  read?: Maybe<VoiceoversDocAccessFields_Title_Read>;
-  update?: Maybe<VoiceoversDocAccessFields_Title_Update>;
-};
-
-export type VoiceoversDocAccessFields_Title_Create = {
-  __typename?: 'VoiceoversDocAccessFields_title_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Title_Delete = {
-  __typename?: 'VoiceoversDocAccessFields_title_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Title_Read = {
-  __typename?: 'VoiceoversDocAccessFields_title_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_Title_Update = {
-  __typename?: 'VoiceoversDocAccessFields_title_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_UpdatedAt = {
-  __typename?: 'VoiceoversDocAccessFields_updatedAt';
-  create?: Maybe<VoiceoversDocAccessFields_UpdatedAt_Create>;
-  delete?: Maybe<VoiceoversDocAccessFields_UpdatedAt_Delete>;
-  read?: Maybe<VoiceoversDocAccessFields_UpdatedAt_Read>;
-  update?: Maybe<VoiceoversDocAccessFields_UpdatedAt_Update>;
-};
-
-export type VoiceoversDocAccessFields_UpdatedAt_Create = {
-  __typename?: 'VoiceoversDocAccessFields_updatedAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_UpdatedAt_Delete = {
-  __typename?: 'VoiceoversDocAccessFields_updatedAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_UpdatedAt_Read = {
-  __typename?: 'VoiceoversDocAccessFields_updatedAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversDocAccessFields_UpdatedAt_Update = {
-  __typename?: 'VoiceoversDocAccessFields_updatedAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields = {
-  __typename?: 'VoiceoversFields';
-  createdAt?: Maybe<VoiceoversFields_CreatedAt>;
-  kodikTranslationId?: Maybe<VoiceoversFields_KodikTranslationId>;
-  slug?: Maybe<VoiceoversFields_Slug>;
-  title?: Maybe<VoiceoversFields_Title>;
-  updatedAt?: Maybe<VoiceoversFields_UpdatedAt>;
-};
-
-export type VoiceoversFields_CreatedAt = {
-  __typename?: 'VoiceoversFields_createdAt';
-  create?: Maybe<VoiceoversFields_CreatedAt_Create>;
-  delete?: Maybe<VoiceoversFields_CreatedAt_Delete>;
-  read?: Maybe<VoiceoversFields_CreatedAt_Read>;
-  update?: Maybe<VoiceoversFields_CreatedAt_Update>;
-};
-
-export type VoiceoversFields_CreatedAt_Create = {
-  __typename?: 'VoiceoversFields_createdAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_CreatedAt_Delete = {
-  __typename?: 'VoiceoversFields_createdAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_CreatedAt_Read = {
-  __typename?: 'VoiceoversFields_createdAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_CreatedAt_Update = {
-  __typename?: 'VoiceoversFields_createdAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_KodikTranslationId = {
-  __typename?: 'VoiceoversFields_kodikTranslationId';
-  create?: Maybe<VoiceoversFields_KodikTranslationId_Create>;
-  delete?: Maybe<VoiceoversFields_KodikTranslationId_Delete>;
-  read?: Maybe<VoiceoversFields_KodikTranslationId_Read>;
-  update?: Maybe<VoiceoversFields_KodikTranslationId_Update>;
-};
-
-export type VoiceoversFields_KodikTranslationId_Create = {
-  __typename?: 'VoiceoversFields_kodikTranslationId_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_KodikTranslationId_Delete = {
-  __typename?: 'VoiceoversFields_kodikTranslationId_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_KodikTranslationId_Read = {
-  __typename?: 'VoiceoversFields_kodikTranslationId_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_KodikTranslationId_Update = {
-  __typename?: 'VoiceoversFields_kodikTranslationId_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Slug = {
-  __typename?: 'VoiceoversFields_slug';
-  create?: Maybe<VoiceoversFields_Slug_Create>;
-  delete?: Maybe<VoiceoversFields_Slug_Delete>;
-  read?: Maybe<VoiceoversFields_Slug_Read>;
-  update?: Maybe<VoiceoversFields_Slug_Update>;
-};
-
-export type VoiceoversFields_Slug_Create = {
-  __typename?: 'VoiceoversFields_slug_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Slug_Delete = {
-  __typename?: 'VoiceoversFields_slug_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Slug_Read = {
-  __typename?: 'VoiceoversFields_slug_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Slug_Update = {
-  __typename?: 'VoiceoversFields_slug_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Title = {
-  __typename?: 'VoiceoversFields_title';
-  create?: Maybe<VoiceoversFields_Title_Create>;
-  delete?: Maybe<VoiceoversFields_Title_Delete>;
-  read?: Maybe<VoiceoversFields_Title_Read>;
-  update?: Maybe<VoiceoversFields_Title_Update>;
-};
-
-export type VoiceoversFields_Title_Create = {
-  __typename?: 'VoiceoversFields_title_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Title_Delete = {
-  __typename?: 'VoiceoversFields_title_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Title_Read = {
-  __typename?: 'VoiceoversFields_title_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_Title_Update = {
-  __typename?: 'VoiceoversFields_title_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_UpdatedAt = {
-  __typename?: 'VoiceoversFields_updatedAt';
-  create?: Maybe<VoiceoversFields_UpdatedAt_Create>;
-  delete?: Maybe<VoiceoversFields_UpdatedAt_Delete>;
-  read?: Maybe<VoiceoversFields_UpdatedAt_Read>;
-  update?: Maybe<VoiceoversFields_UpdatedAt_Update>;
-};
-
-export type VoiceoversFields_UpdatedAt_Create = {
-  __typename?: 'VoiceoversFields_updatedAt_Create';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_UpdatedAt_Delete = {
-  __typename?: 'VoiceoversFields_updatedAt_Delete';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_UpdatedAt_Read = {
-  __typename?: 'VoiceoversFields_updatedAt_Read';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversFields_UpdatedAt_Update = {
-  __typename?: 'VoiceoversFields_updatedAt_Update';
-  permission: Scalars['Boolean']['output'];
-};
-
-export type VoiceoversReadAccess = {
-  __typename?: 'VoiceoversReadAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversReadDocAccess = {
-  __typename?: 'VoiceoversReadDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversUpdateAccess = {
-  __typename?: 'VoiceoversUpdateAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
-export type VoiceoversUpdateDocAccess = {
-  __typename?: 'VoiceoversUpdateDocAccess';
-  permission: Scalars['Boolean']['output'];
-  where?: Maybe<Scalars['JSONObject']['output']>;
-};
-
 export type AllMedia = {
   __typename?: 'allMedia';
   docs: Array<Media>;
@@ -10665,11 +9454,6 @@ export type ContentDocAccess = {
 
 export type CountContents = {
   __typename?: 'countContents';
-  totalDocs?: Maybe<Scalars['Int']['output']>;
-};
-
-export type CountEpisodeSources = {
-  __typename?: 'countEpisodeSources';
   totalDocs?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -10718,32 +9502,9 @@ export type CountUsers = {
   totalDocs?: Maybe<Scalars['Int']['output']>;
 };
 
-export type CountVoiceovers = {
-  __typename?: 'countVoiceovers';
-  totalDocs?: Maybe<Scalars['Int']['output']>;
-};
-
 export type CountallMedia = {
   __typename?: 'countallMedia';
   totalDocs?: Maybe<Scalars['Int']['output']>;
-};
-
-export type Episode_SourcesAccess = {
-  __typename?: 'episode_sourcesAccess';
-  create?: Maybe<EpisodeSourcesCreateAccess>;
-  delete?: Maybe<EpisodeSourcesDeleteAccess>;
-  fields?: Maybe<EpisodeSourcesFields>;
-  read?: Maybe<EpisodeSourcesReadAccess>;
-  update?: Maybe<EpisodeSourcesUpdateAccess>;
-};
-
-export type Episode_SourcesDocAccess = {
-  __typename?: 'episode_sourcesDocAccess';
-  create?: Maybe<EpisodeSourcesCreateDocAccess>;
-  delete?: Maybe<EpisodeSourcesDeleteDocAccess>;
-  fields?: Maybe<EpisodeSourcesDocAccessFields>;
-  read?: Maybe<EpisodeSourcesReadDocAccess>;
-  update?: Maybe<EpisodeSourcesUpdateDocAccess>;
 };
 
 export type EpisodesAccess = {
@@ -10830,8 +9591,6 @@ export type MutationContentInput = {
   kinopoiskId?: InputMaybe<Scalars['String']['input']>;
   kodikId?: InputMaybe<Scalars['String']['input']>;
   meta?: InputMaybe<MutationContent_MetaInput>;
-  nextEpisodeAt?: InputMaybe<Scalars['Float']['input']>;
-  nextEpisodeNumber?: InputMaybe<Scalars['Float']['input']>;
   originalTitle?: InputMaybe<Scalars['String']['input']>;
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
@@ -10859,8 +9618,6 @@ export type MutationContentUpdateInput = {
   kinopoiskId?: InputMaybe<Scalars['String']['input']>;
   kodikId?: InputMaybe<Scalars['String']['input']>;
   meta?: InputMaybe<MutationContentUpdate_MetaInput>;
-  nextEpisodeAt?: InputMaybe<Scalars['Float']['input']>;
-  nextEpisodeNumber?: InputMaybe<Scalars['Float']['input']>;
   originalTitle?: InputMaybe<Scalars['String']['input']>;
   playerLink?: InputMaybe<Scalars['String']['input']>;
   poster?: InputMaybe<Scalars['Int']['input']>;
@@ -10898,22 +9655,6 @@ export type MutationEpisodeInput = {
   season?: InputMaybe<Scalars['Int']['input']>;
   title: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type MutationEpisodeSourceInput = {
-  createdAt?: InputMaybe<Scalars['String']['input']>;
-  episode?: InputMaybe<Scalars['Int']['input']>;
-  playerLink: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['String']['input']>;
-  voiceover?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type MutationEpisodeSourceUpdateInput = {
-  createdAt?: InputMaybe<Scalars['String']['input']>;
-  episode?: InputMaybe<Scalars['Int']['input']>;
-  playerLink?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['String']['input']>;
-  voiceover?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type MutationEpisodeUpdateInput = {
@@ -11122,22 +9863,6 @@ export type MutationUser_SessionsInput = {
   createdAt?: InputMaybe<Scalars['String']['input']>;
   expiresAt: Scalars['String']['input'];
   id: Scalars['String']['input'];
-};
-
-export type MutationVoiceoverInput = {
-  createdAt?: InputMaybe<Scalars['String']['input']>;
-  kodikTranslationId?: InputMaybe<Scalars['Float']['input']>;
-  slug: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type MutationVoiceoverUpdateInput = {
-  createdAt?: InputMaybe<Scalars['String']['input']>;
-  kodikTranslationId?: InputMaybe<Scalars['Float']['input']>;
-  slug?: InputMaybe<Scalars['String']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Payload_KvAccess = {
@@ -11470,26 +10195,6 @@ export type VersionsContent_Version__Meta__Title_Operator = {
   not_in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-export type VersionsContent_Version__NextEpisodeAt_Operator = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Float']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  less_than?: InputMaybe<Scalars['Float']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  not_equals?: InputMaybe<Scalars['Float']['input']>;
-};
-
-export type VersionsContent_Version__NextEpisodeNumber_Operator = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  greater_than?: InputMaybe<Scalars['Float']['input']>;
-  greater_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  less_than?: InputMaybe<Scalars['Float']['input']>;
-  less_than_equal?: InputMaybe<Scalars['Float']['input']>;
-  not_equals?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type VersionsContent_Version__OriginalTitle_Operator = {
   all?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   contains?: InputMaybe<Scalars['String']['input']>;
@@ -11651,8 +10356,6 @@ export type VersionsContent_Where = {
   version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
   version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
   version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
-  version__nextEpisodeAt?: InputMaybe<VersionsContent_Version__NextEpisodeAt_Operator>;
-  version__nextEpisodeNumber?: InputMaybe<VersionsContent_Version__NextEpisodeNumber_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -11689,8 +10392,6 @@ export type VersionsContent_Where_And = {
   version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
   version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
   version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
-  version__nextEpisodeAt?: InputMaybe<VersionsContent_Version__NextEpisodeAt_Operator>;
-  version__nextEpisodeNumber?: InputMaybe<VersionsContent_Version__NextEpisodeNumber_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -11727,8 +10428,6 @@ export type VersionsContent_Where_Or = {
   version__meta__description?: InputMaybe<VersionsContent_Version__Meta__Description_Operator>;
   version__meta__image?: InputMaybe<VersionsContent_Version__Meta__Image_Operator>;
   version__meta__title?: InputMaybe<VersionsContent_Version__Meta__Title_Operator>;
-  version__nextEpisodeAt?: InputMaybe<VersionsContent_Version__NextEpisodeAt_Operator>;
-  version__nextEpisodeNumber?: InputMaybe<VersionsContent_Version__NextEpisodeNumber_Operator>;
   version__originalTitle?: InputMaybe<VersionsContent_Version__OriginalTitle_Operator>;
   version__playerLink?: InputMaybe<VersionsContent_Version__PlayerLink_Operator>;
   version__poster?: InputMaybe<VersionsContent_Version__Poster_Operator>;
@@ -11758,48 +10457,6 @@ export type VersionsContents = {
   totalDocs: Scalars['Int']['output'];
   totalPages: Scalars['Int']['output'];
 };
-
-export type VoiceoversAccess = {
-  __typename?: 'voiceoversAccess';
-  create?: Maybe<VoiceoversCreateAccess>;
-  delete?: Maybe<VoiceoversDeleteAccess>;
-  fields?: Maybe<VoiceoversFields>;
-  read?: Maybe<VoiceoversReadAccess>;
-  update?: Maybe<VoiceoversUpdateAccess>;
-};
-
-export type VoiceoversDocAccess = {
-  __typename?: 'voiceoversDocAccess';
-  create?: Maybe<VoiceoversCreateDocAccess>;
-  delete?: Maybe<VoiceoversDeleteDocAccess>;
-  fields?: Maybe<VoiceoversDocAccessFields>;
-  read?: Maybe<VoiceoversReadDocAccess>;
-  update?: Maybe<VoiceoversUpdateDocAccess>;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -11914,20 +10571,7 @@ export type UpdateUserMutationVariables = Exact<{
 
 export type UpdateUserMutation = { updateUser: { id: number, name: string | null, email: unknown, roles: Array<User_Roles> | null } | null };
 
-export type GetContentIdsByKinopoiskQueryVariables = Exact<{
-  kinopoiskId: string;
-}>;
 
-
-export type GetContentIdsByKinopoiskQuery = { Contents: { docs: Array<{ id: number }> } | null };
-
-export type GetAiredEpisodesQueryVariables = Exact<{
-  where: Episode_Where;
-  limit?: number | null | undefined;
-}>;
-
-
-export type GetAiredEpisodesQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number, airingAt: number | null, season: { id: number, content: { id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null } | null } | null }> } | null };
 
 export type GetContentBySlugQueryVariables = Exact<{
   slug: string;
@@ -11944,55 +10588,12 @@ export type GetContentQueryVariables = Exact<{
 }>;
 
 
-export type GetContentQuery = { Contents: { totalDocs: number, hasNextPage: boolean, docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null }> } | null };
-
-export type GetEpisodeSourcesQueryVariables = Exact<{
-  where?: EpisodeSource_Where | null | undefined;
-}>;
-
-
-export type GetEpisodeSourcesQuery = { EpisodeSources: { docs: Array<{ id: number, playerLink: string, episode: { id: number } | null, voiceover: { id: number, title: string, slug: string } | null }> } | null };
+export type GetContentQuery = { Contents: { totalDocs: number, hasNextPage: boolean, docs: Array<{ id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null }> } | null };
 
 export type GetGenresQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGenresQuery = { Genres: { docs: Array<{ id: number, title: string, slug: string }> } | null };
-
-export type GetHeroContentQueryVariables = Exact<{
-  where?: Content_Where | null | undefined;
-}>;
-
-
-export type GetHeroContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, description: unknown, releaseYear: number | null, duration: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null }> } | null };
-
-export type GetNextEpisodesQueryVariables = Exact<{
-  where: Content_Where;
-}>;
-
-
-export type GetNextEpisodesQuery = { Contents: { docs: Array<{ id: number, slug: string | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null }> } | null };
-
-export type GetScheduleQueryVariables = Exact<{
-  where: Content_Where;
-  limit?: number | null | undefined;
-}>;
-
-
-export type GetScheduleQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null, poster: { url: string | null } | null }> } | null };
-
-export type GetSeasonEpisodeIdsQueryVariables = Exact<{
-  where?: Episode_Where | null | undefined;
-}>;
-
-
-export type GetSeasonEpisodeIdsQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number }> } | null };
-
-export type GetSeriesFranchiseQueryVariables = Exact<{
-  where: Content_Where;
-}>;
-
-
-export type GetSeriesFranchiseQuery = { Contents: { docs: Array<{ id: number, slug: string | null, titleRu: string | null, releaseYear: number | null, releaseStatus: Content_ReleaseStatus | null, rating: number | null, ageRating: number | null, description: unknown, poster: { url: string | null } | null, backdrop: { url: string | null } | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null, airingAt: number | null }> } | null }> } | null }> } | null };
 
 export type GetSimilarContentQueryVariables = Exact<{
   where?: Content_Where | null | undefined;
@@ -12001,22 +10602,9 @@ export type GetSimilarContentQueryVariables = Exact<{
 }>;
 
 
-export type GetSimilarContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null }> } | null };
-
-export type GetSitemapEntriesQueryVariables = Exact<{
-  limit: number;
-  page: number;
-}>;
+export type GetSimilarContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null }> } | null };
 
 
-export type GetSitemapEntriesQuery = { Contents: { hasNextPage: boolean, docs: Array<{ slug: string | null, type: Content_Type | null, updatedAt: unknown }> } | null };
-
-export type SearchContentQueryVariables = Exact<{
-  where: SearchResult_Where;
-}>;
-
-
-export type SearchContentQuery = { SearchResults: { docs: Array<{ id: number, title: string | null, titleEn: string | null, slug: string | null, type: string | null, releaseYear: number | null, rating: number | null, poster: { id: number, url: string | null } | null }> } | null };
 
 export type AddFavoriteMutationVariables = Exact<{
   userId: number;
@@ -12025,13 +10613,6 @@ export type AddFavoriteMutationVariables = Exact<{
 
 
 export type AddFavoriteMutation = { createFavorite: { id: number, content: { id: number } | null } | null };
-
-export type GetFavoriteItemsQueryVariables = Exact<{
-  where?: Favorite_Where | null | undefined;
-}>;
-
-
-export type GetFavoriteItemsQuery = { Favorites: { docs: Array<{ id: number, content: { id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null } | null }> } | null };
 
 export type GetFavoritesQueryVariables = Exact<{
   where?: Favorite_Where | null | undefined;
@@ -12047,13 +10628,37 @@ export type RemoveFavoriteMutationVariables = Exact<{
 
 export type RemoveFavoriteMutation = { deleteFavorite: { id: number } | null };
 
-export type GetSeasonsByContentIdsQueryVariables = Exact<{
-  contentIds: Array<unknown> | unknown;
+
+
+
+export type GetHeroContentQueryVariables = Exact<{
+  where?: Content_Where | null | undefined;
 }>;
 
 
-export type GetSeasonsByContentIdsQuery = { Seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, content: { id: number, slug: string | null, titleRu: string | null, releaseYear: number | null, releaseStatus: Content_ReleaseStatus | null, rating: number | null, ageRating: number | null, description: unknown, poster: { url: string | null } | null, backdrop: { url: string | null } | null } | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null, airingAt: number | null }> } | null }> } | null };
+export type GetHeroContentQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, description: unknown, releaseYear: number | null, duration: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null, backdrop: { url: string | null } | null }> } | null };
 
+export type GetSeriesFranchiseQueryVariables = Exact<{
+  where: Content_Where;
+}>;
+
+
+export type GetSeriesFranchiseQuery = { Contents: { docs: Array<{ id: number, slug: string | null, titleRu: string | null, releaseYear: number | null, releaseStatus: Content_ReleaseStatus | null, rating: number | null, ageRating: number | null, description: unknown, poster: { url: string | null } | null, backdrop: { url: string | null } | null, seasons: { docs: Array<{ id: number, seasonNumber: number, title: string | null, releaseYear: number | null, episodes: { docs: Array<{ id: number, episodeNumber: number, title: string, playerLink: string | null, description: unknown, duration: number | null, airingAt: number | null }> } | null }> } | null }> } | null };
+
+export type GetSitemapEntriesQueryVariables = Exact<{
+  limit: number;
+  page: number;
+}>;
+
+
+export type GetSitemapEntriesQuery = { Contents: { hasNextPage: boolean, docs: Array<{ slug: string | null, type: Content_Type | null, updatedAt: unknown }> } | null };
+
+export type GetFavoriteItemsQueryVariables = Exact<{
+  where?: Favorite_Where | null | undefined;
+}>;
+
+
+export type GetFavoriteItemsQuery = { Favorites: { docs: Array<{ id: number, content: { id: number, titleEn: string | null, titleRu: string | null, slug: string | null, type: Content_Type | null, releaseYear: number | null, rating: number | null, poster: { url: string | null } | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null } | null }> } | null };
 
 export const ForgotPasswordUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ForgotPasswordUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"forgotPasswordUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}]}}]} as unknown as DocumentNode<ForgotPasswordUserMutation, ForgotPasswordUserMutationVariables>;
 export const LoginUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LoginUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"loginUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}},{"kind":"Field","name":{"kind":"Name","value":"exp"}}]}}]}}]} as unknown as DocumentNode<LoginUserMutation, LoginUserMutationVariables>;
@@ -12062,22 +10667,179 @@ export const MeUserDocument = {"kind":"Document","definitions":[{"kind":"Operati
 export const RegisterUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RegisterUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}}]}}]} as unknown as DocumentNode<RegisterUserMutation, RegisterUserMutationVariables>;
 export const ResetPasswordUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResetPasswordUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resetPasswordUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"token"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<ResetPasswordUserMutation, ResetPasswordUserMutationVariables>;
 export const UpdateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"name"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"name"},"value":{"kind":"Variable","name":{"kind":"Name","value":"name"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"roles"}}]}}]}}]} as unknown as DocumentNode<UpdateUserMutation, UpdateUserMutationVariables>;
-export const GetContentIdsByKinopoiskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentIdsByKinopoisk"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"kinopoiskId"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"kinopoiskId"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GetContentIdsByKinopoiskQuery, GetContentIdsByKinopoiskQueryVariables>;
-export const GetAiredEpisodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAiredEpisodes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Episode_where"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"airingAt","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}},{"kind":"Field","name":{"kind":"Name","value":"season"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetAiredEpisodesQuery, GetAiredEpisodesQueryVariables>;
 export const GetContentBySlugDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContentBySlug"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"slug"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"equals"},"value":{"kind":"Variable","name":{"kind":"Name","value":"slug"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"originalTitle"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"kinopoiskId"}},{"kind":"Field","name":{"kind":"Name","value":"franchiseId"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"genres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"image"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetContentBySlugQuery, GetContentBySlugQueryVariables>;
 export const GetContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalDocs"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetContentQuery, GetContentQueryVariables>;
-export const GetEpisodeSourcesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEpisodeSources"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"EpisodeSource_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"EpisodeSources"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20000"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"episode"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"voiceover"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetEpisodeSourcesQuery, GetEpisodeSourcesQueryVariables>;
 export const GetGenresDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetGenres"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Genres"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"title","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]} as unknown as DocumentNode<GetGenresQuery, GetGenresQueryVariables>;
-export const GetHeroContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetHeroContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-updatedAt","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]} as unknown as DocumentNode<GetHeroContentQuery, GetHeroContentQueryVariables>;
-export const GetNextEpisodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetNextEpisodes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"nextEpisodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"nextEpisodeAt"}}]}}]}}]}}]} as unknown as DocumentNode<GetNextEpisodesQuery, GetNextEpisodesQueryVariables>;
-export const GetScheduleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSchedule"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"nextEpisodeAt","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"nextEpisodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"nextEpisodeAt"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetScheduleQuery, GetScheduleQueryVariables>;
-export const GetSeasonEpisodeIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeasonEpisodeIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Episode_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1000"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}}]}}]}}]}}]} as unknown as DocumentNode<GetSeasonEpisodeIdsQuery, GetSeasonEpisodeIdsQueryVariables>;
-export const GetSeriesFranchiseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeriesFranchise"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber,releaseYear","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeriesFranchiseQuery, GetSeriesFranchiseQueryVariables>;
 export const GetSimilarContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSimilarContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sort"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sort"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]} as unknown as DocumentNode<GetSimilarContentQuery, GetSimilarContentQueryVariables>;
-export const GetSitemapEntriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSitemapEntries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-updatedAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetSitemapEntriesQuery, GetSitemapEntriesQueryVariables>;
-export const SearchContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SearchContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchResult_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"SearchResults"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}}]}}]}}]} as unknown as DocumentNode<SearchContentQuery, SearchContentQueryVariables>;
 export const AddFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"user"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<AddFavoriteMutation, AddFavoriteMutationVariables>;
-export const GetFavoriteItemsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavoriteItems"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-createdAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoriteItemsQuery, GetFavoriteItemsQueryVariables>;
 export const GetFavoritesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavorites"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoritesQuery, GetFavoritesQueryVariables>;
 export const RemoveFavoriteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveFavorite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFavorite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<RemoveFavoriteMutation, RemoveFavoriteMutationVariables>;
-export const GetSeasonsByContentIdsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeasonsByContentIds"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JSON"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"content"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contentIds"}}}]}}]}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber,releaseYear","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeasonsByContentIdsQuery, GetSeasonsByContentIdsQueryVariables>;
+export const GetHeroContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetHeroContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-updatedAt","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]} as unknown as DocumentNode<GetHeroContentQuery, GetHeroContentQueryVariables>;
+export const GetSeriesFranchiseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSeriesFranchise"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Content_where"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"50"}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"BooleanValue","value":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"backdrop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"seasons"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"seasonNumber,releaseYear","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"seasonNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"episodes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"episodeNumber","block":false}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"episodeNumber"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"playerLink"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"airingAt"}}]}}]}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSeriesFranchiseQuery, GetSeriesFranchiseQueryVariables>;
+export const GetSitemapEntriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSitemapEntries"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Contents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-updatedAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}}]}}]}}]} as unknown as DocumentNode<GetSitemapEntriesQuery, GetSitemapEntriesQueryVariables>;
+export const GetFavoriteItemsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFavoriteItems"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Favorite_where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Favorites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"500"}},{"kind":"Argument","name":{"kind":"Name","value":"sort"},"value":{"kind":"StringValue","value":"-createdAt","block":false}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"docs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"titleEn"}},{"kind":"Field","name":{"kind":"Name","value":"titleRu"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"releaseYear"}},{"kind":"Field","name":{"kind":"Name","value":"rating"}},{"kind":"Field","name":{"kind":"Name","value":"poster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ageRating"}},{"kind":"Field","name":{"kind":"Name","value":"releaseStatus"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetFavoriteItemsQuery, GetFavoriteItemsQueryVariables>;
+
+/* -------------------------------------------------------------------------- */
+/* ВРУЧНУЮ добавлено: озвучки серий (коллекция CMS episode-sources).           */
+/* Исходники — src/graphql/content/get-season-episode-ids.graphql и           */
+/* get-episode-sources.graphql. Перед коммитом выполните `pnpm codegen`:      */
+/* он заменит этот блок настоящим выводом (и уберёт import { parse } выше).   */
+/* -------------------------------------------------------------------------- */
+
+export type EpisodeSource_Episode_Operator = {
+  all?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  equals?: InputMaybe<Scalars['JSON']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+  not_equals?: InputMaybe<Scalars['JSON']['input']>;
+  not_in?: InputMaybe<Array<InputMaybe<Scalars['JSON']['input']>>>;
+};
+
+export type EpisodeSource_Voiceover_Operator = EpisodeSource_Episode_Operator;
+
+export type EpisodeSource_Where = {
+  episode?: InputMaybe<EpisodeSource_Episode_Operator>;
+  voiceover?: InputMaybe<EpisodeSource_Voiceover_Operator>;
+};
+
+export type GetSeasonEpisodeIdsQueryVariables = Exact<{
+  where?: InputMaybe<Episode_Where>;
+}>;
+
+
+export type GetSeasonEpisodeIdsQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number }> } | null };
+
+export type GetEpisodeSourcesQueryVariables = Exact<{
+  where?: InputMaybe<EpisodeSource_Where>;
+}>;
+
+
+export type GetEpisodeSourcesQuery = { EpisodeSources: { docs: Array<{ id: number, playerLink: string, episode: { id: number } | null, voiceover: { id: number, title: string, slug: string } | null }> } | null };
+
+export const GetSeasonEpisodeIdsDocument = parse(`
+  query GetSeasonEpisodeIds($where: Episode_where) {
+    Episodes(where: $where, limit: 1000, pagination: false) {
+      docs {
+        id
+        episodeNumber
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetSeasonEpisodeIdsQuery, GetSeasonEpisodeIdsQueryVariables>;
+export const GetEpisodeSourcesDocument = parse(`
+  query GetEpisodeSources($where: EpisodeSource_where) {
+    EpisodeSources(where: $where, limit: 20000, pagination: false) {
+      docs {
+        id
+        playerLink
+        episode {
+          id
+        }
+        voiceover {
+          id
+          title
+          slug
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetEpisodeSourcesQuery, GetEpisodeSourcesQueryVariables>;
+
+/* -------------------------------------------------------------------------- */
+/* ВРУЧНУЮ добавлено: расписание серий (content.nextEpisodeNumber/At).         */
+/* Исходник — src/graphql/content/get-next-episodes.graphql. Перед коммитом   */
+/* выполните `pnpm codegen`: он заменит этот блок настоящим выводом.          */
+/* -------------------------------------------------------------------------- */
+
+export type GetNextEpisodesQueryVariables = Exact<{
+  where: Content_Where;
+}>;
+
+
+export type GetNextEpisodesQuery = { Contents: { docs: Array<{ id: number, slug: string | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null }> } | null };
+
+export const GetNextEpisodesDocument = parse(`
+  query GetNextEpisodes($where: Content_where!) {
+    Contents(where: $where, limit: 50, pagination: false) {
+      docs {
+        id
+        slug
+        nextEpisodeNumber
+        nextEpisodeAt
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetNextEpisodesQuery, GetNextEpisodesQueryVariables>;
+
+/* ВРУЧНУЮ добавлено: страница расписания (src/graphql/content/get-schedule.graphql). */
+/* Перед коммитом выполните `pnpm codegen`.                                          */
+
+export type GetScheduleQueryVariables = Exact<{
+  where: Content_Where;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetScheduleQuery = { Contents: { docs: Array<{ id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, nextEpisodeNumber: number | null, nextEpisodeAt: number | null, poster: { url: string | null } | null }> } | null };
+
+export const GetScheduleDocument = parse(`
+  query GetSchedule($where: Content_where!, $limit: Int) {
+    Contents(where: $where, limit: $limit, sort: "nextEpisodeAt", pagination: false) {
+      docs {
+        id
+        type
+        titleEn
+        titleRu
+        slug
+        releaseYear
+        rating
+        ageRating
+        releaseStatus
+        nextEpisodeNumber
+        nextEpisodeAt
+        poster {
+          url
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetScheduleQuery, GetScheduleQueryVariables>;
+
+/* ВРУЧНУЮ добавлено: вышедшие серии для расписания (src/graphql/content/get-aired-episodes.graphql). */
+/* Перед коммитом выполните `pnpm codegen`.                                                         */
+
+export type GetAiredEpisodesQueryVariables = Exact<{
+  where: Episode_Where;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetAiredEpisodesQuery = { Episodes: { docs: Array<{ id: number, episodeNumber: number, airingAt: number | null, season: { id: number, content: { id: number, type: Content_Type | null, titleEn: string | null, titleRu: string | null, slug: string | null, releaseYear: number | null, rating: number | null, ageRating: number | null, releaseStatus: Content_ReleaseStatus | null, poster: { url: string | null } | null } | null } | null }> } | null };
+
+export const GetAiredEpisodesDocument = parse(`
+  query GetAiredEpisodes($where: Episode_where!, $limit: Int) {
+    Episodes(where: $where, limit: $limit, sort: "airingAt", pagination: false) {
+      docs {
+        id
+        episodeNumber
+        airingAt
+        season {
+          id
+          content {
+            id
+            type
+            titleEn
+            titleRu
+            slug
+            releaseYear
+            rating
+            ageRating
+            releaseStatus
+            poster {
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetAiredEpisodesQuery, GetAiredEpisodesQueryVariables>;

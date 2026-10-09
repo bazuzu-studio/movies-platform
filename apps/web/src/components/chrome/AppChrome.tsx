@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
-const NO_CHROME = ["/login", "/register", "/forgot-password"];
+const NO_CHROME = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

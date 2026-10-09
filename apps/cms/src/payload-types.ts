@@ -310,9 +310,12 @@ export interface Content {
    * Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте
    */
   releaseStatus?: ('anons' | 'ongoing' | 'released') | null;
+  /**
+   * Номер ближайшей невышедшей серии. Заполняет пайплайн (`sync-schedule`), при ручной правке будет перезаписано
+   */
   nextEpisodeNumber?: number | null;
   /**
-   * Заполняется пайплайном (sync-schedule) по расписанию AniList.
+   * Время эфира ближайшей серии в Японии, Unix-секунды. Заполняет пайплайн (`sync-schedule`). Сайт показывает его по Москве
    */
   nextEpisodeAt?: number | null;
   updatedAt: string;

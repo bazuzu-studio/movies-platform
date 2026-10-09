@@ -5,7 +5,6 @@ import { admin } from '@/access/admin'
 import { publishedOrEditor } from '@/access/publishedOrEditor'
 import { revalidateAfterChange, revalidateAfterDelete } from '@/hooks/revalidate'
 import { slugify } from '@/lib/slugify'
-import { scheduleFields } from '../ContentScheduleFields'
 
 /**
  * Единая коллекция для фильмов и сериалов.
@@ -17,6 +16,8 @@ import { scheduleFields } from '../ContentScheduleFields'
  *   updatedAt -> updated_at
  *   ageRating -> age_rating
  *   releaseStatus -> release_status
+ *   nextEpisodeNumber -> next_episode_number
+ *   nextEpisodeAt -> next_episode_at
  *
  * Поле `type` различает movie / series.
  */
@@ -344,6 +345,27 @@ export const Content: CollectionConfig = {
           'Анонс / выходит / вышло. Обновляется пайплайном из Kodik; при ручной правке будет перезаписано при следующем импорте',
       },
     },
-    ...scheduleFields
+    {
+      name: 'nextEpisodeNumber',
+      type: 'number',
+      label: 'Следующая серия (номер)',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Номер ближайшей невышедшей серии. Заполняет пайплайн (`sync-schedule`), при ручной правке будет перезаписано',
+      },
+    },
+    {
+      name: 'nextEpisodeAt',
+      type: 'number',
+      label: 'Следующая серия (эфир, Unix)',
+      // Расписание сайта фильтрует и сортирует по этому полю.
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Время эфира ближайшей серии в Японии, Unix-секунды. Заполняет пайплайн (`sync-schedule`). Сайт показывает его по Москве',
+      },
+    },
   ],
 }

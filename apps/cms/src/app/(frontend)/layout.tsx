@@ -2,7 +2,7 @@ import React from 'react'
 import './styles.css'
 
 export const metadata = {
-  title: 'MovHub CMS',
+  title: 'otakuum CMS',
   // CMS не должна попадать в поисковую выдачу.
   robots: { index: false, follow: false },
 }

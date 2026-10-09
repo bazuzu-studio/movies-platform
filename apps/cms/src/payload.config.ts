@@ -24,7 +24,7 @@ import { Voiceovers } from './collections/voiceovers/config'
 import { EpisodeSources } from './collections/episode-sources/config'
 // [Dokploy] Миграции БД (генерируются `pnpm migrate:create`) — в production
 // схема разворачивается ими, а не Drizzle push.
-
+import { migrations } from './migrations'
 // [Dokploy] URL CMS/frontend и список CORS/CSRF-origin'ов теперь читаются из
 // runtime-переменных CMS_URL / FRONTEND_URL (см. src/lib/urls.ts). Раньше эти
 // значения были захардкожены на localhost и NEXT_PUBLIC_APP_URL.
@@ -35,7 +35,6 @@ import { healthEndpoint } from './endpoints/health'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import type { GenerateTitle, GenerateDescription, GenerateURL } from '@payloadcms/plugin-seo/types'
-import { migrations } from './migrations'
 
 // SEO: заголовок/описание/URL для мета-тегов. Если мета-поля не заполнены,
 // фронтенд может использовать эти же правила как fallback.
@@ -87,6 +86,12 @@ export default buildConfig({
   admin: {
     user: Users.slug,
 
+    // Бренд в заголовке вкладки админки вместо «— Payload»: страница входа в
+    // /admin должна выглядеть как часть otakuum, а не как безымянная форма.
+    meta: {
+      titleSuffix: ' — otakuum CMS',
+    },
+
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -102,6 +107,16 @@ export default buildConfig({
 
   secret: process.env.PAYLOAD_SECRET || '',
 
+  // Неверный email/пароль и блокировка аккаунта — штатные ситуации, а не сбои
+  // сервера. Раньше каждая такая попытка писалась в лог как ERROR с полным
+  // стеком, и настоящие ошибки тонули в этом шуме (особенно при переборе
+  // паролей ботами). Теперь они идут уровнем info; ERROR остаётся для сбоев.
+  // Имена — это `name` классов ошибок Payload (AuthenticationError, LockedAuth).
+  loggingLevels: {
+    AuthenticationError: 'info',
+    LockedAuth: 'info',
+  },
+
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -116,7 +131,7 @@ export default buildConfig({
     // применяет ещё не выполненные миграции автоматически при старте
     // контейнера — отдельный шаг `payload migrate` в Dokploy не нужен.
     // В dev-режиме по-прежнему работает push.
-   prodMigrations: migrations,
+    prodMigrations: migrations,
   }),
 
   // Приведение типа намеренное: между версиями `sharp` (0.34.x/0.35.x) и

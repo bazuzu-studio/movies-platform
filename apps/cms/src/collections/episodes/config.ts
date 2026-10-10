@@ -8,7 +8,7 @@ export const Episodes: CollectionConfig = {
   admin: {
     group: 'Каталог',
     useAsTitle: 'title',
-    defaultColumns: ['season', 'episodeNumber', 'title', 'airingAt'],
+    defaultColumns: ['season', 'episodeNumber', 'title', 'airingAt', 'firstAvailableAt', 'sourcesCount'],
   },
   access: {
     read: () => true,
@@ -62,6 +62,31 @@ export const Episodes: CollectionConfig = {
       label: 'Время эфира (Unix)',
       admin: {
         description: 'Время выхода эпизода (Unix-время, секунды). Фронтенд показывает его как дату выхода серии',
+      },
+    },
+    {
+      // Когда серия впервые появилась на сайте (хотя бы у одной озвучки), в отличие от
+      // airingAt — это не время эфира в Японии. Заполняет kodik-pipeline; у серий,
+      // загруженных до появления поля, пусто (реальное время неизвестно).
+      name: 'firstAvailableAt',
+      type: 'date',
+      label: 'Появилась на сайте',
+      index: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Когда пайплайн впервые увидел серию. Заполняется автоматически (sync-dubs / update-ongoing).',
+        date: { pickerAppearance: 'dayAndTime' },
+      },
+    },
+    {
+      name: 'sourcesCount',
+      type: 'number',
+      label: 'Озвучек у серии',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Сколько озвучек (episode-sources) есть у этой серии. Заполняет пайплайн.',
       },
     },
 

@@ -10,13 +10,19 @@ interface VoiceoverPickerProps {
   /** Играющий сейчас вариант. */
   active: VoiceoverOption | undefined;
   onSelect: (option: VoiceoverOption) => void;
+  /**
+   * Сколько серий сезона озвучено каждой студией ({ slug: число }) и сколько серий
+   * в сезоне всего. Если студия озвучила не все, рядом с названием — «5/12».
+   */
+  coverage?: Record<string, number>;
+  total?: number;
 }
 
 /**
  * Выбор озвучки текущей серии: горизонтальный ряд кнопок (на телефоне
  * прокручивается). Показывается, только если у серии больше одной озвучки.
  */
-export function VoiceoverPicker({ options, active, onSelect }: VoiceoverPickerProps) {
+export function VoiceoverPicker({ options, active, onSelect, coverage, total }: VoiceoverPickerProps) {
   if (options.length < 2) return null;
 
   return (
@@ -28,6 +34,8 @@ export function VoiceoverPicker({ options, active, onSelect }: VoiceoverPickerPr
       <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
         {options.map((option) => {
           const isActive = option === active || (!!active && option.url === active.url);
+          const done = option.slug && coverage ? coverage[option.slug] : undefined;
+          const partial = done !== undefined && total !== undefined && total > 0 && done < total;
           return (
             <button
               key={`${option.slug ?? "default"}-${option.url}`}
@@ -42,6 +50,14 @@ export function VoiceoverPicker({ options, active, onSelect }: VoiceoverPickerPr
               )}
             >
               {option.title}
+              {partial && (
+                <span
+                  className="ml-1.5 font-medium tabular-nums opacity-70"
+                  title={`Озвучено ${done} из ${total} серий сезона`}
+                >
+                  {done}/{total}
+                </span>
+              )}
             </button>
           );
         })}

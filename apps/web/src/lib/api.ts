@@ -8,6 +8,7 @@ import {
   GetHeroContentDocument,
   GetAiredEpisodesDocument,
   GetNextEpisodesDocument,
+  GetSeasonAvailabilityDocument,
   GetScheduleDocument,
   GetSeasonEpisodeIdsDocument,
   GetSeriesFranchiseDocument,
@@ -32,6 +33,7 @@ import { richTextToPlainText } from "./richtext";
 import { dedupeSeasonsBySlug, labelSeasons, pickLatestSeason } from "./seasons";
 import { mskDayStartSec, parseNextEpisode, type NextEpisode } from "./next-episode";
 import { groupSources, type SeasonSources, type SourceRow } from "./voiceovers";
+import { groupAvailability, type SeasonAvailability } from "./availability";
 
 const endpoint =
   process.env.GRAPHQL_API_URL ??
@@ -518,6 +520,18 @@ export async function getSeasonSources(seasonId: number): Promise<SeasonSources>
     });
   }
   return groupSources(rows);
+}
+
+/**
+ * Когда серии сезона появились на сайте (episodes.firstAvailableAt): по номеру серии.
+ * Если полей в CMS ещё нет (миграция 20261010_120000), запрос падает — вызывающий
+ * маршрут отвечает ошибкой, а страница просто не показывает отметки «новая».
+ */
+export async function getSeasonAvailability(seasonId: number): Promise<SeasonAvailability> {
+  const data = await serverClient.request(GetSeasonAvailabilityDocument, {
+    where: { season: { equals: seasonId } } as Episode_Where,
+  });
+  return groupAvailability(docsOf(data.Episodes));
 }
 
 /* -------------------------------------------------------------------------- */

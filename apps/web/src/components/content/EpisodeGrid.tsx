@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import type { Episode } from "@/lib/types";
 import { formatEpisodeDateLong, formatEpisodeDateShort } from "@/lib/episode";
 import { formatNextEpisode, type NextEpisode } from "@/lib/next-episode";
+import { isFresh, type SeasonAvailability } from "@/lib/availability";
 import { cn } from "@/lib/utils";
 
 const GROUP_SIZE = 24;
@@ -19,6 +20,12 @@ interface EpisodeGridProps {
    * озвучки), показывается неактивной плиткой «скоро» с датой.
    */
   upcoming?: NextEpisode;
+  /**
+   * Когда серии появились на сайте (episodes.firstAvailableAt), по номеру серии.
+   * Свежие (за последние 48 ч) помечаются зелёной точкой, время — в подсказке.
+   * Не передан или пуст (поля в CMS нет / серия загружена раньше) — без отметок.
+   */
+  availability?: SeasonAvailability;
 }
 
 /**
@@ -26,7 +33,7 @@ interface EpisodeGridProps {
  * карточек. На телефоне 5 колонок, помещается 20+ серий на экран. Если серий
  * больше 24 — сверху вкладки-диапазоны («1–24», «25–48»…).
  */
-export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcoming }: EpisodeGridProps) {
+export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcoming, availability }: EpisodeGridProps) {
   const sorted = useMemo(
     () => [...episodes].sort((a, b) => a.episodeNumber - b.episodeNumber),
     [episodes],
@@ -60,6 +67,8 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
   // Одинаковая высота плиток, если хотя бы у одной серии есть дата.
   const anyDate = visible.some((e) => Boolean(e.releaseDate));
   const showUpcoming = Boolean(upcoming && upcomingText) && Math.min(group, lastIndex) === lastIndex;
+  // availability приходит уже после гидратации (клиентский fetch), поэтому Date.now() здесь безопасен.
+  const nowMs = Date.now();
 
   return (
     <div>
@@ -90,14 +99,21 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
           const isWatched = watched.has(ep.episodeNumber);
           const date = formatEpisodeDateShort(ep.releaseDate);
           const full = formatEpisodeDateLong(ep.releaseDate);
+          const availableAt = availability?.[ep.episodeNumber];
+          const availableFull = availableAt ? formatEpisodeDateLong(availableAt) : "";
+          const fresh = isFresh(availableAt, nowMs);
+          const hint = [
+            full ? `эфир в Японии ${full}` : "",
+            availableFull ? `на сайте с ${availableFull}` : "",
+          ].filter(Boolean).join(" · ");
           return (
             <button
               key={ep.id ?? ep.episodeNumber}
               type="button"
               onClick={() => onSelect(ep)}
               aria-current={isActive ? "true" : undefined}
-              title={full ? `Серия ${ep.episodeNumber} — эфир ${full}` : undefined}
-              aria-label={`Серия ${ep.episodeNumber}${ep.title ? `: ${ep.title}` : ""}${full ? `, эфир ${full}` : ""}${isWatched ? " (просмотрена)" : ""}`}
+              title={hint ? `Серия ${ep.episodeNumber} — ${hint}` : undefined}
+              aria-label={`Серия ${ep.episodeNumber}${ep.title ? `: ${ep.title}` : ""}${full ? `, эфир ${full}` : ""}${fresh ? ", новая серия" : ""}${isWatched ? " (просмотрена)" : ""}`}
               className={cn(
                 "relative flex flex-col items-center justify-center rounded-xl border text-sm font-bold tabular-nums transition-all active:scale-95",
                 anyDate ? "h-14" : "h-12",
@@ -118,6 +134,15 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
                 >
                   {date}
                 </span>
+              )}
+              {fresh && (
+                <span
+                  className={cn(
+                    "absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full",
+                    isActive ? "bg-white" : "bg-emerald-400",
+                  )}
+                  aria-hidden
+                />
               )}
               {isWatched && !isActive && (
                 <Check className="absolute right-1 top-1 h-3 w-3 text-[#EF4A4F]" aria-hidden />

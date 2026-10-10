@@ -1,0 +1,16 @@
+# Когда серии сезона впервые появились на сайте (episodes.firstAvailableAt) и сколько
+# озвучек у каждой (episodes.sourcesCount). Поля заполняет kodik-pipeline v2.9
+# (`sync-dubs`, `update-ongoing`); у серий, загруженных раньше, firstAvailableAt пусто.
+# Отдельный запрос, как get-next-episodes: пока CMS не получила миграцию
+# 20261010_120000, он падает, и сайт просто не показывает отметки «новая»
+# (getSeasonAvailability перехватывается в маршруте /api/episode-availability),
+# а не теряет страницу сериала или выбор озвучки.
+query GetSeasonAvailability($where: Episode_where) {
+  Episodes(where: $where, limit: 1000, pagination: false) {
+    docs {
+      episodeNumber
+      firstAvailableAt
+      sourcesCount
+    }
+  }
+}

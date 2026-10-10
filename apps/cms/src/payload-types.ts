@@ -76,6 +76,7 @@ export interface Config {
     seasons: Season;
     voiceovers: Voiceover;
     'episode-sources': EpisodeSource;
+    'title-dubs': TitleDub;
     'search-results': SearchResult;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -100,6 +101,7 @@ export interface Config {
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
     voiceovers: VoiceoversSelect<false> | VoiceoversSelect<true>;
     'episode-sources': EpisodeSourcesSelect<false> | EpisodeSourcesSelect<true>;
+    'title-dubs': TitleDubsSelect<false> | TitleDubsSelect<true>;
     'search-results': SearchResultsSelect<false> | SearchResultsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -382,6 +384,14 @@ export interface Episode {
    * Время выхода эпизода (Unix-время, секунды). Фронтенд показывает его как дату выхода серии
    */
   airingAt?: number | null;
+  /**
+   * Когда пайплайн впервые увидел серию. Заполняется автоматически (sync-dubs / update-ongoing).
+   */
+  firstAvailableAt?: string | null;
+  /**
+   * Сколько озвучек (episode-sources) есть у этой серии. Заполняет пайплайн.
+   */
+  sourcesCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -429,6 +439,25 @@ export interface EpisodeSource {
   episode: number | Episode;
   voiceover: number | Voiceover;
   playerLink: string;
+  firstSeenAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "title-dubs".
+ */
+export interface TitleDub {
+  id: number;
+  content: number | Content;
+  voiceover: number | Voiceover;
+  /**
+   * Запись Kodik этой озвучки; по нему можно запросить её отдельно.
+   */
+  kodikId: string;
+  episodesCount?: number | null;
+  lastEpisode?: number | null;
+  kodikUpdatedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -514,6 +543,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'episode-sources';
         value: number | EpisodeSource;
+      } | null)
+    | ({
+        relationTo: 'title-dubs';
+        value: number | TitleDub;
       } | null)
     | ({
         relationTo: 'search-results';
@@ -667,6 +700,8 @@ export interface EpisodesSelect<T extends boolean = true> {
   description?: T;
   duration?: T;
   airingAt?: T;
+  firstAvailableAt?: T;
+  sourcesCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -712,6 +747,21 @@ export interface EpisodeSourcesSelect<T extends boolean = true> {
   episode?: T;
   voiceover?: T;
   playerLink?: T;
+  firstSeenAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "title-dubs_select".
+ */
+export interface TitleDubsSelect<T extends boolean = true> {
+  content?: T;
+  voiceover?: T;
+  kodikId?: T;
+  episodesCount?: T;
+  lastEpisode?: T;
+  kodikUpdatedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

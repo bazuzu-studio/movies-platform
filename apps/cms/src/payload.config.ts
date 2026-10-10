@@ -22,6 +22,7 @@ import { Favorites } from './collections/favorites/config'
 import { Seasons } from './collections/seasons/config'
 import { Voiceovers } from './collections/voiceovers/config'
 import { EpisodeSources } from './collections/episode-sources/config'
+import { TitleDubs } from './collections/title-dubs/config'
 // [Dokploy] Миграции БД (генерируются `pnpm migrate:create`) — в production
 // схема разворачивается ими, а не Drizzle push.
 import { migrations } from './migrations'
@@ -97,7 +98,7 @@ export default buildConfig({
     },
   },
 
-  collections: [Users, Media, Genres, Content, Episodes, Favorites, Seasons, Voiceovers, EpisodeSources],
+  collections: [Users, Media, Genres, Content, Episodes, Favorites, Seasons, Voiceovers, EpisodeSources, TitleDubs],
 
   // [Dokploy] Включаем только если заданы SMTP_* — иначе оставляем Payload
   // работать в дефолтном режиме (лог предупреждения вместо отправки).

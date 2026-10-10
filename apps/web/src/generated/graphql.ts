@@ -2340,9 +2340,11 @@ export type Episode = {
   description?: Maybe<Scalars['JSON']['output']>;
   duration?: Maybe<Scalars['Float']['output']>;
   episodeNumber: Scalars['Float']['output'];
+  firstAvailableAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['Int']['output'];
   playerLink?: Maybe<Scalars['String']['output']>;
   season?: Maybe<Season>;
+  sourcesCount?: Maybe<Scalars['Float']['output']>;
   title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -10843,3 +10845,28 @@ export const GetAiredEpisodesDocument = parse(`
     }
   }
 `) as unknown as DocumentNode<GetAiredEpisodesQuery, GetAiredEpisodesQueryVariables>;
+
+/* -------------------------------------------------------------------------- */
+/* ВРУЧНУЮ добавлено: даты появления серий на сайте (episodes.firstAvailableAt). */
+/* Исходник — src/graphql/content/get-season-availability.graphql. Перед       */
+/* коммитом выполните `pnpm codegen`: он заменит этот блок настоящим выводом.  */
+/* -------------------------------------------------------------------------- */
+
+export type GetSeasonAvailabilityQueryVariables = Exact<{
+  where?: InputMaybe<Episode_Where>;
+}>;
+
+
+export type GetSeasonAvailabilityQuery = { Episodes: { docs: Array<{ episodeNumber: number, firstAvailableAt: string | null, sourcesCount: number | null }> } | null };
+
+export const GetSeasonAvailabilityDocument = parse(`
+  query GetSeasonAvailability($where: Episode_where) {
+    Episodes(where: $where, limit: 1000, pagination: false) {
+      docs {
+        episodeNumber
+        firstAvailableAt
+        sourcesCount
+      }
+    }
+  }
+`) as unknown as DocumentNode<GetSeasonAvailabilityQuery, GetSeasonAvailabilityQueryVariables>;

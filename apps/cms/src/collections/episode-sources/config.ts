@@ -23,7 +23,7 @@ export const EpisodeSources: CollectionConfig = {
   admin: {
     group: 'Каталог',
     useAsTitle: 'playerLink',
-    defaultColumns: ['episode', 'voiceover', 'playerLink'],
+    defaultColumns: ['episode', 'voiceover', 'playerLink', 'firstSeenAt'],
   },
   access: {
     // Как у episodes: ссылки на плеер читаются публично (сайт запрашивает их без входа).
@@ -60,6 +60,19 @@ export const EpisodeSources: CollectionConfig = {
       type: 'text',
       label: 'Ссылка на плеер',
       required: true,
+    },
+    {
+      // Когда пайплайн впервые увидел ссылку этой озвучки. Нужна, чтобы считать, какие
+      // озвучки выпускают серии быстрее (firstSeenAt − airingAt серии). Пусто у ссылок,
+      // загруженных первым проходом по озвучке или у завершённых тайтлов: реальное время
+      // появления тогда неизвестно, и подставлять «сейчас» было бы неправдой.
+      name: 'firstSeenAt',
+      type: 'date',
+      label: 'Впервые замечена',
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+      },
     },
   ],
 }

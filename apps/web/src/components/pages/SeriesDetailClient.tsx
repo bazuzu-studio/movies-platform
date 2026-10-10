@@ -20,6 +20,7 @@ import { formatAge } from "@/lib/age";
 import { plural } from "@/lib/plural";
 import { pickLatestSeason, seasonKey } from "@/lib/seasons";
 import { saveContinue } from "@/lib/continue-watching";
+import { dubCoverage, type SeasonAvailability } from "@/lib/availability";
 import {
   buildOptions,
   chooseOption,
@@ -247,6 +248,7 @@ export function SeriesDetailClient({
   // открытого сезона. Ошибка или отсутствие коллекции в CMS не мешают:
   // серия играет по основной ссылке, выбор озвучки просто не показывается.
   const [sourcesBySeason, setSourcesBySeason] = useState<Record<string, SeasonSources>>({});
+  const [availabilityBySeason, setAvailabilityBySeason] = useState<Record<string, SeasonAvailability>>({});
   const requestedSeasons = useRef<Set<string>>(new Set());
   const activeSeasonId = activeSeasonDoc?.id;
 
@@ -264,6 +266,17 @@ export function SeriesDetailClient({
       })
       .catch(() => {
         // нет сети/коллекции — остаёмся на основной озвучке
+      });
+
+    // Когда серии появились на сайте (episodes.firstAvailableAt) — для отметки «новая».
+    // Отдельный запрос: пока в CMS нет поля, он падает, и это ни на что больше не влияет.
+    fetch(`/api/episode-availability?season=${id}`)
+      .then((res) => (res.ok ? (res.json() as Promise<SeasonAvailability>) : null))
+      .then((data) => {
+        if (data && typeof data === "object") setAvailabilityBySeason((prev) => ({ ...prev, [key]: data }));
+      })
+      .catch(() => {
+        // нет сети/поля — без отметок
       });
   }, [activeSeasonId]);
 
@@ -292,6 +305,7 @@ export function SeriesDetailClient({
     [activeEpisode, sourcesBySeason, activeSeasonId],
   );
   const activeVoiceover = chooseOption(voiceoverOptions, preferredVoiceover);
+  const coverage = useMemo(() => dubCoverage(sourcesBySeason[String(activeSeasonId)]), [sourcesBySeason, activeSeasonId]);
 
   const selectVoiceover = useCallback((option: VoiceoverOption) => {
     setPreferredVoiceover(option.slug);
@@ -518,7 +532,13 @@ export function SeriesDetailClient({
             </div>
 
             {activeEpisode && (
-              <VoiceoverPicker options={voiceoverOptions} active={activeVoiceover} onSelect={selectVoiceover} />
+              <VoiceoverPicker
+                options={voiceoverOptions}
+                active={activeVoiceover}
+                onSelect={selectVoiceover}
+                coverage={coverage}
+                total={sortedEpisodes.length}
+              />
             )}
 
             {activeEpisode && (
@@ -548,6 +568,7 @@ export function SeriesDetailClient({
                   watched={watched}
                   onSelect={selectEpisode}
                   upcoming={view.nextEpisode}
+                  availability={availabilityBySeason[String(activeSeasonId)]}
                 />
               ) : (
                 <p className="py-8 text-center text-sm text-[#8E8E98]">

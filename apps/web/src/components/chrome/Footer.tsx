@@ -8,7 +8,6 @@ const links = [
   { label: "Избранное", href: "/favorites" },
   { label: "Профиль", href: "/profile" },
   { label: "Контакты", href: "/contact" },
-  { label: "Условия использования", href: "/terms" },
   { label: "Конфиденциальность", href: "/privacy" },
   { label: "Правообладателям", href: "/copyright" },
 ];
@@ -36,7 +35,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-[#6B6B75]">© {new Date().getFullYear()} otakuum. Видео воспроизводится сторонними плеерами; права на материалы принадлежат их владельцам.</p>
+          <p className="text-xs text-[#6B6B75]">© 2026 otakuum. Концепт. Все права защищены.</p>
         </div>
       </div>
     </footer>

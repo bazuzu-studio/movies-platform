@@ -61,7 +61,7 @@ export function ContactClient() {
   };
 
   return (
-    <AuthLayout legal={false}>
+    <AuthLayout>
       <h1 className="text-2xl font-bold text-white mb-1">Связаться с нами</h1>
       <p className="text-sm text-[#8E8E98] mb-6">
         Вопрос, жалоба на контент или предложение — напишите нам, ответим на почту

@@ -9,7 +9,6 @@ import type { Season } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { plural } from "@/lib/plural";
 import { seasonKey } from "@/lib/seasons";
-import { NextEpisodeBadge } from "./NextEpisodeBadge";
 
 
 interface SeasonSwitcherProps {
@@ -141,7 +140,6 @@ export function SeasonSwitcher({ seasons, activeKey, onSelect }: SeasonSwitcherP
                       Выходит
                     </span>
                   )}
-                  <NextEpisodeBadge next={season.nextEpisode} variant="inline" />
                   {season.releaseStatus === "anons" && (
                     <span className="mt-1 inline-flex items-center text-[10px] font-bold uppercase tracking-wider text-amber-300">
                       Анонс

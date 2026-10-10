@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Mail, Check } from "lucide-react";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
-import { AuthField } from "@/components/ui/AuthField";
 import { gqlClient } from "@/lib/graphql-client";
 import { ForgotPasswordUserDocument } from "@/generated/graphql";
 
@@ -53,17 +52,19 @@ export function ForgotPasswordClient() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <AuthField
-            id="email"
-            label="Email"
-            type="email"
-            icon={Mail}
-            value={email}
-            onChange={setEmail}
-            autoComplete="email"
-            placeholder="you@example.com"
-            disabled={submitting}
-          />
+          <div>
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E98]" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+              />
+            </div>
+          </div>
           <Btn type="submit" size="lg" className="w-full justify-center" disabled={submitting}>
             {submitting ? "Отправка..." : "Отправить ссылку"}
           </Btn>

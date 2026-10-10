@@ -7,9 +7,8 @@ import { Lock, Check } from "lucide-react";
 import { ClientError } from "graphql-request";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
-import { AuthField } from "@/components/ui/AuthField";
 import { gqlClient } from "@/lib/graphql-client";
-import { PASSWORD_HINT, PASSWORD_MAX_LENGTH, validatePassword } from "@/lib/validation";
+import { PASSWORD_HINT, validatePassword } from "@/lib/validation";
 import { ResetPasswordUserDocument } from "@/generated/graphql";
 
 function extractGraphQLErrorMessage(error: unknown, fallback: string): string {
@@ -78,19 +77,20 @@ export function ResetPasswordClient() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <AuthField
-            id="new-password"
-            label="Новый пароль"
-            type="password"
-            icon={Lock}
-            value={password}
-            onChange={setPassword}
-            autoComplete="new-password"
-            hint={PASSWORD_HINT}
-            maxLength={PASSWORD_MAX_LENGTH}
-            disabled={submitting}
-          />
-          {error && <p role="alert" className="text-sm text-[#FF7A7D]">{error}</p>}
+          <div>
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Новый пароль</label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E98]" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={PASSWORD_HINT}
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
+              />
+            </div>
+          </div>
+          {error && <p className="text-sm text-[#FF7A7D]">{error}</p>}
           <Btn type="submit" size="lg" className="w-full justify-center" disabled={submitting}>
             {submitting ? "Сохранение..." : "Сохранить пароль"}
           </Btn>

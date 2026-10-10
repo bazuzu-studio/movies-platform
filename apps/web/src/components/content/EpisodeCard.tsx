@@ -2,6 +2,7 @@ import React from "react";
 import { Clock } from "lucide-react";
 import type { Episode } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { formatEpisodeDateLong } from "@/lib/episode";
 
 interface EpisodeCardProps {
   episode: Episode;
@@ -55,7 +56,7 @@ export function EpisodeCard({ episode, onClick, isSelected = false }: EpisodeCar
         <p className="text-xs text-[#71717A] mt-0.5 line-clamp-2">{episode.description}</p>
 
         <div className="flex items-center gap-3 mt-1.5 text-xs text-[#3f3f46]">
-          <span>{episode.releaseDate}</span>
+          <span>{formatEpisodeDateLong(episode.releaseDate)}</span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {episode.duration}м

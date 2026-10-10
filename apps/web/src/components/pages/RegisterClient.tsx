@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Mail, Lock, User, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { AuthLayout } from "./AuthLayout";
 import { Btn } from "@/components/ui/Btn";
+import { AuthField } from "@/components/ui/AuthField";
 import { useAuth } from "@/components/providers/AuthContext";
-import { PASSWORD_HINT, validatePassword } from "@/lib/validation";
+import { PASSWORD_HINT, PASSWORD_MAX_LENGTH, validatePassword } from "@/lib/validation";
 
 export function RegisterClient() {
   const router = useRouter();
@@ -17,7 +18,6 @@ export function RegisterClient() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,65 +56,67 @@ const handleSubmit = async (e: React.FormEvent) => {
       <h1 className="text-2xl font-bold text-white mb-1">Создайте аккаунт</h1>
       <p className="text-sm text-[#8E8E98] mb-6">Присоединяйтесь к otakuum</p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {[
-          { label: "Имя", val: name, set: setName, type: "text", placeholder: "Алексей Морозов" },
-          { label: "Email", val: email, set: setEmail, type: "email", placeholder: "you@example.com" },
-        ].map(({ label, val, set, type, placeholder }) => (
-          <div key={label}>
-            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">{label}</label>
-            <input
-              type={type}
-              required
-              value={val}
-              onChange={(e) => {
-                set(e.target.value);
-                setError("");
-              }}
-              placeholder={placeholder}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
-            />
-          </div>
-        ))}
-
-        <div>
-          <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Пароль</label>
-          <div className="relative">
-            <input
-              type={showPass ? "text" : "password"}
-              value={pass}
-              onChange={(e) => {
-                setPass(e.target.value);
-                setError("");
-              }}
-              placeholder={PASSWORD_HINT}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 pr-11 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#8E8E98] hover:text-white"
-            >
-              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Повтор пароля</label>
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => {
-              setConfirm(e.target.value);
-              setError("");
-            }}
-            placeholder="Повторите пароль"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#6B6B75] outline-none focus:border-[#EF4A4F]/50 transition-colors"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" aria-label="Регистрация">
+        <AuthField
+          id="name"
+          label="Имя"
+          icon={User}
+          value={name}
+          onChange={(v) => {
+            setName(v);
+            setError("");
+          }}
+          autoComplete="name"
+          placeholder="Как к вам обращаться"
+          maxLength={80}
+          disabled={isSubmitting}
+        />
+        <AuthField
+          id="email"
+          label="Email"
+          type="email"
+          icon={Mail}
+          value={email}
+          onChange={(v) => {
+            setEmail(v);
+            setError("");
+          }}
+          autoComplete="email"
+          placeholder="you@example.com"
+          disabled={isSubmitting}
+        />
+        <AuthField
+          id="new-password"
+          label="Пароль"
+          type="password"
+          icon={Lock}
+          value={pass}
+          onChange={(v) => {
+            setPass(v);
+            setError("");
+          }}
+          autoComplete="new-password"
+          hint={PASSWORD_HINT}
+          maxLength={PASSWORD_MAX_LENGTH}
+          disabled={isSubmitting}
+        />
+        <AuthField
+          id="confirm-password"
+          label="Повтор пароля"
+          type="password"
+          icon={Lock}
+          value={confirm}
+          onChange={(v) => {
+            setConfirm(v);
+            setError("");
+          }}
+          autoComplete="new-password"
+          maxLength={PASSWORD_MAX_LENGTH}
+          disabled={isSubmitting}
+        />
 
         {error && (
-          <div className="flex items-center gap-2 text-[#EF4A4F] text-xs p-3 rounded-lg bg-[#EF4A4F]/10 border border-[#EF4A4F]/20">
+          <div role="alert" className="flex items-center gap-2 text-[#EF4A4F] text-xs p-3 rounded-lg bg-[#EF4A4F]/10 border border-[#EF4A4F]/20">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             {error}
           </div>
@@ -123,6 +125,12 @@ const handleSubmit = async (e: React.FormEvent) => {
         <Btn type="submit" size="lg" className="w-full justify-center mt-1" disabled={isSubmitting}>
           {isSubmitting ? "Создаём..." : "Зарегистрироваться"}
         </Btn>
+
+        <p className="text-xs text-[#6B6B75] text-center leading-relaxed">
+          Создавая аккаунт, вы принимаете{" "}
+          <Link href="/terms" className="underline hover:text-white">условия использования</Link> и{" "}
+          <Link href="/privacy" className="underline hover:text-white">политику конфиденциальности</Link>.
+        </p>
 
         <div className="text-center text-sm text-[#8E8E98]">
           Уже есть аккаунт?{" "}

@@ -44,11 +44,13 @@ ARG SKIP_TYPECHECK=false
 ENV SKIP_TYPECHECK=\${SKIP_TYPECHECK}
 
 # Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
+# Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
 RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
-  sh -c 'start=\$(date +%s); \
-    flag=""; [ "\$NEXT_BUNDLER" = "webpack" ] && flag="--webpack"; \
-    pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=\${BUILD_MEMORY_MB}" next build \$flag \
-    && echo "build took \$(( \((date +\%s) - start ))s (bundler:\)NEXT_BUNDLER)"'
+  start=$(date +%s); \
+  flag=""; [ "$NEXT_BUNDLER" = "webpack" ] && flag="--webpack"; \
+  pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build $flag; \
+  echo "build took $(( $(date +%s) - start ))s (bundler: $NEXT_BUNDLER)"
+
 
 # ─────────────────────────────────────────────
 # runner: минимальный образ для запуска

@@ -32,7 +32,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS builder
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# pnpm-workspace.yaml* — со звёздочкой: файла может не быть, и тогда обычный COPY
+# падает с "not found". С маской сборка идёт и без него (нужен BuildKit — в Dokploy он есть).
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
   pnpm install --frozen-lockfile --prefer-offline
 
@@ -52,8 +54,9 @@ ARG NEXT_BUNDLER=turbopack
 ARG SKIP_TYPECHECK=false
 ENV SKIP_TYPECHECK=${SKIP_TYPECHECK}
 # Кэш Next/Turbopack между деплоями: повторная сборка заметно быстрее.
+# (Пустая строка после `\` здесь раньше была: BuildKit предупреждает о пустой
+# строке продолжения, а в будущих версиях это станет ошибкой.)
 RUN --mount=type=cache,id=next-cache-cms,target=/app/.next/cache \
-
   sh -c 'start=$(date +%s); \
     flag=""; [ "$NEXT_BUNDLER" = "webpack" ] && flag="--webpack"; \
     pnpm exec cross-env NODE_OPTIONS="--no-deprecation --max-old-space-size=${BUILD_MEMORY_MB}" next build $flag \
@@ -73,11 +76,22 @@ ENV NODE_ENV=production \
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Каталог для кэша Next.js (пререндер, оптимизация изображений)
 RUN mkdir .next && chown nextjs:nodejs .next
 
 # standalone-сборка + статика. Миграции БД применяются самим приложением
 # при старте (prodMigrations в src/payload.config.ts).
+#
+# Статику (.next/static) standalone НЕ включает — её нужно копировать отдельно,
+# иначе админка Payload открывается без JS/CSS. Раньше файл обрывался на строке
+# с standalone: не было ни статики, ни USER/EXPOSE/CMD, и контейнер не стартовал.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+
+# server.js лежит в корне standalone-сборки (создаётся `next build`).
+CMD ["node", "server.js"]

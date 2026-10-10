@@ -1,17 +1,16 @@
-import * as migration_20260924_075556_initial from './20260924_075556_initial';
-import * as migration_20260928_193844_add_release_status from './20260928_193844_add_release_status';
-
+import * as migration_20261008_220946 from './20261008_220946';
+import * as migration_20261010_120000 from './20261010_120000';
 
 export const migrations = [
   {
-    up: migration_20260924_075556_initial.up,
-    down: migration_20260924_075556_initial.down,
-    name: '20260924_075556_initial',
-  },
-  {
-    up: migration_20260928_193844_add_release_status.up,
-    down: migration_20260928_193844_add_release_status.down,
-    name: '20260928_193844_add_release_status'
+    up: migration_20261008_220946.up,
+    down: migration_20261008_220946.down,
+    name: '20261008_220946'
   },
 
+  {
+    up: migration_20261010_120000.up,
+    down: migration_20261010_120000.down,
+    name: '20261010_120000'
+  },
 ];

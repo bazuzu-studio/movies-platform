@@ -3,20 +3,31 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Calendar, Tv, Bookmark, BookmarkCheck, Film, Play, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Tv, Bookmark, BookmarkCheck, Film, Play, ChevronLeft, ChevronRight, Clock, CalendarClock } from "lucide-react";
 import type { Series, ContentItem, Episode, Season } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/ui/Btn";
 import { Badge, GenreChip, ReleaseStatusBadge, StarRating } from "@/components/ui/Meta";
+import { NextEpisodeBadge } from "@/components/content/NextEpisodeBadge";
+import { formatEpisodeDateLong } from "@/lib/episode";
 import { SeasonSwitcher } from "@/components/content/SeasonSwitcher";
 import { SimilarContent } from "@/components/content/SimilarContent";
 import { EpisodeGrid } from "@/components/content/EpisodeGrid";
 import { VideoPlayer } from "@/components/content/VideoPlayer";
+import { VoiceoverPicker } from "@/components/content/VoiceoverPicker";
 import { AgeGate } from "@/components/content/AgeGate";
 import { formatAge } from "@/lib/age";
 import { plural } from "@/lib/plural";
 import { pickLatestSeason, seasonKey } from "@/lib/seasons";
 import { saveContinue } from "@/lib/continue-watching";
+import { dubCoverage, type SeasonAvailability } from "@/lib/availability";
+import {
+  buildOptions,
+  chooseOption,
+  parseVoiceoverSlug,
+  type SeasonSources,
+  type VoiceoverOption,
+} from "@/lib/voiceovers";
 import { useFavorites } from "@/components/providers/FavoritesContext";
 import { useAuth } from "@/components/providers/AuthContext";
 
@@ -73,6 +84,7 @@ export function SeriesDetailClient({
   const view = {
     releaseYear: activeSeasonDoc?.releaseYear || series.releaseYear,
     releaseStatus: activeSeasonDoc?.releaseStatus ?? series.releaseStatus,
+    nextEpisode: activeSeasonDoc?.nextEpisode,
     rating: activeSeasonDoc?.rating || series.rating,
     ageRating: activeSeasonDoc?.ageRating ?? series.ageRating,
     description: activeSeasonDoc?.description || series.description,
@@ -230,7 +242,86 @@ export function SeriesDetailClient({
     if (first) selectEpisode(first);
   };
 
-  const safeEmbedUrl = activeEpisode ? activeEpisode.embedUrl : undefined;
+  /* -------------------------------- Озвучки --------------------------------- */
+
+  // Ссылки других озвучек (коллекция episode-sources) грузятся лениво для
+  // открытого сезона. Ошибка или отсутствие коллекции в CMS не мешают:
+  // серия играет по основной ссылке, выбор озвучки просто не показывается.
+  const [sourcesBySeason, setSourcesBySeason] = useState<Record<string, SeasonSources>>({});
+  const [availabilityBySeason, setAvailabilityBySeason] = useState<Record<string, SeasonAvailability>>({});
+  const requestedSeasons = useRef<Set<string>>(new Set());
+  const activeSeasonId = activeSeasonDoc?.id;
+
+  useEffect(() => {
+    const id = Number(activeSeasonId);
+    if (!Number.isInteger(id) || id <= 0) return;
+    const key = String(id);
+    if (requestedSeasons.current.has(key)) return;
+    requestedSeasons.current.add(key);
+
+    fetch(`/api/episode-sources?season=${id}`)
+      .then((res) => (res.ok ? (res.json() as Promise<SeasonSources>) : null))
+      .then((data) => {
+        if (data && typeof data === "object") setSourcesBySeason((prev) => ({ ...prev, [key]: data }));
+      })
+      .catch(() => {
+        // нет сети/коллекции — остаёмся на основной озвучке
+      });
+
+    // Когда серии появились на сайте (episodes.firstAvailableAt) — для отметки «новая».
+    // Отдельный запрос: пока в CMS нет поля, он падает, и это ни на что больше не влияет.
+    fetch(`/api/episode-availability?season=${id}`)
+      .then((res) => (res.ok ? (res.json() as Promise<SeasonAvailability>) : null))
+      .then((data) => {
+        if (data && typeof data === "object") setAvailabilityBySeason((prev) => ({ ...prev, [key]: data }));
+      })
+      .catch(() => {
+        // нет сети/поля — без отметок
+      });
+  }, [activeSeasonId]);
+
+  // Выбранная озвучка: ?voiceover=slug (ссылкой делились) или запомненная в браузере.
+  const [preferredVoiceover, setPreferredVoiceover] = useState<string | null>(null);
+  useEffect(() => {
+    let slug = parseVoiceoverSlug(new URLSearchParams(window.location.search).get("voiceover"));
+    if (!slug) {
+      try {
+        slug = parseVoiceoverSlug(localStorage.getItem("voiceover"));
+      } catch {
+        // localStorage недоступен — без запоминания
+      }
+    }
+    setPreferredVoiceover(slug);
+  }, []);
+
+  const voiceoverOptions = useMemo(
+    () =>
+      activeEpisode
+        ? buildOptions(
+            activeEpisode.embedUrl,
+            sourcesBySeason[String(activeSeasonId)]?.[activeEpisode.episodeNumber],
+          )
+        : [],
+    [activeEpisode, sourcesBySeason, activeSeasonId],
+  );
+  const activeVoiceover = chooseOption(voiceoverOptions, preferredVoiceover);
+  const coverage = useMemo(() => dubCoverage(sourcesBySeason[String(activeSeasonId)]), [sourcesBySeason, activeSeasonId]);
+
+  const selectVoiceover = useCallback((option: VoiceoverOption) => {
+    setPreferredVoiceover(option.slug);
+    const params = new URLSearchParams(window.location.search);
+    if (option.slug) params.set("voiceover", option.slug);
+    else params.delete("voiceover");
+    window.history.replaceState(null, "", `?${params.toString()}`);
+    try {
+      if (option.slug) localStorage.setItem("voiceover", option.slug);
+      else localStorage.removeItem("voiceover");
+    } catch {
+      // см. выше
+    }
+  }, []);
+
+  const safeEmbedUrl = activeVoiceover?.url ?? (activeEpisode ? activeEpisode.embedUrl : undefined);
   const activeEpisodeNumber = activeEpisode?.episodeNumber;
   // Части одного сезона считаем как один сезон.
   const seasonsCount = new Set(series.seasons.map((s) => s.seasonNumber)).size;
@@ -286,6 +377,7 @@ export function SeriesDetailClient({
               <Badge variant="series">СЕРИАЛ</Badge>
               {series.isNew && <Badge variant="new">НОВИНКА</Badge>}
               <ReleaseStatusBadge status={view.releaseStatus} showReleased />
+              <NextEpisodeBadge next={view.nextEpisode} />
               {series.genres.map((g, idx) => (
                 <GenreChip key={idx} label={g} />
               ))}
@@ -374,6 +466,7 @@ export function SeriesDetailClient({
                 Сериал ещё выходит — новые серии появляются по мере выхода.
               </p>
             )}
+            <NextEpisodeBadge next={view.nextEpisode} variant="note" />
 
             {/* Связанные сезоны (отдельные записи франшизы) */}
             <SeasonSwitcher seasons={series.seasons} activeKey={activeKey} onSelect={selectSeason} />
@@ -407,10 +500,20 @@ export function SeriesDetailClient({
                         ? ` — ${activeEpisode.title}`
                         : ""}
                     </p>
-                    {activeEpisode.duration > 0 && (
-                      <p className="mt-0.5 flex items-center justify-center gap-1 text-xs text-[#8E8E98]">
-                        <Clock className="h-3 w-3" />
-                        {activeEpisode.duration} мин
+                    {(activeEpisode.releaseDate || activeEpisode.duration > 0) && (
+                      <p className="mt-0.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 text-xs text-[#8E8E98]">
+                        {activeEpisode.releaseDate && (
+                          <span className="flex items-center gap-1">
+                            <CalendarClock className="h-3 w-3" />
+                            Эфир {formatEpisodeDateLong(activeEpisode.releaseDate)}
+                          </span>
+                        )}
+                        {activeEpisode.duration > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {activeEpisode.duration} мин
+                          </span>
+                        )}
                       </p>
                     )}
                   </div>
@@ -427,6 +530,16 @@ export function SeriesDetailClient({
                 </div>
               )}
             </div>
+
+            {activeEpisode && (
+              <VoiceoverPicker
+                options={voiceoverOptions}
+                active={activeVoiceover}
+                onSelect={selectVoiceover}
+                coverage={coverage}
+                total={sortedEpisodes.length}
+              />
+            )}
 
             {activeEpisode && (
               <label className="mb-2 mt-1 flex cursor-pointer items-center justify-end gap-2 text-xs text-[#A1A1AA]">
@@ -454,6 +567,8 @@ export function SeriesDetailClient({
                   activeNumber={activeEpisodeNumber ?? null}
                   watched={watched}
                   onSelect={selectEpisode}
+                  upcoming={view.nextEpisode}
+                  availability={availabilityBySeason[String(activeSeasonId)]}
                 />
               ) : (
                 <p className="py-8 text-center text-sm text-[#8E8E98]">

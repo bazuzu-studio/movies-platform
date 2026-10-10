@@ -13,12 +13,13 @@ ARG PNPM_VERSION=10.34.5
 FROM node:${NODE_VERSION}-alpine AS base
 ARG PNPM_VERSION
 
-# Переключаемся на официальное зеркало Yandex для обхода проблем с TLS
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirror.yandex.ru/g' /etc/apk/repositories \
+# Заменяем https на http в адресах репозиториев для обхода TLS-блокировок
+RUN sed -i 's/https/http/g' /etc/apk/repositories \
   && apk add --no-cache libc6-compat \
-  && npm install -g pnpm@\${PNPM_VERSION}
+  && npm install -g pnpm@${PNPM_VERSION}
 
 ENV NEXT_TELEMETRY_DISABLED=1
+
 
 # ─────────────────────────────────────────────
 # builder: зависимости + сборка Next.js

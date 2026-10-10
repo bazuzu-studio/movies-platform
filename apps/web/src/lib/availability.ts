@@ -16,15 +16,28 @@ export const FRESH_HOURS = 48;
 
 export interface AvailabilityRow {
   episodeNumber: number;
-  firstAvailableAt: string | null | undefined;
+  /**
+   * Скаляр DateTime в схеме, сгенерированной `pnpm codegen`, — `unknown`
+   * (в ручном блоке generated/graphql.ts он был string), поэтому принимаем любой тип
+   * и разбираем сами: строка ISO, миллисекунды или Date.
+   */
+  firstAvailableAt: unknown;
+}
+
+/** Время в миллисекундах из значения поля DateTime; NaN, если даты нет или она некорректна. */
+function toTime(value: unknown): number {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "string" && value.trim()) return new Date(value).getTime();
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return new Date(value).getTime();
+  return Number.NaN;
 }
 
 /** Строки CMS → { номер серии: ISO }. Пустые и некорректные даты отбрасываются. */
 export function groupAvailability(rows: AvailabilityRow[]): SeasonAvailability {
   const result: SeasonAvailability = {};
   for (const row of rows) {
-    if (!Number.isFinite(row.episodeNumber) || !row.firstAvailableAt) continue;
-    const time = new Date(row.firstAvailableAt).getTime();
+    if (!Number.isFinite(row.episodeNumber)) continue;
+    const time = toTime(row.firstAvailableAt);
     if (Number.isNaN(time)) continue;
     result[row.episodeNumber] = new Date(time).toISOString();
   }

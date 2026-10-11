@@ -31,7 +31,7 @@ import { episodeReleaseDate, episodeTitle } from "./episode";
 import { normalizeImageUrl } from "./image-url";
 import { richTextToPlainText } from "./richtext";
 import { dedupeSeasonsBySlug, labelSeasons, pickLatestSeason } from "./seasons";
-import { mskDayStartSec, parseNextEpisode, type NextEpisode } from "./next-episode";
+import { inferEarlierAiring, mskDayStartSec, parseNextEpisode, type NextEpisode } from "./next-episode";
 import { groupSources, type SeasonSources, type SourceRow } from "./voiceovers";
 import { groupAvailability, type SeasonAvailability } from "./availability";
 
@@ -361,6 +361,9 @@ export interface ScheduleEntry {
  * content.nextEpisode* после выхода серии стоит уже следующая, поэтому без них
  * вышедшее пропадало бы из списка). По умолчанию вышедшие берутся с начала
  * СЕГОДНЯ; `daysBack` сдвигает начало назад (1 — с начала вчерашнего дня).
+ * Серии, которые уже вышли в эфир, но ещё без озвучки, в CMS отсутствуют (эпизод
+ * заводится вместе с озвучкой): их время восстанавливается по недельному шагу от
+ * «следующей» серии (см. inferEarlierAiring) и тоже попадает в список.
  * Дубли (тайтл + номер серии) схлопываются; по времени эфира.
  *
  * Бросает ошибку, если в CMS нет полей nextEpisode* — вызывающий код решает,
@@ -403,11 +406,24 @@ export async function getSchedule(limit = 200, daysBack = 0): Promise<ScheduleEn
     entries.set(key, { item: mapContentToItem(raw), next });
   };
 
+  const nowSec = Math.floor(nowMs / 1000);
+
   for (const doc of docsOf(upcoming.Contents)) {
     add(doc, parseNextEpisode(doc.nextEpisodeNumber, doc.nextEpisodeAt));
   }
+  // Реальные эпизоды из CMS добавляются раньше оценочных и имеют приоритет.
   for (const episode of docsOf(aired?.Episodes)) {
     add(episode.season?.content, parseNextEpisode(episode.episodeNumber, episode.airingAt));
+  }
+  // Вышедшие, но ещё не озвученные серии (эпизодов для них в CMS нет).
+  for (const doc of docsOf(upcoming.Contents)) {
+    const next = parseNextEpisode(doc.nextEpisodeNumber, doc.nextEpisodeAt);
+    if (!next) continue;
+    for (let number = next.number - 1; number >= 1; number--) {
+      const airingAt = inferEarlierAiring(next, number);
+      if (airingAt < startSec) break;
+      if (airingAt <= nowSec) add(doc, { number, airingAt });
+    }
   }
 
   return [...entries.values()].sort((a, b) => a.next.airingAt - b.next.airingAt);

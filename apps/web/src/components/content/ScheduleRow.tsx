@@ -71,7 +71,7 @@ export function ScheduleRow({ entries, serverNow }: { entries: ScheduleEntry[]; 
         className="scrollbar-hide flex snap-x snap-proximity scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 pt-2 sm:scroll-px-6 sm:gap-4 sm:px-6 lg:scroll-px-8 lg:px-8"
       >
         {flat.map(({ item, next, aired }) => (
-          <div key={item.id} className="w-[132px] shrink-0 snap-start sm:w-[164px] lg:w-[184px]">
+          <div key={`${item.id}-${next.number}`} className="w-[132px] shrink-0 snap-start sm:w-[164px] lg:w-[184px]">
             <ScheduleCard
               item={item}
               next={next}

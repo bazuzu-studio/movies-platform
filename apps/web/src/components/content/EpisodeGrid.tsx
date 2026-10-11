@@ -4,11 +4,20 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import type { Episode } from "@/lib/types";
 import { formatEpisodeDateLong, formatEpisodeDateShort } from "@/lib/episode";
-import { formatNextEpisode, type NextEpisode } from "@/lib/next-episode";
+import { formatNextEpisode, inferEarlierAiring, type NextEpisode } from "@/lib/next-episode";
 import { isFresh, type SeasonAvailability } from "@/lib/availability";
 import { cn } from "@/lib/utils";
 
 const GROUP_SIZE = 24;
+/** Сколько вышедших, но не озвученных серий показывать (ближайших к «следующей»). */
+const MAX_PENDING = 12;
+
+/** Плитка сетки: серия с плеером или вышедшая в эфир серия, у которой озвучка ещё готовится. */
+type Tile =
+  | { kind: "episode"; ep: Episode }
+  | { kind: "pending"; number: number; airingAt: number };
+
+const tileNumber = (t: Tile): number => (t.kind === "episode" ? t.ep.episodeNumber : t.number);
 
 interface EpisodeGridProps {
   episodes: Episode[];
@@ -17,7 +26,9 @@ interface EpisodeGridProps {
   onSelect: (episode: Episode) => void;
   /**
    * Ближайшая серия по расписанию эфира. Если её ещё нет среди серий (нет
-   * озвучки), показывается неактивной плиткой «скоро» с датой.
+   * озвучки), показывается неактивной плиткой «скоро» с датой. Номера меньше неё,
+   * которых нет среди серий, — уже вышли в эфир, но ждут озвучку: показываются
+   * неактивными плитками с ориентировочной датой эфира.
    */
   upcoming?: NextEpisode;
   /**
@@ -39,14 +50,29 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
     [episodes],
   );
 
+  // Серии с плеером + вышедшие в эфир без озвучки (их эпизодов в CMS нет).
+  const tiles = useMemo(() => {
+    const list: Tile[] = sorted.map((ep): Tile => ({ kind: "episode", ep }));
+    if (upcoming) {
+      const have = new Set(sorted.map((e) => e.episodeNumber));
+      let added = 0;
+      for (let n = upcoming.number - 1; n >= 1 && added < MAX_PENDING; n--) {
+        if (have.has(n)) continue;
+        list.push({ kind: "pending", number: n, airingAt: inferEarlierAiring(upcoming, n) });
+        added++;
+      }
+    }
+    return list.sort((a, b) => tileNumber(a) - tileNumber(b));
+  }, [sorted, upcoming]);
+
   const groups = useMemo(() => {
-    const result: Episode[][] = [];
-    for (let i = 0; i < sorted.length; i += GROUP_SIZE) result.push(sorted.slice(i, i + GROUP_SIZE));
+    const result: Tile[][] = [];
+    for (let i = 0; i < tiles.length; i += GROUP_SIZE) result.push(tiles.slice(i, i + GROUP_SIZE));
     return result;
-  }, [sorted]);
+  }, [tiles]);
 
   const activeGroup = useMemo(() => {
-    const idx = groups.findIndex((g) => g.some((e) => e.episodeNumber === activeNumber));
+    const idx = groups.findIndex((g) => g.some((t) => t.kind === "episode" && t.ep.episodeNumber === activeNumber));
     return idx === -1 ? 0 : idx;
   }, [groups, activeNumber]);
 
@@ -65,7 +91,7 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
       ? formatNextEpisode(upcoming, Date.now())
       : null;
   // Одинаковая высота плиток, если хотя бы у одной серии есть дата.
-  const anyDate = visible.some((e) => Boolean(e.releaseDate));
+  const anyDate = visible.some((t) => t.kind === "pending" || Boolean(t.ep.releaseDate));
   const showUpcoming = Boolean(upcoming && upcomingText) && Math.min(group, lastIndex) === lastIndex;
   // availability приходит уже после гидратации (клиентский fetch), поэтому Date.now() здесь безопасен.
   const nowMs = Date.now();
@@ -87,14 +113,32 @@ export function EpisodeGrid({ episodes, activeNumber, watched, onSelect, upcomin
                   : "border-white/10 bg-white/5 text-[#A1A1AA] hover:text-white",
               )}
             >
-              {g[0].episodeNumber}–{g[g.length - 1].episodeNumber}
+              {tileNumber(g[0])}–{tileNumber(g[g.length - 1])}
             </button>
           ))}
         </div>
       )}
 
       <div className="grid grid-cols-5 gap-2 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
-        {visible.map((ep) => {
+        {visible.map((tile) => {
+          if (tile.kind === "pending") {
+            const iso = new Date(tile.airingAt * 1000).toISOString();
+            const full = formatEpisodeDateLong(iso);
+            return (
+              <div
+                key={`pending-${tile.number}`}
+                title={`Серия ${tile.number} — вышла в эфир ${full} (по расписанию). Озвучка готовится.`}
+                aria-label={`Серия ${tile.number}: вышла в эфир, озвучка готовится`}
+                className="flex h-14 cursor-default flex-col items-center justify-center rounded-xl border border-dashed border-emerald-400/35 bg-emerald-500/[0.05] text-sm font-bold tabular-nums text-emerald-200"
+              >
+                <span>{tile.number}</span>
+                <span className="mt-0.5 text-[10px] font-medium leading-none text-emerald-300/80">
+                  {formatEpisodeDateShort(iso)}
+                </span>
+              </div>
+            );
+          }
+          const ep = tile.ep;
           const isActive = ep.episodeNumber === activeNumber;
           const isWatched = watched.has(ep.episodeNumber);
           const date = formatEpisodeDateShort(ep.releaseDate);

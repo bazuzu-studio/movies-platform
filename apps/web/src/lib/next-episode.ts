@@ -13,6 +13,21 @@ export interface NextEpisode {
   airingAt: number;
 }
 
+/** Недельный шаг эфира, секунды. */
+export const WEEK_SEC = 7 * 86_400;
+
+/**
+ * Время эфира более ранней серии, если известна «следующая»: аниме выходит
+ * раз в неделю, поэтому серия N вышла на (next.number − N) недель раньше.
+ * В CMS эпизоды появляются вместе с озвучкой, а content.nextEpisode* после
+ * выхода серии сразу перескакивает на следующую — поэтому время вышедшей, но
+ * ещё не озвученной серии восстанавливается только так. Оценка: при перерыве
+ * в эфире она может ошибаться.
+ */
+export function inferEarlierAiring(next: NextEpisode, number: number): number {
+  return next.airingAt - (next.number - number) * WEEK_SEC;
+}
+
 /** Серия, вышедшая в эфир раньше этого срока, уже не «следующая» — не показываем. */
 const STALE_AFTER_MS = 48 * 3600 * 1000;
 

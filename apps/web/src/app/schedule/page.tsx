@@ -17,7 +17,8 @@ export default async function SchedulePage() {
   let unavailable = false;
 
   try {
-    entries = await getSchedule();
+    // Сегодня (вышедшие и будущие) и вчера.
+    entries = await getSchedule(200, 1);
   } catch (error) {
     // Например, CMS ещё без полей nextEpisode*.
     console.error("SchedulePage: не удалось загрузить расписание", error);

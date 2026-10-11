@@ -112,9 +112,10 @@ const headingFmt = new Intl.DateTimeFormat("ru-RU", {
   month: "long",
 });
 
-/** Заголовок дня: «Сегодня», «Завтра» или «Пятница, 10 октября». */
+/** Заголовок дня: «Вчера», «Сегодня», «Завтра» или «Пятница, 10 октября». */
 export function formatDayHeading(dayNumber: number, todayNumber: number): string {
   const diff = dayNumber - todayNumber;
+  if (diff === -1) return "Вчера";
   if (diff === 0) return "Сегодня";
   if (diff === 1) return "Завтра";
   const text = headingFmt.format(dayNumber * DAY_MS);
@@ -133,9 +134,10 @@ const tabFmt = new Intl.DateTimeFormat("ru-RU", {
   month: "short",
 });
 
-/** Короткая подпись дня для вкладок: «Сегодня», «Завтра», «Пн, 12 окт». */
+/** Короткая подпись дня для вкладок: «Вчера», «Сегодня», «Завтра», «Пн, 12 окт». */
 export function formatDayTab(dayNumber: number, todayNumber: number): string {
   const diff = dayNumber - todayNumber;
+  if (diff === -1) return "Вчера";
   if (diff === 0) return "Сегодня";
   if (diff === 1) return "Завтра";
   const text = tabFmt.format(dayNumber * DAY_MS).replace(/\./g, "");
@@ -168,17 +170,21 @@ export interface ScheduleGroup<T extends { next: NextEpisode }> {
  * Раскладывает расписание по дням (МСК), начиная с сегодняшнего: сегодня
  * остаются и уже вышедшие в эфир серии (вместе с будущими, по времени), более
  * ранние дни не показываются.
+ *
+ * `daysBack` — сколько прошедших дней оставить: 1 — ещё и вчерашний (страница
+ * расписания), 0 — только сегодня и дальше (лента на главной).
  */
 export function groupSchedule<T extends { next: NextEpisode }>(
   entries: T[],
   nowMs: number,
+  daysBack = 0,
 ): ScheduleGroup<T>[] {
   const today = mskDayNumber(nowMs);
   const byDay = new Map<number, T[]>();
 
   for (const entry of [...entries].sort((a, b) => a.next.airingAt - b.next.airingAt)) {
     const day = mskDayNumber(entry.next.airingAt * 1000);
-    if (day < today) continue;
+    if (day < today - daysBack) continue;
     const list = byDay.get(day);
     if (list) list.push(entry);
     else byDay.set(day, [entry]);

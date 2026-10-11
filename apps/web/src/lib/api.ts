@@ -357,18 +357,19 @@ export interface ScheduleEntry {
 
 /**
  * Расписание на сегодня и дальше (по Москве): будущие серии из
- * content.nextEpisode*, плюс уже вышедшие СЕГОДНЯ серии из episodes.airingAt
- * (в content.nextEpisode* после выхода серии стоит уже следующая, поэтому без
- * них сегодняшний вечер пропадал бы из списка). Дубли (тайтл + номер серии)
- * схлопываются; по времени эфира.
+ * content.nextEpisode*, плюс уже вышедшие серии из episodes.airingAt (в
+ * content.nextEpisode* после выхода серии стоит уже следующая, поэтому без них
+ * вышедшее пропадало бы из списка). По умолчанию вышедшие берутся с начала
+ * СЕГОДНЯ; `daysBack` сдвигает начало назад (1 — с начала вчерашнего дня).
+ * Дубли (тайтл + номер серии) схлопываются; по времени эфира.
  *
  * Бросает ошибку, если в CMS нет полей nextEpisode* — вызывающий код решает,
  * что показывать (страница — сообщение, главная — нет блока). Запрос вышедших
  * серий необязателен: при сбое остаётся только будущее расписание.
  */
-export async function getSchedule(limit = 200): Promise<ScheduleEntry[]> {
+export async function getSchedule(limit = 200, daysBack = 0): Promise<ScheduleEntry[]> {
   const nowMs = Date.now();
-  const startSec = mskDayStartSec(nowMs);
+  const startSec = mskDayStartSec(nowMs) - daysBack * 86_400;
 
   const where = {
     AND: [{ type: { equals: "series" } }, { nextEpisodeAt: { greater_than_equal: startSec } }],

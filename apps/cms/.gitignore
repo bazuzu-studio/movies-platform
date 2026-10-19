@@ -51,3 +51,4 @@ node_modules/
 
 # Dokploy: файл с реальными секретами (не коммитить!)
 dokploy.env
+tsconfig.tsbuildinfo
